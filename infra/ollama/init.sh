@@ -19,6 +19,12 @@ for m in $MODELS; do
     echo "[ollama-init] baixando $m ..."; ollama pull "$m"
   fi
 done
+# sem modelo local? tenta baixar da Release do GitHub (o volume ./ml/models é montado em /models)
+if [ ! -f /models/asclepio-med/Modelfile ] && [ -w /models ] && command -v curl >/dev/null 2>&1; then
+  MODEL_URL="${ASCLEPIO_MODEL_URL:-https://github.com/rodrigogrosa/asclepio/releases/download/v1.2.0/asclepio-med-v1.2.0.tar.gz}"
+  echo "[ollama-init] baixando modelo fine-tunado de $MODEL_URL ..."
+  (curl -fL "$MODEL_URL" -o /tmp/m.tgz && tar -xzf /tmp/m.tgz -C /models && rm -f /tmp/m.tgz && echo "[ollama-init] modelo baixado") || echo "[ollama-init] download do modelo falhou; seguindo com fallback"
+fi
 if [ -f /models/asclepio-med/Modelfile ]; then
   if ollama list | awk '{print $1}' | grep -q "^asclepio-med"; then
     echo "[ollama-init] asclepio-med já existe (use 'make ollama-create' para recriar)"

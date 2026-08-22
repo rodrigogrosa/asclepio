@@ -35,6 +35,8 @@
 
 ## 🚀 Instalação em 1 comando
 
+> Passo a passo completo para avaliadores (pré-requisitos com links, acesso, credenciais, roteiro de demo, problemas comuns): **[docs/GUIA_INSTALACAO.md](docs/GUIA_INSTALACAO.md)**. O modelo fine-tunado `asclepio-med` é baixado automaticamente da [Release v1.2.0](https://github.com/rodrigogrosa/asclepio/releases/tag/v1.2.0) (não precisa treinar).
+
 **Opção A — instalador de 1 linha** (macOS ou Linux; no Windows use WSL2/Ubuntu). Instala o que faltar (git, Docker, Ollama), clona o repositório em `~/asclepio` e sobe tudo:
 
 ```bash
@@ -204,6 +206,7 @@ Tudo documentado em [`docs/POLITICAS.md`](docs/POLITICAS.md).
 
 | Documento | Conteúdo |
 |---|---|
+| [`docs/GUIA_INSTALACAO.md`](docs/GUIA_INSTALACAO.md) | Passo a passo de instalação para avaliação (links, acesso, credenciais, demo, troubleshooting) |
 | [`docs/EVIDENCIAS.md`](docs/EVIDENCIAS.md) | **Onde cada exigência do Tech Challenge aparece no sistema** (tela + arquivo + comando) — guia para avaliação |
 | [`docs/RELATORIO_TECNICO.md`](docs/RELATORIO_TECNICO.md) · [PDF](docs/RELATORIO_TECNICO.pdf) | Relatório técnico da Fase 3 (fine-tuning, assistente, diagramas, avaliação e resultados) — PDF com anexos via `make docs-pdf` |
 | [`docs/FINE_TUNING.md`](docs/FINE_TUNING.md) | Processo de fine-tuning em detalhe, métricas e análise |

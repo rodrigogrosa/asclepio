@@ -68,7 +68,7 @@ services:
       OLLAMA_PULL_MODELS: ${OLLAMA_PULL_MODELS:-nomic-embed-text llama3.1:8b}
     volumes:
       - ./infra/ollama/init.sh:/init.sh:ro
-      - ./ml/models:/models:ro
+      - ./ml/models:/models
     restart: "no"
 
   # ---------------- API (FastAPI + LangChain/LangGraph) ----------------

@@ -65,6 +65,18 @@ for var in ASCLEPIO_ADMIN_PASSWORD ASCLEPIO_RODRIGO_PASSWORD; do
 done
 [[ ${#NEW_PWDS[@]} -gt 0 ]] && ok "senhas iniciais dos usuários reais geradas e salvas no .env (serão exibidas no final)"
 
+# ---------- 2c) modelo fine-tunado (baixa da Release do GitHub se não existir localmente) ----------
+MODEL_URL="${ASCLEPIO_MODEL_URL:-https://github.com/rodrigogrosa/asclepio/releases/download/v1.2.0/asclepio-med-v1.2.0.tar.gz}"
+if [[ ! -f ml/models/asclepio-med/Modelfile ]]; then
+  say "Modelo fine-tunado (asclepio-med) não encontrado localmente — baixando da Release (~1 GB)…"
+  mkdir -p ml/models
+  if curl -fL --progress-bar "$MODEL_URL" -o /tmp/asclepio-med.tar.gz && tar -xzf /tmp/asclepio-med.tar.gz -C ml/models; then
+    rm -f /tmp/asclepio-med.tar.gz; ok "modelo asclepio-med baixado em ml/models/asclepio-med"
+  else
+    warn "não foi possível baixar o modelo fine-tunado (sem internet/asset?). A API usará o fallback llama3.1:8b; rode 'make finetune' para treinar localmente."
+  fi
+fi
+
 # ---------- 3) Ollama: host ou container? ----------
 PROFILES=()
 OLLAMA_URL_FOR_CONTAINERS="http://ollama:11434"
