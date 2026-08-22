@@ -205,7 +205,7 @@ Tudo documentado em [`docs/POLITICAS.md`](docs/POLITICAS.md).
 | Documento | Conteúdo |
 |---|---|
 | [`docs/EVIDENCIAS.md`](docs/EVIDENCIAS.md) | **Onde cada exigência do Tech Challenge aparece no sistema** (tela + arquivo + comando) — guia para avaliação |
-| [`docs/RELATORIO_TECNICO.md`](docs/RELATORIO_TECNICO.md) | Relatório técnico da Fase 3 (fine-tuning, assistente, diagramas, avaliação e resultados) |
+| [`docs/RELATORIO_TECNICO.md`](docs/RELATORIO_TECNICO.md) · [PDF](docs/RELATORIO_TECNICO.pdf) | Relatório técnico da Fase 3 (fine-tuning, assistente, diagramas, avaliação e resultados) — PDF com anexos via `make docs-pdf` |
 | [`docs/FINE_TUNING.md`](docs/FINE_TUNING.md) | Processo de fine-tuning em detalhe, métricas e análise |
 | [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | Componentes, fluxos de dados, diagramas de sequência, decisões |
 | [`docs/CONTRATO_API.md`](docs/CONTRATO_API.md) | Contrato REST/SSE (tipos e endpoints) |
