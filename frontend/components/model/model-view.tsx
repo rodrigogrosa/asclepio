@@ -8,6 +8,7 @@ import { useAsync } from "@/lib/hooks";
 import type { EvalSample } from "@/lib/types";
 import { cn, fmtDateTime, fmtDuration, fmtNumber, fmtPct } from "@/lib/utils";
 import { useAuth } from "@/components/providers/auth-provider";
+import { hasPermission } from "@/lib/permissions";
 import { useToast } from "@/components/providers/toast-provider";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,8 @@ const COLORS = ["#9A9AAB", "#ED145B", "#7B2FF7", "#3AA0FF"];
 const tooltipStyle = { contentStyle: { background: "#14141B", border: "1px solid #2A2A38", borderRadius: 12, fontSize: 12 }, itemStyle: { color: "#F5F5F7" }, labelStyle: { color: "#9A9AAB" }, cursor: { fill: "rgba(255,255,255,0.04)" } };
 
 export function ModelView() {
-  const { hasRole } = useAuth();
+  const { user } = useAuth();
+  const canSwitch = hasPermission(user, "model:read");
   const toast = useToast();
   const { data, loading, error, reload, setData } = useAsync(() => api.model.info(), []);
   const [switching, setSwitching] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export function ModelView() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Modelo" description="Model card: modelo ativo, fine-tuning (LoRA), avaliação base vs fine-tuned e métricas do RAG." />
+      <PageHeader title="IA & Modelos" description="Modelo de linguagem ativo, ajuste fino (LoRA), avaliação comparativa e métricas de recuperação de documentos." />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="overflow-hidden">
@@ -104,7 +106,7 @@ export function ModelView() {
         </Card>
 
         <Card className="lg:col-span-2">
-          <CardHeader title="Modelos disponíveis" subtitle={hasRole("admin") ? "Administradores podem trocar o modelo ativo" : "Somente administradores podem trocar o modelo"} icon={<Cpu className="h-4 w-4" />} />
+          <CardHeader title="Modelos disponíveis" subtitle={canSwitch ? "Administradores podem trocar o modelo ativo" : "Somente administradores podem trocar o modelo"} icon={<Cpu className="h-4 w-4" />} />
           <ul className="divide-y divide-border">
             {data.available.map((m) => {
               const active = m.name === data.active.name;
@@ -117,7 +119,7 @@ export function ModelView() {
                   <span className="ml-auto">
                     {active ? (
                       <Badge tone="success">ativo</Badge>
-                    ) : hasRole("admin") ? (
+                    ) : canSwitch ? (
                       <Button size="sm" variant="outline" loading={switching === m.name} onClick={() => switchModel(m.name)}><ArrowLeftRight className="h-3.5 w-3.5" /> Ativar</Button>
                     ) : null}
                   </span>

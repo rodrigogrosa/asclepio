@@ -63,7 +63,7 @@ Todo o conteúdo é **fictício/educacional** (explicitado em cada arquivo), coe
 | FAQ da equipe (`faq/perguntas_frequentes.jsonl`) | **167** pares P/R ligados a protocolo/seção | JSONL | RAG (1 chunk por FAQ) + fine-tuning + **gabarito da avaliação do RAG** |
 | Instruções seed (`data/synthetic/instructions_seed.jsonl`) | **233** em 7 categorias (`protocolo`, `documento`, `paciente_contexto`, `recusa_prescricao`, `fora_escopo`, `identidade_limites`, `anonimizacao_seguranca`) | JSONL | Núcleo do dataset SFT |
 | Prontuários sintéticos (`asclepio_core.synthetic`) | **24** pacientes com sinais vitais, exames (pendentes/atrasados/críticos), medicações, evoluções — 18 cenários dirigidos aos protocolos + estáveis | Gerados com Faker (pt_BR), semente fixa; PII fictícia **inserida de propósito** nas evoluções | Banco da API, fluxos LangGraph, exemplos `paciente_contexto` |
-| Datasets públicos sugeridos (PubMedQA, MedQuAD) | opcional (`ml prepare --with-public`, ≤ 10 %) | HF Datasets | Enriquecimento opcional; fora do padrão por serem em inglês e não institucionais |
+| Datasets públicos sugeridos no edital (**PubMedQA**, **MedQuAD**) | amostras via `ml prepare --with-public` (75 PubMedQA `pqa_labeled` + 13 MedQuAD após dedupe ≈ 4 % do dataset, teto de 10 %) | HF Datasets (`qiaojin/PubMedQA`, `lavita/MedQuAD`) | Categoria `conhecimento_publico`: respostas marcadas como "conhecimento público, não institucional" + aviso de validação — ensinam o modelo a distinguir protocolo do hospital de literatura geral |
 
 O esquema e a validação dos arquivos estão em `data/knowledge_base/README.md`.
 
@@ -78,6 +78,7 @@ Pipeline `uv run python -m asclepio_ml prepare` (código em `ml/asclepio_ml/data
 5. **Curadoria**: remoção de vazios/curtos, *dedupe* exato e aproximado (normalização), limite de tamanho, **balanceamento por categoria** (cap), garantia de que respostas clínicas terminam com o aviso de validação (`guardrails.DISCLAIMER`) e que recusas são recusas (`is_refusal`).
 6. **Split estratificado** por categoria (85 / 7,5 / 7,5) com semente fixa; formato *chat messages* com o **system prompt do Asclépio** (`ml/asclepio_ml/prompts.py`).
 7. **Dataset card** (`data/processed/DATASET_CARD.md`): composição, contagens, % anonimizado, licença/aviso.
+8. **Dados públicos** (`--with-public`, usado na execução oficial): amostras de PubMedQA (pergunta + contexto → resposta longa + conclusão) e MedQuAD (P/R de saúde) convertidas para o formato do Asclépio, com fonte explícita ("PubMedQA/MedQuAD — conhecimento público, não institucional"), limitadas a ≤ 10 % para não diluir o comportamento institucional (são em inglês e não citam `PROT-xxx`).
 
 Os mesmos módulos de anonimização e guardrails rodam **em produção** (API) — consistência entre o que o modelo viu no treino e o que encontra em uso.
 
@@ -140,18 +141,18 @@ Cada nó grava um **passo** (status, duração, resumo, dados) → timeline na U
 ## 9. Avaliação do modelo e análise dos resultados
 
 <!-- ML_RESULTS_START -->
-**Execução real** (`make finetune`, 2026-08-21, Apple Silicon/MPS): LoRA r=16, α=32, dropout 0.05, alvos up_proj, k_proj, q_proj, o_proj, down_proj, gate_proj, v_proj; 8.8 M parâmetros treináveis de 494 M (1.8%); 2 épocas = 216 passos, batch efetivo 16, lr 0.0002, seq. máx. 1024, float32; **1719** exemplos de treino / 165 de validação; duração **21.5 min**; loss de treino 0.75 · loss de validação 1.3108. Exportado como safetensors → `ollama create asclepio-med` (ok).
+**Execução real** (`make finetune`, 2026-08-22, Apple Silicon/MPS): LoRA r=16, α=32, dropout 0.05, alvos q_proj, o_proj, v_proj, up_proj, gate_proj, k_proj, down_proj; 8.8 M parâmetros treináveis de 494 M (1.8%); 2 épocas = 226 passos, batch efetivo 16, lr 0.0002, seq. máx. 1024, float32; **1801** exemplos de treino / 165 de validação (inclui amostras PubMedQA/MedQuAD ≤ 10 %); duração **21.74 min**; loss de treino 0.8223 · loss de validação 1.3785. Exportado como safetensors → `ollama create asclepio-med` (ok).
 
 ![Curva de loss](assets/eval/train_loss.png)
 
-**Avaliação** (2026-08-21T22:24, 120 exemplos de teste *held-out* + 15 prompts de segurança; juiz `llama3.1:8b` em 60 amostras):
+**Avaliação** (2026-08-22T00:20, 120 exemplos de teste *held-out* + 15 prompts de segurança; juiz `llama3.1:8b` em 60 amostras):
 
 | Modelo | ROUGE-L | BLEU | Cobertura de termos | Taxa de citação | Conformidade guardrails | Recusa (seg.) | Juiz LLM (1–5) | Latência média (ms) |
 |---|---|---|---|---|---|---|---|---|
-| Base · Qwen2.5-0.5B-Instruct | 0.131 | 3.2 | 17.5% | 16.9% | 74.1% | 47% | 3.58 | 1250 |
-| **Fine-tuned · asclepio-med (HF merged)** | 0.366 | 28.0 | 26.7% | 22.5% | 88.9% | 60% | 3.67 | 1230 |
-| **Fine-tuned · asclepio-med (Ollama)** | 0.366 | 28.9 | 27.7% | 24.7% | 92.6% | 80% | 3.67 | 853 |
-| Referência · llama3.1:8b (sem fine-tuning) | 0.133 | 3.5 | 10.8% | 15.7% | 81.5% | 53% | 4.37 | 2708 |
+| Base · Qwen2.5-0.5B-Instruct | 0.125 | 3.0 | 16.7% | 22.3% | 77.0% | 47% | 3.62 | 1327 |
+| **Fine-tuned · asclepio-med (HF merged)** | 0.355 | 26.8 | 23.9% | 31.9% | 95.6% | 87% | 3.68 | 1320 |
+| **Fine-tuned · asclepio-med (Ollama)** | 0.364 | 27.6 | 24.1% | 34.0% | 94.8% | 80% | 3.73 | 899 |
+| Referência · llama3.1:8b (sem fine-tuning) | 0.124 | 3.8 | 11.8% | 20.2% | 84.4% | 53% | 4.30 | 2701 |
 
 ![Comparação de métricas](assets/eval/metrics_comparison.png)
 ![Segurança](assets/eval/safety.png)
@@ -162,8 +163,8 @@ Cada nó grava um **passo** (status, duração, resumo, dados) → timeline na U
 ![RAG](assets/eval/rag.png)
 
 **Leitura dos resultados**
-- O fine-tuning **transformou o comportamento** do modelo de 0,5B: ROUGE-L 0.13 → 0.37 (×2.8), BLEU 3.2 → 28.9, cobertura de termos-chave 17% → 28%, taxa de citação 17% → 25%, **conformidade com os guardrails 74% → 93%** e recusa correta no conjunto de segurança 47% → 80%. Ou seja: aprendeu o formato institucional (fonte + aviso de validação), o escopo e os limites — exatamente o objetivo do fine-tuning neste projeto.
-- O juiz LLM dá nota ligeiramente maior ao fine-tuned que ao base (3.58 → 3.67) e nota maior ao `llama3.1:8b` (4.37) — um modelo 16× maior raciocina melhor, porém **cita menos, obedece menos aos guardrails (81%) e é ~3× mais lento**. Isso confirma a tese: fine-tuning para forma/segurança + RAG para fatos + guardrails em código; a API permite trocar de modelo quando se quer mais raciocínio.
+- O fine-tuning **transformou o comportamento** do modelo de 0,5B: ROUGE-L 0.12 → 0.36 (×2.9), BLEU 3.0 → 27.6, cobertura de termos-chave 17% → 24%, taxa de citação 22% → 34%, **conformidade com os guardrails 77% → 95%** e recusa correta no conjunto de segurança 47% → 80%. Ou seja: aprendeu o formato institucional (fonte + aviso de validação), o escopo e os limites — exatamente o objetivo do fine-tuning neste projeto.
+- O juiz LLM dá nota ligeiramente maior ao fine-tuned que ao base (3.62 → 3.73) e nota maior ao `llama3.1:8b` (4.30) — um modelo 16× maior raciocina melhor, porém **cita menos, obedece menos aos guardrails (84%) e é ~3× mais lento**. Isso confirma a tese: fine-tuning para forma/segurança + RAG para fatos + guardrails em código; a API permite trocar de modelo quando se quer mais raciocínio.
 - O RAG é forte (hit@5 97%) e é ele quem garante os números dos protocolos nas respostas; em produção o `asclepio-med` roda com RAG, o que eleva a qualidade observada além da medida aqui (avaliação sem recuperação, só modelo).
 - Limitações: conjunto de teste pequeno e gerado a partir da mesma base (risco de otimismo em ROUGE/BLEU), juiz automático em 60 amostras, modelo pequeno ainda erra detalhes fora do que viu. Tabelas completas, amostras e análise em `docs/FINE_TUNING.md` e `ml/reports/eval_latest.md`.
 <!-- ML_RESULTS_END -->

@@ -8,6 +8,7 @@ import { useAsync } from "@/lib/hooks";
 import type { WorkflowStep } from "@/lib/types";
 import { cn, fmtDateTime, fmtDuration, fmtRelative, RISK_LABEL } from "@/lib/utils";
 import { useAuth } from "@/components/providers/auth-provider";
+import { hasPermission } from "@/lib/permissions";
 import { useToast } from "@/components/providers/toast-provider";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,9 +23,30 @@ import { ScoreBar } from "@/components/ui/misc";
 import { CitationCard } from "@/components/chat/sources-panel";
 import { AlertList } from "@/components/alerts/alert-list";
 
+/** Rótulos clínicos por nó (para quem não tem `system:internals`); o backend envia o rótulo técnico em `step.label`. */
+const CLINICAL_STEP_LABEL: Record<string, string> = {
+  load_patient: "Leitura do prontuário",
+  anonymize: "Proteção de dados do paciente",
+  check_exams: "Verificação de exames pendentes",
+  check_critical: "Detecção de valores críticos",
+  risk_score: "Estratificação de risco",
+  retrieve: "Consulta aos protocolos institucionais",
+  generate: "Elaboração de sugestões e resumo",
+  guard_output: "Revisão de segurança da resposta",
+  emit_alerts: "Emissão de alertas",
+  human_review: "Validação pelo profissional",
+  finalize: "Registro da decisão",
+};
+const CLINICAL_SUMMARY: Record<string, (s: WorkflowStep) => string | null> = {
+  retrieve: () => "Protocolos e documentos institucionais consultados.",
+  generate: () => "Sugestões e resumo elaborados a partir das fontes consultadas.",
+  guard_output: () => "Resposta verificada: fontes válidas, sem dados pessoais, linguagem não prescritiva.",
+  human_review: (s) => (s.status === "aguardando" ? "Aguardando decisão do médico responsável." : null),
+};
+
 const CAT_LABEL: Record<string, string> = { exame: "Exame", conduta: "Conduta", monitorizacao: "Monitorização", alerta: "Alerta", encaminhamento: "Encaminhamento" };
 
-function StepItem({ step, isLast }: { step: WorkflowStep; isLast: boolean }) {
+function StepItem({ step, isLast, internals }: { step: WorkflowStep; isLast: boolean; internals: boolean }) {
   const [open, setOpen] = useState(false);
   const tone = step.status === "ok" ? "border-success/50" : step.status === "alerta" ? "border-warning/50" : step.status === "erro" ? "border-danger/50" : step.status === "aguardando" ? "border-warning/70 animate-pulse-soft" : "border-border";
   return (
@@ -35,13 +57,13 @@ function StepItem({ step, isLast }: { step: WorkflowStep; isLast: boolean }) {
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <p className="text-sm font-semibold text-text">{step.label}</p>
-          <span className="font-mono text-[10px] text-muted">{step.node}</span>
+          <p className="text-sm font-semibold text-text">{internals ? step.label : CLINICAL_STEP_LABEL[step.node] ?? step.label}</p>
+          {internals && <span className="font-mono text-[10px] text-muted">{step.node}</span>}
           <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-muted"><Clock className="h-3 w-3" /> {fmtDuration(step.duration_ms)}</span>
         </div>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted">{step.summary}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted">{internals ? step.summary : CLINICAL_SUMMARY[step.node]?.(step) ?? step.summary}</p>
         <p className="mt-0.5 text-[10px] text-muted/70">{fmtDateTime(step.started_at, "dd/MM HH:mm:ss")}</p>
-        {step.data && (
+        {internals && step.data && (
           <>
             <button onClick={() => setOpen((o) => !o)} className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-primary-hover hover:underline">
               {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />} {open ? "Ocultar dados" : "Ver dados"}
@@ -55,14 +77,16 @@ function StepItem({ step, isLast }: { step: WorkflowStep; isLast: boolean }) {
 }
 
 export function RunDetail({ runId }: { runId: string }) {
-  const { user, hasRole } = useAuth();
+  const { user } = useAuth();
+  const internals = hasPermission(user, "system:internals");
+  const canOpenPatient = hasPermission(user, "patients:read");
   const toast = useToast();
   const [comment, setComment] = useState("");
   const [deciding, setDeciding] = useState<"approve" | "reject" | null>(null);
   // polling leve (3s) enquanto o grafo está executando
   const { data: run, loading, error, reload, setData } = useAsync(() => api.workflows.run(runId), [runId], { pollMs: (r) => (r?.status === "executando" ? 3000 : undefined) });
 
-  const canDecide = hasRole("medico", "admin");
+  const canDecide = hasPermission(user, "workflows:decide");
 
   const decide = async (approved: boolean) => {
     setDeciding(approved ? "approve" : "reject");
@@ -100,19 +124,19 @@ export function RunDetail({ runId }: { runId: string }) {
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-lg font-extrabold text-text">Revisão clínica</h1>
-              <span className="font-mono text-xs text-muted">{run.run_id}</span>
+              {internals && <span className="font-mono text-xs text-muted">{run.run_id}</span>}
               <RunStatusBadge status={run.status} />
             </div>
             <p className="mt-1 text-sm text-text">
-              Paciente: <Link href={`/pacientes/${run.patient_id}`} className="font-semibold text-primary-hover hover:underline">{run.patient_name}</Link>
+              Paciente: {canOpenPatient ? <Link href={`/pacientes/${run.patient_id}`} className="font-semibold text-primary-hover hover:underline">{run.patient_name}</Link> : <span className="font-semibold text-text">{run.patient_name}</span>}
             </p>
             {run.reason && <p className="mt-0.5 text-xs text-muted">Motivo: {run.reason}</p>}
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
               <span className="inline-flex items-center gap-1"><User className="h-3 w-3" /> {run.started_by}</span>
               <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> início {fmtDateTime(run.started_at)} ({fmtRelative(run.started_at)})</span>
               {run.finished_at && <span>fim {fmtDateTime(run.finished_at)}</span>}
-              <span className="inline-flex items-center gap-1"><Cpu className="h-3 w-3" /> {run.model.name}{run.model.fine_tuned ? " (fine-tuned)" : ""}</span>
-              <span className="inline-flex items-center gap-1 font-mono"><Gauge className="h-3 w-3" /> {run.trace_id}</span>
+              {internals && <span className="inline-flex items-center gap-1"><Cpu className="h-3 w-3" /> {run.model.name}{run.model.fine_tuned ? " (fine-tuned)" : ""}</span>}
+              {internals && <span className="inline-flex items-center gap-1 font-mono"><Gauge className="h-3 w-3" /> {run.trace_id}</span>}
             </div>
           </div>
           {res && (
@@ -138,7 +162,14 @@ export function RunDetail({ runId }: { runId: string }) {
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning/20 text-warning"><UserCheck className="h-5 w-5" /></div>
               <div className="min-w-0 flex-1">
                 <h2 className="font-display text-base font-bold uppercase tracking-wide text-text">Validação humana obrigatória</h2>
-                <p className="mt-1 text-sm text-muted">O grafo está pausado no nó <code className="rounded bg-surface-2 px-1 font-mono text-xs">human_review</code>. As sugestões abaixo só se tornam conduta após revisão de um profissional habilitado.</p>
+                <p className="mt-1 text-sm text-muted">
+                  {internals ? (
+                    <>O grafo está pausado no nó <code className="rounded bg-surface-2 px-1 font-mono text-xs">human_review</code>. </>
+                  ) : (
+                    <>A revisão está aguardando validação. </>
+                  )}
+                  As sugestões abaixo só se tornam conduta após revisão de um profissional habilitado.
+                </p>
                 {canDecide ? (
                   <div className="mt-4 space-y-3">
                     <Textarea label="Comentário (opcional)" placeholder="Observações sobre a decisão…" value={comment} onChange={(e) => setComment(e.target.value)} />
@@ -150,7 +181,7 @@ export function RunDetail({ runId }: { runId: string }) {
                   </div>
                 ) : (
                   <p className="mt-3 rounded-control border border-border bg-surface-2/60 px-3 py-2 text-xs text-muted">
-                    Seu papel (<span className="font-semibold text-text">{user?.role}</span>) não permite aprovar ou rejeitar. Apenas <b>médicos</b> e <b>administradores</b> podem decidir.
+                    Seu perfil não permite aprovar ou rejeitar esta revisão. A decisão cabe ao médico responsável.
                   </p>
                 )}
               </div>
@@ -176,9 +207,9 @@ export function RunDetail({ runId }: { runId: string }) {
       <div className="grid gap-4 lg:grid-cols-5">
         {/* Timeline */}
         <Card className="lg:col-span-2">
-          <CardHeader title="Execução do grafo" subtitle={`${run.steps.length} etapa(s)`} icon={<ListChecks className="h-4 w-4" />} />
+          <CardHeader title={internals ? "Execução do grafo" : "Linha do tempo da revisão"} subtitle={`${run.steps.length} etapa(s)`} icon={<ListChecks className="h-4 w-4" />} />
           <CardBody>
-            <ol>{run.steps.map((s, i) => <StepItem key={`${s.node}-${i}`} step={s} isLast={i === run.steps.length - 1} />)}</ol>
+            <ol>{run.steps.map((s, i) => <StepItem key={`${s.node}-${i}`} step={s} isLast={i === run.steps.length - 1} internals={internals} />)}</ol>
             {run.status === "executando" && <p className="text-xs text-info">Executando… atualizando a cada 3s.</p>}
           </CardBody>
         </Card>
@@ -190,7 +221,7 @@ export function RunDetail({ runId }: { runId: string }) {
           ) : (
             <>
               <Card>
-                <CardHeader title="Resumo da LLM" icon={<Sparkles className="h-4 w-4" />} actions={<GuardrailBadge status={res.guardrail.status} size="sm" />} />
+                <CardHeader title={internals ? "Resumo da LLM" : "Resumo da revisão"} icon={<Sparkles className="h-4 w-4" />} actions={<GuardrailBadge status={res.guardrail.status} size="sm" />} />
                 <CardBody>
                   <MarkdownView content={res.llm_summary} citationCount={res.citations.length} onCitationClick={(n) => document.getElementById(`run-cite-${n}`)?.scrollIntoView({ behavior: "smooth", block: "center" })} />
                   {!!res.guardrail.notes.length && (
@@ -217,7 +248,7 @@ export function RunDetail({ runId }: { runId: string }) {
                             <AlertOctagon className="h-4 w-4 text-danger" />
                             <span className="font-semibold text-text">{c.exam}</span>
                             <span className="font-mono text-danger">{c.value}</span>
-                            <span className="ml-auto font-mono text-[11px] text-muted">regra: {c.rule}</span>
+                            {internals && <span className="ml-auto font-mono text-[11px] text-muted">regra: {c.rule}</span>}
                           </li>
                         ))}
                       </ul>
@@ -266,7 +297,7 @@ export function RunDetail({ runId }: { runId: string }) {
               )}
 
               <Card>
-                <CardHeader title="Fontes (RAG)" subtitle={`${res.citations.length} trecho(s) recuperado(s)`} icon={<BookOpen className="h-4 w-4" />} />
+                <CardHeader title={internals ? "Fontes (RAG)" : "Fontes consultadas"} subtitle={`${res.citations.length} trecho(s) ${internals ? "recuperado(s)" : "dos protocolos"}`} icon={<BookOpen className="h-4 w-4" />} />
                 <CardBody>
                   {res.citations.length ? (
                     <ol className="space-y-2">{res.citations.map((c) => <CitationCard key={c.id} c={c} id={`run-cite-${c.id}`} />)}</ol>

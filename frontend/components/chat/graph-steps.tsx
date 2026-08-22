@@ -41,3 +41,29 @@ export function GraphSteps({ states, className }: { states: Record<string, StepS
     </ol>
   );
 }
+
+/** Indicador simples (sem nomes de nós) para quem não tem `system:internals`. */
+const SIMPLE_LABEL: Record<string, string> = {
+  guard_input: "validando a pergunta…",
+  classify: "entendendo a pergunta…",
+  retrieve: "consultando os protocolos…",
+  generate: "gerando resposta…",
+  guard_output: "revisando a resposta…",
+};
+export function SimpleProgress({ states, className }: { states: Record<string, StepState>; className?: string }) {
+  const running = CHAT_NODES.find((n) => states[n.node] === "running");
+  const errored = CHAT_NODES.find((n) => states[n.node] === "error");
+  const done = CHAT_NODES.filter((n) => states[n.node] === "ok").length;
+  const label = errored ? "não foi possível concluir" : running ? SIMPLE_LABEL[running.node] ?? "processando…" : done === CHAT_NODES.length ? "resposta concluída" : "iniciando…";
+  return (
+    <div className={cn("flex items-center gap-2 text-[11px] text-muted", className)} role="status" aria-live="polite">
+      {errored ? <X className="h-3.5 w-3.5 text-danger" /> : done === CHAT_NODES.length ? <Check className="h-3.5 w-3.5 text-success" /> : <Loader2 className="h-3.5 w-3.5 animate-spin text-info" />}
+      <span>{label}</span>
+      <span className="ml-1 flex gap-0.5" aria-hidden>
+        {CHAT_NODES.map((n) => (
+          <span key={n.node} className={cn("h-1 w-4 rounded-full", states[n.node] === "ok" ? "bg-success" : states[n.node] === "running" ? "bg-info animate-pulse" : states[n.node] === "error" ? "bg-danger" : "bg-surface-2")} />
+        ))}
+      </span>
+    </div>
+  );
+}

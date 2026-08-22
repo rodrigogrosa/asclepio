@@ -83,9 +83,18 @@ services:
         condition: service_healthy
     environment:
       APP_ENV: ${APP_ENV:-development}
+      APP_HOSPITAL_NAME: ${APP_HOSPITAL_NAME:-Hospital Universitário}
+      APP_HOSPITAL_SHORT_NAME: ${APP_HOSPITAL_SHORT_NAME:-HU}
+      APP_SUPPORT_EMAIL: ${APP_SUPPORT_EMAIL:-}
       LOG_FORMAT: ${LOG_FORMAT:-json}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       SECRET_KEY: ${SECRET_KEY:-troque-esta-chave-por-algo-longo-e-aleatorio-em-producao}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      REFRESH_TOKEN_EXPIRE_HOURS: ${REFRESH_TOKEN_EXPIRE_HOURS:-12}
+      MFA_REQUIRED_FOR_ADMIN: ${MFA_REQUIRED_FOR_ADMIN:-true}
+      ASCLEPIO_ADMIN_PASSWORD: ${ASCLEPIO_ADMIN_PASSWORD:-}
+      ASCLEPIO_RODRIGO_PASSWORD: ${ASCLEPIO_RODRIGO_PASSWORD:-}
+      SEED_DEMO_USERS: ${SEED_DEMO_USERS:-true}
       DATABASE_URL: postgresql+asyncpg://asclepio:${POSTGRES_PASSWORD:-asclepio}@db:5432/asclepio
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       LLM_PROVIDER: ${LLM_PROVIDER:-ollama}

@@ -20,8 +20,11 @@ class Settings(BaseSettings):
 
     # --- app ---
     app_name: str = "Asclépio"
+    app_hospital_name: str = "Hospital Universitário"
+    app_hospital_short_name: str = "HU"
+    app_support_email: str | None = None
     app_env: Literal["development", "test", "production"] = "development"
-    app_version: str = "1.0.0"
+    app_version: str = "1.2.0"
     log_level: str = "INFO"
     log_format: Literal["console", "json"] = "console"
     api_prefix: str = "/api/v1"
@@ -29,7 +32,11 @@ class Settings(BaseSettings):
     # --- segurança ---
     secret_key: str = Field(default="dev-only-insecure-secret-key-change-me", min_length=16)
     jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 480
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_hours: int = 12
+    mfa_token_expire_minutes: int = 5
+    mfa_required_for_admin: bool = True
+    max_failed_mfa: int = 5
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
     rate_limit_per_minute: int = 60
     login_rate_limit_per_minute: int = 10
@@ -41,6 +48,12 @@ class Settings(BaseSettings):
     # --- banco ---
     database_url: str = f"sqlite+aiosqlite:///{REPO_ROOT / 'data' / 'asclepio.sqlite'}"
     seed_on_startup: bool = True
+    seed_demo_users: bool = True
+    admin_email: str = "admin@asclepio.fiap"
+    admin_password: str | None = Field(default=None, validation_alias="ASCLEPIO_ADMIN_PASSWORD")
+    rodrigo_email: str = "rodrigo.grosa2011@gmail.com"
+    rodrigo_name: str = "Rodrigo Rosa"
+    rodrigo_password: str | None = Field(default=None, validation_alias="ASCLEPIO_RODRIGO_PASSWORD")
 
     # --- LLM ---
     llm_provider: Literal["ollama", "litellm", "openai", "fake"] = "ollama"

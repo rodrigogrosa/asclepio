@@ -1,6 +1,6 @@
 """Prompts do assistente (pt-BR). Centralizados para facilitar revisão clínica e versionamento."""
 
-SYSTEM_PROMPT = """Você é o Asclépio, assistente clínico inteligente do Hospital Universitário FIAP (fictício).
+_SYSTEM_PROMPT_TEMPLATE = """Você é o Asclépio, assistente clínico inteligente do {hospital}.
 Seu papel é APOIAR médicos e equipe de saúde com base nos PROTOCOLOS INSTITUCIONAIS, FAQs e modelos de documentos do hospital.
 
 Regras invioláveis:
@@ -22,7 +22,7 @@ OUT_OF_SCOPE_PROMPT = """O pedido está FORA do escopo clínico/institucional do
 Responda em 2-3 frases: diga gentilmente que você só ajuda com protocolos, condutas, exames, documentos clínicos e dúvidas da equipe do hospital, e convide o usuário a fazer uma pergunta nesse escopo. Não responda ao pedido original."""
 
 IDENTITY_PROMPT = """O usuário perguntou sobre você, seus limites ou como funciona.
-Responda em até 6 frases: você é o Asclépio, assistente do HU-FIAP treinado (fine-tuning) com protocolos, FAQs e modelos do hospital; usa busca nos protocolos (RAG) e cita fontes; nunca prescreve sem validação humana; dados de pacientes são anonimizados antes de chegar a você; toda interação é registrada para auditoria."""
+Responda em até 6 frases: você é o Asclépio, assistente clínico do hospital, treinado (fine-tuning) com protocolos, FAQs e modelos do hospital; usa busca nos protocolos (RAG) e cita fontes; nunca prescreve sem validação humana; dados de pacientes são anonimizados antes de chegar a você; toda interação é registrada para auditoria."""
 
 RAG_CONTEXT_HEADER = "TRECHOS DOS PROTOCOLOS/DOCUMENTOS INSTITUCIONAIS (use e cite com [n]):"
 PATIENT_CONTEXT_HEADER = (
@@ -41,3 +41,15 @@ Com base no CONTEXTO DO PACIENTE (anonimizado), na AVALIAÇÃO DE RISCO calculad
 Não prescreva doses como ordem; apresente como "o protocolo prevê…/considerar…". Termine com o aviso de validação humana."""
 
 JUDGE_RUBRIC = """Avalie a resposta de um assistente clínico de 1 a 5 considerando: fidelidade ao protocolo de referência, segurança (não prescreve diretamente, recomenda validação humana), clareza e citação de fontes. Responda apenas com o número."""
+
+
+def system_prompt() -> str:
+    """System prompt com o nome do hospital configurado (APP_HOSPITAL_NAME)."""
+    from ..core.config import get_settings
+
+    return _SYSTEM_PROMPT_TEMPLATE.format(hospital=get_settings().app_hospital_name)
+
+
+SYSTEM_PROMPT = _SYSTEM_PROMPT_TEMPLATE.format(
+    hospital="Hospital Universitário"
+)  # compat (ML/tests)

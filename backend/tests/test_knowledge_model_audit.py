@@ -23,7 +23,10 @@ def test_reindex_admin_only(client, medico, admin):
 
 
 def test_model_info_and_switch(client, medico, admin):
-    info = client.get(f"{API}/model/info", headers=medico).json()
+    assert (
+        client.get(f"{API}/model/info", headers=medico).status_code == 403
+    )  # IA & Modelos: só admin
+    info = client.get(f"{API}/model/info", headers=admin).json()
     assert info["active"]["provider"] == "fake"
     assert (
         client.post(f"{API}/model/switch", json={"model": "x"}, headers=medico).status_code == 403
@@ -36,9 +39,61 @@ def test_model_info_and_switch(client, medico, admin):
     )
 
 
-def test_dashboard(client, medico):
+def test_dashboard_per_role(client, medico, admin, auditor):
     d = client.get(f"{API}/dashboard/stats", headers=medico).json()
-    assert d["patients"] >= 20 and "risk_distribution" in d and d["model"]["provider"] == "fake"
+    assert d["patients"] >= 20 and "risk_distribution" in d
+    assert d["model"] is None and d["guardrail_blocks_today"] is None  # médico não vê IA/sistema
+    assert "pending_approvals" in d["my_work"]
+    a = client.get(f"{API}/dashboard/stats", headers=admin).json()
+    assert a["model"]["provider"] == "fake" and isinstance(a["guardrail_blocks_today"], int)
+    au = client.get(f"{API}/dashboard/stats", headers=auditor).json()
+    assert au["my_work"] is None and au["model"] is None
+
+
+def test_public_config_and_catalogs(client, medico, admin):
+    cfg = client.get(f"{API}/public/config").json()
+    assert (
+        cfg["hospital_name"] and cfg["demo_mode"] is True and "admin" in cfg["mfa_required_roles"]
+    )
+    specs = client.get(f"{API}/catalog/specialties", headers=medico).json()
+    assert len(specs) >= 25 and all("professionals_count" in s for s in specs)
+    sectors = client.get(f"{API}/catalog/sectors", headers=medico).json()
+    assert any(s["name"] == "Pronto-Socorro" for s in sectors)
+    # médico não gerencia catálogos
+    assert (
+        client.post(f"{API}/catalog/specialties", json={"name": "Nova"}, headers=medico).status_code
+        == 403
+    )
+    r = client.post(
+        f"{API}/catalog/specialties",
+        json={"name": "Medicina do Sono", "code": "SON"},
+        headers=admin,
+    )
+    assert r.status_code == 201
+    sid = r.json()["id"]
+    assert (
+        client.post(
+            f"{API}/catalog/specialties", json={"name": "medicina do sono"}, headers=admin
+        ).status_code
+        == 409
+    )
+    assert (
+        client.patch(
+            f"{API}/catalog/specialties/{sid}", json={"active": False}, headers=admin
+        ).json()["active"]
+        is False
+    )
+    assert client.delete(f"{API}/catalog/specialties/{sid}", headers=admin).json()["ok"]
+    r = client.post(
+        f"{API}/catalog/sectors", json={"name": "Maternidade", "kind": "internacao"}, headers=admin
+    )
+    assert r.status_code == 201
+    assert (
+        client.post(
+            f"{API}/catalog/sectors", json={"name": "X", "kind": "invalido"}, headers=admin
+        ).status_code
+        == 422
+    )
 
 
 def test_health_and_metrics(client):

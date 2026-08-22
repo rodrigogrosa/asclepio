@@ -1,21 +1,26 @@
-// Cliente HTTP tipado contra docs/CONTRATO_API.md. Em NEXT_PUBLIC_USE_MOCK=true usa lib/mock.
-import type { StreamEvent } from "./types";
+// Cliente HTTP tipado contra docs/CONTRATO_API.md (v1 + auth v1.1). Em NEXT_PUBLIC_USE_MOCK=true usa lib/mock.
+import type { StreamEvent, TokenOut } from "./types";
 import type { ApiClient, ApiError as ApiErrorT, StreamHandler } from "./api-types";
 import { mockApi } from "./mock";
+import {
+  clearSession, getRefreshToken, getToken, notifyPrecondition, notifyUnauthorized, saveSession, TOKEN_KEY, USER_KEY, UNAUTHORIZED_EVENT,
+} from "./session";
 
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1").replace(/\/$/, "");
 export const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
-export const TOKEN_KEY = "asclepio.token";
-export const USER_KEY = "asclepio.user";
+// Re-exportados por compatibilidade (implementação em lib/session.ts)
+export { TOKEN_KEY, USER_KEY, UNAUTHORIZED_EVENT, getToken, clearSession };
 
 export class ApiError extends Error implements ApiErrorT {
   status: number;
   detail: string;
-  constructor(status: number, detail: string) {
+  code?: string;
+  constructor(status: number, detail: string, code?: string) {
     super(detail);
     this.name = "ApiError";
     this.status = status;
     this.detail = detail;
+    this.code = code;
   }
 }
 
@@ -29,23 +34,54 @@ export function errorMessage(e: unknown, fallback = "Erro inesperado"): string {
   return fallback;
 }
 
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+// ---- Refresh com mutex: várias requisições em 401 simultâneas disparam UM único POST /auth/refresh ----
+let refreshing: Promise<TokenOut | null> | null = null;
+
+/**
+ * Renova a sessão com o refresh token guardado. Resolve com o novo TokenOut ou null.
+ * Se o backend recusar o refresh (401/403) a sessão é limpa e o AuthProvider é notificado.
+ */
+export function refreshSession(): Promise<TokenOut | null> {
+  if (refreshing) return refreshing;
+  const rt = getRefreshToken();
+  if (!rt) return Promise.resolve(null);
+  refreshing = api.auth
+    .refresh(rt)
+    .then((tok) => {
+      saveSession(tok);
+      return tok;
+    })
+    .catch((e: unknown) => {
+      if (isApiError(e) && (e.status === 401 || e.status === 403 || e.status === 422)) notifyUnauthorized();
+      return null;
+    })
+    .finally(() => {
+      refreshing = null;
+    });
+  return refreshing;
 }
 
-export function clearSession() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+/** Interpreta o corpo de erro (FastAPI): `detail` string/lista e `code` opcional. */
+async function parseError(res: Response): Promise<{ detail: string; code?: string }> {
+  let detail = res.statusText || `Erro ${res.status}`;
+  let code: string | undefined;
+  try {
+    const j = await res.json();
+    if (typeof j?.detail === "string") detail = j.detail;
+    else if (Array.isArray(j?.detail)) detail = j.detail.map((d: { msg?: string }) => d.msg ?? JSON.stringify(d)).join("; ");
+    else if (typeof j?.detail?.detail === "string") detail = j.detail.detail;
+    if (typeof j?.code === "string") code = j.code;
+    else if (typeof j?.detail?.code === "string") code = j.detail.code;
+  } catch {
+    /* corpo não-JSON */
+  }
+  return { detail, code };
 }
 
-export const UNAUTHORIZED_EVENT = "asclepio:unauthorized";
-
-/** Limpa a sessão e notifica o AuthProvider (que redireciona para /login). */
-function handleUnauthorized() {
-  clearSession();
-  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT));
+/** 428 Precondition Required: troca de senha obrigatória ou MFA obrigatório (admin). */
+function handlePrecondition(detail: string, code?: string) {
+  notifyPrecondition(code === "mfa_required_setup" ? "mfa" : "password");
+  return new ApiError(428, detail, code);
 }
 
 function qs(params?: Record<string, string | number | boolean | null | undefined>) {
@@ -59,7 +95,9 @@ function qs(params?: Record<string, string | number | boolean | null | undefined
   return s ? `?${s}` : "";
 }
 
-async function request<T>(path: string, init: RequestInit = {}, opts: { auth?: boolean } = {}): Promise<T> {
+type ReqOpts = { auth?: boolean; retried?: boolean };
+
+async function request<T>(path: string, init: RequestInit = {}, opts: ReqOpts = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (!headers.has("Content-Type") && init.body) headers.set("Content-Type", "application/json");
   headers.set("Accept", "application/json");
@@ -72,19 +110,18 @@ async function request<T>(path: string, init: RequestInit = {}, opts: { auth?: b
     throw new ApiError(0, "Não foi possível conectar à API. Verifique se o backend está em execução.");
   }
   if (res.status === 401 && opts.auth !== false) {
-    handleUnauthorized();
+    // Tenta renovar UMA vez e repete a requisição; se falhar, limpa a sessão e redireciona para /login.
+    if (!opts.retried) {
+      const tok = await refreshSession();
+      if (tok) return request<T>(path, init, { ...opts, retried: true });
+    }
+    notifyUnauthorized();
     throw new ApiError(401, "Sessão expirada. Faça login novamente.");
   }
   if (!res.ok) {
-    let detail = res.statusText || `Erro ${res.status}`;
-    try {
-      const j = await res.json();
-      if (typeof j?.detail === "string") detail = j.detail;
-      else if (Array.isArray(j?.detail)) detail = j.detail.map((d: { msg?: string }) => d.msg ?? JSON.stringify(d)).join("; ");
-    } catch {
-      /* corpo não-JSON */
-    }
-    throw new ApiError(res.status, detail);
+    const { detail, code } = await parseError(res);
+    if (res.status === 428 && opts.auth !== false) throw handlePrecondition(detail, code);
+    throw new ApiError(res.status, detail, code);
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
@@ -92,10 +129,11 @@ async function request<T>(path: string, init: RequestInit = {}, opts: { auth?: b
 
 const get = <T>(path: string) => request<T>(path);
 const post = <T>(path: string, body?: unknown) => request<T>(path, { method: "POST", body: body === undefined ? undefined : JSON.stringify(body) });
+const patch = <T>(path: string, body?: unknown) => request<T>(path, { method: "PATCH", body: body === undefined ? undefined : JSON.stringify(body) });
 const del = <T>(path: string) => request<T>(path, { method: "DELETE" });
 
 /** Parser manual de SSE sobre fetch (EventSource não suporta POST). */
-async function streamSse(path: string, body: unknown, onEvent: StreamHandler, signal?: AbortSignal): Promise<void> {
+async function streamSse(path: string, body: unknown, onEvent: StreamHandler, signal?: AbortSignal, retried = false): Promise<void> {
   const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "text/event-stream" };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -107,18 +145,17 @@ async function streamSse(path: string, body: unknown, onEvent: StreamHandler, si
     throw new ApiError(0, "Não foi possível conectar à API.");
   }
   if (res.status === 401) {
-    handleUnauthorized();
+    if (!retried) {
+      const tok = await refreshSession();
+      if (tok) return streamSse(path, body, onEvent, signal, true);
+    }
+    notifyUnauthorized();
     throw new ApiError(401, "Sessão expirada.");
   }
   if (!res.ok || !res.body) {
-    let detail = res.statusText;
-    try {
-      const j = await res.json();
-      if (typeof j?.detail === "string") detail = j.detail;
-    } catch {
-      /* ignore */
-    }
-    throw new ApiError(res.status, detail || "Falha no stream");
+    const { detail, code } = await parseError(res);
+    if (res.status === 428) throw handlePrecondition(detail, code);
+    throw new ApiError(res.status, detail || "Falha no stream", code);
   }
   const reader = res.body.getReader();
   const decoder = new TextDecoder("utf-8");
@@ -161,10 +198,39 @@ async function streamSse(path: string, body: unknown, onEvent: StreamHandler, si
 
 export const httpApi: ApiClient = {
   health: () => get("/health"),
+  publicConfig: () => request("/public/config", {}, { auth: false }),
   auth: {
     login: (email, password) => request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }, { auth: false }),
+    mfaVerify: (mfa_token, code) => request("/auth/mfa/verify", { method: "POST", body: JSON.stringify({ mfa_token, code }) }, { auth: false }),
+    // refresh NÃO passa pelo fluxo de retry (auth:false) — o próprio refresh token é a credencial
+    refresh: (refresh_token) => request("/auth/refresh", { method: "POST", body: JSON.stringify({ refresh_token }) }, { auth: false }),
     me: () => get("/auth/me"),
-    logout: () => post("/auth/logout"),
+    logout: (body) => post("/auth/logout", { refresh_token: body?.refresh_token ?? undefined }),
+    logoutAll: () => post("/auth/logout-all"),
+    changePassword: (current_password, new_password) => post("/auth/change-password", { current_password, new_password }),
+    mfaSetup: () => get("/auth/mfa/setup"),
+    mfaEnable: (code) => post("/auth/mfa/enable", { code }),
+    mfaDisable: (password, code) => post("/auth/mfa/disable", { password, code }),
+    sessions: () => get("/auth/sessions"),
+    revokeSession: (id) => del(`/auth/sessions/${id}`),
+  },
+  users: {
+    list: (params) => get(`/users${qs({ role: params?.role || undefined, active: params?.active === "" || params?.active === undefined ? undefined : params.active, q: params?.q || undefined })}`),
+    get: (id) => get(`/users/${id}`),
+    create: (input) => post("/users", input),
+    update: (id, body) => patch(`/users/${id}`, body),
+    resetPassword: (id) => post(`/users/${id}/reset-password`),
+    mfaReset: (id) => post(`/users/${id}/mfa/reset`),
+  },
+  catalog: {
+    specialties: (includeInactive) => get(`/catalog/specialties${qs({ include_inactive: includeInactive ? true : undefined })}`),
+    createSpecialty: (input) => post("/catalog/specialties", input),
+    updateSpecialty: (id, body) => patch(`/catalog/specialties/${id}`, body),
+    deleteSpecialty: (id) => del(`/catalog/specialties/${id}`),
+    sectors: (includeInactive) => get(`/catalog/sectors${qs({ include_inactive: includeInactive ? true : undefined })}`),
+    createSector: (input) => post("/catalog/sectors", input),
+    updateSector: (id, body) => patch(`/catalog/sectors/${id}`, body),
+    deleteSector: (id) => del(`/catalog/sectors/${id}`),
   },
   dashboard: { stats: () => get("/dashboard/stats") },
   patients: {

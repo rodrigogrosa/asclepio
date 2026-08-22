@@ -18,6 +18,8 @@ import { EmptyState, ErrorState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/misc";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/components/providers/auth-provider";
+import { hasPermission } from "@/lib/permissions";
 
 const MermaidGraph = dynamic(() => import("./mermaid-graph").then((m) => m.MermaidGraph), { ssr: false, loading: () => <Skeleton className="h-64" /> });
 
@@ -30,12 +32,15 @@ export function WorkflowsList() {
   const [showNodes, setShowNodes] = useState(false);
   const patientId = Number(params.get("patient_id")) || undefined;
   const { data, loading, error, reload } = useAsync(() => api.workflows.runs({ status, patient_id: patientId, limit: 100 }), [status, patientId], { pollMs: 15_000 });
-  const { data: graph, error: graphError } = useAsync(() => api.workflows.graph(), []);
+  const { user } = useAuth();
+  const internals = hasPermission(user, "system:internals");
+  const { data: graph, error: graphError } = useAsync(() => api.workflows.graph(), [internals], { enabled: internals });
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Fluxos clínicos" description="Revisões clínicas orquestradas em LangGraph com interrupção para validação humana." />
+      <PageHeader title="Fluxos clínicos" description={internals ? "Revisões clínicas orquestradas em LangGraph com interrupção para validação humana." : "Revisões clínicas automatizadas por paciente — toda sugestão passa por validação de um profissional antes de virar conduta."} />
 
+      {internals && (
       <Card>
         <CardHeader
           title="Grafo de revisão clínica"
@@ -74,6 +79,7 @@ export function WorkflowsList() {
           )}
         </CardBody>
       </Card>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
         <Select value={status} onChange={(e) => setStatus(e.target.value as RunStatus | "")} wrapperClassName="w-56" aria-label="Filtrar por status">

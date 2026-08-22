@@ -27,6 +27,14 @@ class UserOut(ORMModel):
     specialty: str | None = None
     avatar_initials: str = ""
     permissions: list[str] = []
+    specialty_id: int | None = None
+    sector_id: int | None = None
+    mfa_enabled: bool = False
+    must_change_password: bool = False
+    is_active: bool = True
+    is_demo: bool = False
+    last_login_at: datetime | None = None
+    created_at: datetime | None = None
 
 
 class LoginIn(BaseModel):
@@ -36,9 +44,83 @@ class LoginIn(BaseModel):
 
 class TokenOut(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
     expires_in: int
+    refresh_expires_in: int
     user: UserOut
+    must_change_password: bool = False
+
+
+class MfaChallengeOut(BaseModel):
+    mfa_required: Literal[True] = True
+    mfa_token: str
+    expires_in: int
+    methods: list[str] = ["totp", "recovery_code"]
+
+
+class MfaVerifyIn(BaseModel):
+    mfa_token: str
+    code: str = Field(min_length=6, max_length=12)
+
+
+class RefreshIn(BaseModel):
+    refresh_token: str = Field(min_length=10)
+
+
+class LogoutIn(BaseModel):
+    refresh_token: str | None = None
+
+
+class ChangePasswordIn(BaseModel):
+    current_password: str = Field(min_length=1, max_length=200)
+    new_password: str = Field(min_length=1, max_length=200)
+
+
+class MfaSetupOut(BaseModel):
+    secret: str
+    otpauth_uri: str
+    qr_svg: str
+
+
+class MfaEnableIn(BaseModel):
+    code: str = Field(min_length=6, max_length=8)
+
+
+class MfaDisableIn(BaseModel):
+    password: str
+    code: str = Field(min_length=6, max_length=12)
+
+
+class SessionOut(BaseModel):
+    id: int
+    created_at: datetime
+    last_used_at: datetime | None
+    expires_at: datetime
+    ip: str | None
+    user_agent: str | None
+    current: bool
+
+
+class UserCreateIn(BaseModel):
+    name: str = Field(min_length=3, max_length=120)
+    email: str = Field(min_length=5, max_length=200)
+    role: Role
+    crm: str | None = Field(default=None, max_length=40)
+    specialty: str | None = Field(default=None, max_length=80)
+    specialty_id: int | None = None
+    sector_id: int | None = None
+    password: str | None = Field(default=None, max_length=200)
+
+
+class UserUpdateIn(BaseModel):
+    name: str | None = Field(default=None, min_length=3, max_length=120)
+    role: Role | None = None
+    crm: str | None = Field(default=None, max_length=40)
+    specialty: str | None = Field(default=None, max_length=80)
+    specialty_id: int | None = None
+    sector_id: int | None = None
+    is_active: bool | None = None
 
 
 # --- pacientes ----------------------------------------------------------------

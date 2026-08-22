@@ -26,12 +26,58 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20), index=True)
     crm: Mapped[str | None] = mapped_column(String(40), nullable=True)
     specialty: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    specialty_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    sector_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
+    must_change_password: Mapped[bool] = mapped_column(Boolean, default=False)
+    mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    mfa_secret: Mapped[str | None] = mapped_column(String(300), nullable=True)  # cifrado (Fernet)
+    mfa_pending_secret: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    mfa_recovery_codes: Mapped[list[str]] = mapped_column(JSON, default=list)  # hashes SHA-256
+    failed_mfa_attempts: Mapped[int] = mapped_column(Integer, default=0)
     failed_attempts: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     password_changed_at: Mapped[datetime] = mapped_column(DateTime, default=now_local)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_local)
+
+
+class Specialty(Base):
+    __tablename__ = "specialties"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), unique=True)
+    code: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class Sector(Base):
+    __tablename__ = "sectors"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), unique=True)
+    kind: Mapped[str] = mapped_column(String(20), default="internacao")
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class Session(Base):
+    """Sessão autenticada: um refresh token (hasheado) + os access tokens emitidos para ela (sid)."""
+
+    __tablename__ = "sessions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    refresh_token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_local)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    revoked_reason: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    replaced_by_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ip: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(200), nullable=True)
+
+    @property
+    def active(self) -> bool:
+        return self.revoked_at is None and self.expires_at > now_local()
 
 
 class Patient(Base):

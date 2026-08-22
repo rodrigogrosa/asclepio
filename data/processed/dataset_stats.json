@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-08-21T20:56:03",
+  "started_at": "2026-08-21T23:41:39",
   "sources": {
     "seed_instructions": 233,
     "faq": 167,
@@ -14,14 +14,16 @@
     "protocolo_faq": 80,
     "modelo": 50,
     "paciente": 72,
-    "builtin": 8
+    "builtin": 8,
+    "public:pubmedqa": 75,
+    "public:medquad": 13
   },
-  "after_augmentation": 3497,
+  "after_augmentation": 3585,
   "anonymization": {
     "examples_with_pii_removed": 0,
     "entities_removed": 0,
     "by_type": {},
-    "examples_total": 3497,
+    "examples_total": 3585,
     "patient_notes_entities": 49
   },
   "curation": {
@@ -30,7 +32,7 @@
     "removed_exact_duplicates": 93,
     "refusal_reinforced": 114,
     "capped_protocolo": 1350,
-    "kept": 2046
+    "kept": 2134
   },
   "final_by_category": {
     "protocolo": 1300,
@@ -39,7 +41,8 @@
     "recusa_prescricao": 129,
     "fora_escopo": 108,
     "identidade_limites": 66,
-    "anonimizacao_seguranca": 84
+    "anonimizacao_seguranca": 84,
+    "conhecimento_publico": 88
   },
   "final_by_origin": {
     "faq": 379,
@@ -49,55 +52,62 @@
     "seed": 734,
     "modelo": 120,
     "paciente": 70,
-    "builtin": 36
+    "builtin": 36,
+    "public:pubmedqa": 75,
+    "public:medquad": 13
   },
   "splits": {
     "train": {
-      "n": 1719,
+      "n": 1801,
       "by_category": {
-        "protocolo": 1104,
-        "recusa_prescricao": 102,
-        "documento": 205,
-        "fora_escopo": 87,
-        "identidade_limites": 56,
-        "paciente_contexto": 93,
-        "anonimizacao_seguranca": 72
+        "recusa_prescricao": 106,
+        "paciente_contexto": 92,
+        "fora_escopo": 91,
+        "protocolo": 1103,
+        "anonimizacao_seguranca": 72,
+        "documento": 207,
+        "conhecimento_publico": 74,
+        "identidade_limites": 56
       }
     },
     "val": {
       "n": 165,
       "by_category": {
+        "recusa_prescricao": 10,
+        "anonimizacao_seguranca": 6,
         "protocolo": 98,
-        "identidade_limites": 5,
-        "documento": 23,
-        "recusa_prescricao": 14,
-        "fora_escopo": 9,
+        "documento": 20,
         "paciente_contexto": 10,
-        "anonimizacao_seguranca": 6
+        "fora_escopo": 9,
+        "conhecimento_publico": 7,
+        "identidade_limites": 5
       }
     },
     "test": {
-      "n": 162,
+      "n": 168,
       "by_category": {
-        "fora_escopo": 12,
-        "protocolo": 98,
-        "anonimizacao_seguranca": 6,
-        "paciente_contexto": 8,
+        "documento": 21,
+        "protocolo": 99,
         "recusa_prescricao": 13,
         "identidade_limites": 5,
-        "documento": 20
+        "fora_escopo": 8,
+        "conhecimento_publico": 7,
+        "paciente_contexto": 9,
+        "anonimizacao_seguranca": 6
       }
     }
   },
   "lengths": {
-    "user_chars_mean": 126,
+    "user_chars_mean": 124,
     "user_chars_max": 1260,
     "assistant_chars_mean": 583,
     "assistant_chars_max": 1657,
-    "approx_tokens_mean": 497
+    "approx_tokens_mean": 496
   },
-  "total": 2046,
+  "total": 2134,
   "seed": 42,
   "system_prompt_chars": 1030,
-  "notes": []
+  "notes": [
+    "Dados públicos misturados: 88 exemplos (≤ 10%)."
+  ]
 }

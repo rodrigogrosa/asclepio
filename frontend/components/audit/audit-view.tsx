@@ -8,6 +8,7 @@ import type { AuditEntry, AuditVerifyResponse } from "@/lib/types";
 import { cn, fmtDateTime, shortHash, ROLE_LABEL } from "@/lib/utils";
 import { useToast } from "@/components/providers/toast-provider";
 import { useAuth } from "@/components/providers/auth-provider";
+import { hasPermission } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { Table, TableWrap, Td, Th, Tr } from "@/components/ui/table";
@@ -32,8 +33,8 @@ function actionTone(action: string): BadgeTone {
 
 export function AuditView() {
   const toast = useToast();
-  const { hasRole, ready } = useAuth();
-  const allowed = hasRole("admin", "auditor");
+  const { user, ready } = useAuth();
+  const allowed = hasPermission(user, "audit:read");
   const [action, setAction] = useState("");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(0);

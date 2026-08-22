@@ -39,7 +39,7 @@ from ..prompts import (
     CLINICAL_REVIEW_PROMPT,
     PATIENT_CONTEXT_HEADER,
     RAG_CONTEXT_HEADER,
-    SYSTEM_PROMPT,
+    system_prompt,
 )
 from .alerts import create_alert
 from .knowledge import get_knowledge_service
@@ -406,7 +406,7 @@ async def suggest_conduct(state: ReviewState) -> ReviewState:
     ks = get_knowledge_service()
     risk = state["risk"]
     msgs = [
-        SystemMessage(content=SYSTEM_PROMPT),
+        SystemMessage(content=system_prompt()),
         SystemMessage(content=CLINICAL_REVIEW_PROMPT),
         SystemMessage(
             content=f"{RAG_CONTEXT_HEADER}\n\n{ks.format_context(state.get('citations', []))}"

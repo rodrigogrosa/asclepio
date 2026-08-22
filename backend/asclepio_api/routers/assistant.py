@@ -225,6 +225,6 @@ async def suggestions(patient_id: int | None = None) -> dict[str, list[str]]:
     return {"suggestions": svc.SUGGESTIONS_PATIENT if patient_id else svc.SUGGESTIONS_GENERAL}
 
 
-@router.get("/graph", dependencies=[require_permission("assistant:chat")])
+@router.get("/graph", dependencies=[require_permission("system:internals")])
 async def graph() -> dict[str, str]:
     return {"mermaid": svc.chat_graph_mermaid()}

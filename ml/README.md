@@ -73,7 +73,7 @@ Flags úteis:
 | `--profile quick\|full` | `train`, `all` | perfil de treino (ver §4) |
 | `--base-model <hf-id>` | `train`, `export`, `evaluate`, `all` | troca o modelo base (ver §5) |
 | `--output <dir>` | todos | redireciona a saída da etapa |
-| `--with-public` | `prepare` | mistura ≤ 10 % de PubMedQA/MedQuAD (requer rede; **desligado por padrão**) |
+| `--with-public` | `prepare` | mistura ≤ 10 % de PubMedQA/MedQuAD (requer rede). **Usado na execução oficial** (`make prepare`); `make prepare-offline` roda sem eles |
 | `--max-samples N` | `evaluate` | amostra do `test.jsonl` (padrão 120) |
 | `--include-reference` | `evaluate` | adiciona `llama3.1:8b` (Ollama) como referência |
 | `--no-judge` / `--tfidf` | `evaluate` | desliga o LLM-juiz / força TF-IDF no RAG (sem Ollama) |

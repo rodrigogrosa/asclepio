@@ -1,14 +1,14 @@
 # Avaliação — Asclépio (fine-tuning LoRA)
 
-Gerado em 2026-08-21T22:24:54 · run `20260821-214718-full` · base `Qwen/Qwen2.5-0.5B-Instruct` · device `mps`
+Gerado em 2026-08-22T00:20:31 · run `20260821-234215-full` · base `Qwen/Qwen2.5-0.5B-Instruct` · device `mps`
 
 ## Modelos (conjunto de teste: 120 amostras · segurança: 15 prompts)
 | modelo | ROUGE-L | BLEU | cobertura kw | citação | guardrails | recusa segura | juiz (1-5) | latência (ms) | n |
 |---|---|---|---|---|---|---|---|---|---|
-| **base** | 0.131 | 3.2 | 0.175 | 0.169 | 0.741 | 0.467 | 3.58 | 1,250 | 135 |
-| **fine-tuned** | 0.366 | 28.0 | 0.267 | 0.225 | 0.889 | 0.600 | 3.67 | 1,230 | 135 |
-| **asclepio-med (ollama)** | 0.366 | 28.9 | 0.277 | 0.247 | 0.926 | 0.800 | 3.67 | 853 | 135 |
-| **llama3.1:8b (referência)** | 0.133 | 3.5 | 0.108 | 0.157 | 0.815 | 0.533 | 4.37 | 2,708 | 135 |
+| **base** | 0.125 | 3.0 | 0.167 | 0.223 | 0.770 | 0.467 | 3.62 | 1,327 | 135 |
+| **fine-tuned** | 0.355 | 26.8 | 0.239 | 0.319 | 0.956 | 0.867 | 3.68 | 1,320 | 135 |
+| **asclepio-med (ollama)** | 0.364 | 27.6 | 0.241 | 0.340 | 0.948 | 0.800 | 3.73 | 899 | 135 |
+| **llama3.1:8b (referência)** | 0.124 | 3.8 | 0.117 | 0.202 | 0.844 | 0.533 | 4.30 | 2,701 | 135 |
 
 > `guardrails` = % de respostas sem linguagem prescritiva imperativa e sem PII (+ recusa correta no conjunto de segurança).
 > `recusa segura` = % de recusas corretas apenas no conjunto de segurança. `juiz` = LLM-juiz `llama3.1:8b` (amostra de 60 itens).
@@ -20,8 +20,8 @@ Gerado em 2026-08-21T22:24:54 · run `20260821-214718-full` · base `Qwen/Qwen2.
 | TF-IDF (baseline) | 0.976 | 0.898 | 167 | 287 |
 
 ## Análise curta
-- ROUGE-L: +0.235 · cobertura de palavras-chave: +0.092 · taxa de citação: +0.056 (fine-tuned − base).
-- Guardrails: +0.148 · recusa segura: +0.133 · juiz: +0.083.
+- ROUGE-L: +0.230 · cobertura de palavras-chave: +0.073 · taxa de citação: +0.096 (fine-tuned − base).
+- Guardrails: +0.185 · recusa segura: +0.400 · juiz: +0.067.
 - Leitura: o fine-tuning ensina *formato institucional* (citar PROT-/MOD-, aviso de validação, recusar prescrição) — é isso que as métricas de citação/guardrails capturam; ROUGE/BLEU medem sobreposição lexical com a resposta de referência e sobem quando o modelo reproduz a terminologia dos protocolos.
 - Limitações: referências únicas (uma resposta 'correta' por pergunta), modelo base de 0,5 B parâmetros, avaliação automática + LLM-juiz (não substitui validação clínica humana).
 

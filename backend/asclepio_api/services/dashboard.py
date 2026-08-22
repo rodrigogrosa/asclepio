@@ -79,3 +79,50 @@ async def stats(session: AsyncSession) -> dict[str, Any]:
         "recent_runs": recent_runs,
         "risk_distribution": dist,
     }
+
+
+async def my_work(session: AsyncSession, user: m.User) -> dict[str, Any]:
+    """Bloco 'Meu trabalho' para médicos/enfermagem: pendências que dependem da pessoa logada."""
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    pending = (
+        (
+            await session.execute(
+                select(m.WorkflowRun)
+                .where(m.WorkflowRun.status == "aguardando_aprovacao")
+                .order_by(m.WorkflowRun.started_at.desc())
+                .limit(10)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    names = dict((await session.execute(select(m.Patient.id, m.Patient.name))).all())
+    convs = (
+        await session.execute(
+            select(func.count(m.Message.id))
+            .join(m.Conversation, m.Conversation.id == m.Message.conversation_id)
+            .where(
+                m.Conversation.user_id == user.id,
+                m.Message.role == "user",
+                m.Message.created_at >= today,
+            )
+        )
+    ).scalar_one()
+    open_alerts = (
+        await session.execute(
+            select(func.count(m.Alert.id)).where(m.Alert.acknowledged_at.is_(None))
+        )
+    ).scalar_one()
+    runs = []
+    for r in pending:
+        d = run_to_dict(r, names.get(r.patient_id, ""))
+        d["steps"] = []
+        d["result"] = (
+            {"risk_level": (r.result or {}).get("risk_level", "baixo")} if r.result else None
+        )
+        runs.append(d)
+    return {
+        "pending_approvals": runs if user.role in ("medico", "admin") else [],
+        "my_open_alerts": open_alerts,
+        "my_conversations_today": convs,
+    }

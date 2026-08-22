@@ -8,6 +8,7 @@ import { api, errorMessage } from "@/lib/api";
 import { cn, fmtDateTime, fmtRelative } from "@/lib/utils";
 import { useToast } from "@/components/providers/toast-provider";
 import { useAuth } from "@/components/providers/auth-provider";
+import { hasPermission } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { SeverityBadge } from "@/components/ui/status-badges";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +16,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 export function AlertList({ alerts, onChanged, showPatient = true, compact = false }: { alerts: Alert[]; onChanged?: (a: Alert) => void; showPatient?: boolean; compact?: boolean }) {
   const toast = useToast();
-  const { hasRole } = useAuth();
-  const canAck = hasRole("admin", "medico", "enfermagem");
+  const { user } = useAuth();
+  const canAck = hasPermission(user, "alerts:ack");
+  const canOpenPatient = hasPermission(user, "patients:read");
   const [busy, setBusy] = useState<number | null>(null);
 
   const ack = async (a: Alert) => {
@@ -51,14 +53,12 @@ export function AlertList({ alerts, onChanged, showPatient = true, compact = fal
               </div>
               <p className="mt-1 text-xs leading-relaxed text-muted">{a.message}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
-                {showPatient && (
-                  <Link href={`/pacientes/${a.patient_id}`} className="font-medium text-primary-hover hover:underline">{a.patient_name}</Link>
-                )}
+                {showPatient &&
+                  (canOpenPatient ? <Link href={`/pacientes/${a.patient_id}`} className="font-medium text-primary-hover hover:underline">{a.patient_name}</Link> : <span className="font-medium text-text">{a.patient_name}</span>)}
                 <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {fmtRelative(a.created_at)}</span>
                 <span>origem: {a.source}</span>
-                {a.run_id && (
-                  <Link href={`/fluxos/${a.run_id}`} className="inline-flex items-center gap-1 hover:text-text"><Workflow className="h-3 w-3" /> {a.run_id}</Link>
-                )}
+                {a.run_id &&
+                  (hasPermission(user, "workflows:run") ? <Link href={`/fluxos/${a.run_id}`} className="inline-flex items-center gap-1 hover:text-text"><Workflow className="h-3 w-3" /> revisão clínica</Link> : <span className="inline-flex items-center gap-1"><Workflow className="h-3 w-3" /> revisão clínica</span>)}
                 {!open && <span>por {a.acknowledged_by} em {fmtDateTime(a.acknowledged_at)}</span>}
               </div>
             </div>

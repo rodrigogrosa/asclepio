@@ -2,6 +2,9 @@
 import type {
   Alert,
   AuditEntry,
+  PublicConfig,
+  Sector,
+  Specialty,
   ChatMessage,
   Citation,
   Conversation,
@@ -25,14 +28,87 @@ export const inHours = (hours: number) => new Date(NOW + hours * 3_600_000).toIS
 const daysAgo = (d: number) => ago(d * 24);
 
 export const MOCK_PASSWORD = "Asclepio@2026";
+/** Senha dos administradores reais no modo MOCK (não aparece na tela de login; em produção é gerada pelo `make setup`). */
+export const MOCK_ADMIN_PASSWORD = "Admin#Asclepio2026";
+/** Código TOTP aceito pelo mock (qualquer usuário com MFA ativo ou em ativação). */
+export const MOCK_TOTP_CODE = "123456";
+/** Código de recuperação inicial do admin no mock. */
+export const MOCK_RECOVERY_CODE = "AAAA-BBBB";
 
-export const USERS: (User & { password: string })[] = [
-  { id: 1, name: "Administrador do Sistema", email: "admin@asclepio.fiap", role: "admin", crm: null, specialty: null, avatar_initials: "AS", password: MOCK_PASSWORD },
-  { id: 2, name: "Dra. Ana Beatriz Souza", email: "dra.ana@asclepio.fiap", role: "medico", crm: "123456-SP", specialty: "Clínica Médica", avatar_initials: "AB", password: MOCK_PASSWORD },
-  { id: 3, name: "Dr. Marcos Vinícius Lima", email: "dr.marcos@asclepio.fiap", role: "medico", crm: "654321-SP", specialty: "Emergência", avatar_initials: "MV", password: MOCK_PASSWORD },
-  { id: 4, name: "Enf. Carla Mendes", email: "enf.carla@asclepio.fiap", role: "enfermagem", crm: "COREN 98765-SP", specialty: "Enfermagem", avatar_initials: "CM", password: MOCK_PASSWORD },
-  { id: 5, name: "Auditoria Clínica", email: "auditor@asclepio.fiap", role: "auditor", crm: null, specialty: null, avatar_initials: "AC", password: MOCK_PASSWORD },
+const PERMS: Record<User["role"], string[]> = {
+  admin: ["*"],
+  medico: ["patients:read", "assistant:chat", "workflows:run", "workflows:decide", "alerts:read", "alerts:ack", "knowledge:read", "catalog:read"],
+  enfermagem: ["patients:read", "assistant:chat", "workflows:run", "alerts:read", "alerts:ack", "knowledge:read", "catalog:read"],
+  auditor: ["audit:read", "alerts:read", "knowledge:read", "catalog:read"],
+};
+
+export const PUBLIC_CONFIG: PublicConfig = {
+  app_name: "Asclépio",
+  hospital_name: "Hospital Universitário",
+  hospital_short_name: "HU",
+  version: "1.2.0",
+  demo_mode: true,
+  mfa_required_roles: ["admin"],
+  support_email: "suporte.ti@hospital.local",
+};
+
+// ---------- Catálogos ----------
+const SPECIALTY_NAMES: [string, string][] = [
+  ["Anestesiologia", "ANEST"], ["Cardiologia", "CARDIO"], ["Cirurgia Geral", "CIRGER"], ["Cirurgia Vascular", "CIRVAS"], ["Clínica Médica", "CLIMED"],
+  ["Dermatologia", "DERMA"], ["Endocrinologia e Metabologia", "ENDO"], ["Gastroenterologia", "GASTRO"], ["Geriatria", "GERIA"], ["Ginecologia e Obstetrícia", "GO"],
+  ["Hematologia e Hemoterapia", "HEMATO"], ["Infectologia", "INFECTO"], ["Medicina de Emergência", "EMERG"], ["Medicina de Família e Comunidade", "MFC"], ["Medicina Intensiva", "UTI"],
+  ["Nefrologia", "NEFRO"], ["Neurocirurgia", "NEUROCIR"], ["Neurologia", "NEURO"], ["Oftalmologia", "OFTALMO"], ["Oncologia Clínica", "ONCO"],
+  ["Ortopedia e Traumatologia", "ORTO"], ["Otorrinolaringologia", "ORL"], ["Pediatria", "PED"], ["Pneumologia", "PNEUMO"], ["Psiquiatria", "PSIQ"],
+  ["Radiologia e Diagnóstico por Imagem", "RADIO"], ["Reumatologia", "REUMA"], ["Urologia", "URO"], ["Enfermagem", "ENF"], ["Patologia Clínica/Medicina Laboratorial", "PATCLIN"],
 ];
+export const SPECIALTIES: Specialty[] = SPECIALTY_NAMES.map(([name, code], i) => ({ id: i + 1, name, code, active: true, professionals_count: 0 }));
+const specId = (name: string) => SPECIALTIES.find((s) => s.name === name)?.id ?? null;
+
+export const SECTORS: Sector[] = [
+  { id: 1, name: "Emergência", kind: "pronto_socorro", active: true, patients_count: 0 },
+  { id: 2, name: "Clínica Médica", kind: "internacao", active: true, patients_count: 0 },
+  { id: 3, name: "UTI Adulto", kind: "uti", active: true, patients_count: 0 },
+  { id: 4, name: "Ortopedia", kind: "internacao", active: true, patients_count: 0 },
+  { id: 5, name: "Centro Cirúrgico", kind: "cirurgico", active: true, patients_count: 0 },
+  { id: 6, name: "Ambulatório", kind: "ambulatorio", active: true, patients_count: 0 },
+  { id: 7, name: "Pediatria", kind: "internacao", active: false, patients_count: 0 },
+];
+const sectorId = (name: string) => SECTORS.find((s) => s.name === name)?.id ?? null;
+
+export type MockUser = User & { password: string; totp_secret: string | null; recovery_codes: string[] };
+export const USERS: MockUser[] = [
+  {
+    id: 1, name: "Administrador do Sistema", email: "admin@asclepio.fiap", role: "admin", crm: null, specialty: null, specialty_id: null, sector_id: null, avatar_initials: "AS", permissions: PERMS.admin,
+    mfa_enabled: true, must_change_password: false, is_active: true, is_demo: false, last_login_at: ago(5), created_at: daysAgo(90),
+    password: MOCK_ADMIN_PASSWORD, totp_secret: "JBSWY3DPEHPK3PXP", recovery_codes: [MOCK_RECOVERY_CODE, "CCCC-DDDD", "EEEE-FFFF"],
+  },
+  {
+    id: 6, name: "Rodrigo Rosa", email: "rodrigo.grosa2011@gmail.com", role: "admin", crm: null, specialty: null, specialty_id: null, sector_id: null, avatar_initials: "RR", permissions: PERMS.admin,
+    mfa_enabled: false, must_change_password: true, is_active: true, is_demo: false, last_login_at: null, created_at: daysAgo(90),
+    password: MOCK_ADMIN_PASSWORD, totp_secret: null, recovery_codes: [],
+  },
+  {
+    id: 2, name: "Dra. Ana Beatriz Souza", email: "dra.ana@asclepio.fiap", role: "medico", crm: "CRM 123456-SP", specialty: "Clínica Médica", specialty_id: specId("Clínica Médica"), sector_id: sectorId("Clínica Médica"), avatar_initials: "AB", permissions: PERMS.medico,
+    mfa_enabled: false, must_change_password: false, is_active: true, is_demo: true, last_login_at: ago(2), created_at: daysAgo(60),
+    password: MOCK_PASSWORD, totp_secret: null, recovery_codes: [],
+  },
+  {
+    id: 3, name: "Dr. Marcos Vinícius Lima", email: "dr.marcos@asclepio.fiap", role: "medico", crm: "CRM 654321-SP", specialty: "Medicina de Emergência", specialty_id: specId("Medicina de Emergência"), sector_id: sectorId("Emergência"), avatar_initials: "MV", permissions: PERMS.medico,
+    mfa_enabled: false, must_change_password: false, is_active: true, is_demo: true, last_login_at: ago(26), created_at: daysAgo(60),
+    password: MOCK_PASSWORD, totp_secret: null, recovery_codes: [],
+  },
+  {
+    id: 4, name: "Enf. Carla Mendes", email: "enf.carla@asclepio.fiap", role: "enfermagem", crm: "COREN 98765-SP", specialty: "Enfermagem", specialty_id: specId("Enfermagem"), sector_id: sectorId("Clínica Médica"), avatar_initials: "CM", permissions: PERMS.enfermagem,
+    mfa_enabled: false, must_change_password: false, is_active: true, is_demo: true, last_login_at: ago(8), created_at: daysAgo(60),
+    password: MOCK_PASSWORD, totp_secret: null, recovery_codes: [],
+  },
+  {
+    id: 5, name: "Auditoria Clínica", email: "auditor@asclepio.fiap", role: "auditor", crm: null, specialty: null, specialty_id: null, sector_id: null, avatar_initials: "AC", permissions: PERMS.auditor,
+    mfa_enabled: false, must_change_password: false, is_active: true, is_demo: true, last_login_at: ago(50), created_at: daysAgo(60),
+    password: MOCK_PASSWORD, totp_secret: null, recovery_codes: [],
+  },
+];
+export const PERMISSIONS_BY_ROLE = PERMS;
 
 export const MODEL_ACTIVE: ModelInfo = { provider: "ollama", name: "asclepio-med", fine_tuned: true, base_model: "llama3.1:8b" };
 export const MODEL_BASE: ModelInfo = { provider: "ollama", name: "llama3.1:8b", fine_tuned: false, base_model: null };
@@ -321,7 +397,7 @@ export function knowledgeDetail(id: string): KnowledgeDocumentDetail | null {
   if (!doc) return null;
   const content =
     DOC_CONTENT[id] ??
-    `# ${doc.title}\n\n> Documento ${doc.doc_type} · versão ${doc.version ?? "—"} · categoria ${doc.category ?? "—"}\n\n## Objetivo\nDescrever a conduta institucional recomendada para o tema **${doc.tags[0] ?? doc.title}** no Hospital Universitário FIAP (fictício).\n\n## Critérios\n- Critério clínico 1 conforme diretriz vigente.\n- Critério clínico 2 com limiar laboratorial definido.\n- Critério clínico 3 para encaminhamento.\n\n## Conduta\n1. Avaliação inicial e estratificação de risco.\n2. Exames complementares prioritários.\n3. Terapêutica inicial e monitorização.\n4. Reavaliação em intervalo definido.\n\n## Referências\nDiretrizes nacionais e internacionais adaptadas ao contexto institucional. Conteúdo sintético para fins acadêmicos.`;
+    `# ${doc.title}\n\n> Documento ${doc.doc_type} · versão ${doc.version ?? "—"} · categoria ${doc.category ?? "—"}\n\n## Objetivo\nDescrever a conduta institucional recomendada para o tema **${doc.tags[0] ?? doc.title}** nesta instituição.\n\n## Critérios\n- Critério clínico 1 conforme diretriz vigente.\n- Critério clínico 2 com limiar laboratorial definido.\n- Critério clínico 3 para encaminhamento.\n\n## Conduta\n1. Avaliação inicial e estratificação de risco.\n2. Exames complementares prioritários.\n3. Terapêutica inicial e monitorização.\n4. Reavaliação em intervalo definido.\n\n## Referências\nDiretrizes nacionais e internacionais adaptadas ao contexto institucional.`;
   return { ...doc, content };
 }
 

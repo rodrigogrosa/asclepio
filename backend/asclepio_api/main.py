@@ -9,7 +9,7 @@ from __future__ import annotations
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
@@ -28,11 +28,14 @@ from .routers import (
     assistant,
     audit,
     auth,
+    catalog,
     dashboard,
     knowledge,
     model,
     patients,
+    public,
     system,
+    users,
     workflows,
 )
 from .services.knowledge import get_knowledge_service
@@ -141,6 +144,15 @@ def create_app() -> FastAPI:
     )
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+    @app.exception_handler(HTTPException)
+    async def _http_exc(request: Request, exc: HTTPException):  # type: ignore[no-untyped-def]
+        # Permite detail estruturado ({"detail": "...", "code": "..."}) sem aninhar em {"detail": {...}}
+        body = exc.detail if isinstance(exc.detail, dict) else {"detail": exc.detail}
+        return JSONResponse(
+            body, status_code=exc.status_code, headers=getattr(exc, "headers", None)
+        )
+
     app.add_middleware(SlowAPIMiddleware)
     app.add_middleware(
         CORSMiddleware,
@@ -163,6 +175,9 @@ def create_app() -> FastAPI:
     api = s.api_prefix
     for r in (
         auth.router,
+        users.router,
+        catalog.router,
+        public.router,
         dashboard.router,
         patients.router,
         assistant.router,

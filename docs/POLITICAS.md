@@ -12,17 +12,34 @@
 | Sessão: JWT HS256 com `sub`, `role`, `jti`, `iat`, `exp`, `iss`; expira em 8 h | `core/security.py`. Tokens emitidos **antes da última troca de senha** são rejeitados. Logout é auditado (stateless). |
 | Segredo forte obrigatório em produção | `get_settings()` recusa `SECRET_KEY` padrão quando `APP_ENV=production`. |
 
+### 1.1 Autenticação forte (v1.1)
+| Política | Implementação |
+|---|---|
+| **MFA com app autenticador (TOTP)** — Google Authenticator, Authy, 1Password, etc. | `GET /auth/mfa/setup` (QR + segredo) → `POST /auth/mfa/enable` (código) → 10 códigos de recuperação de uso único. Segredo guardado **cifrado** (Fernet derivado do `SECRET_KEY`); códigos de recuperação **hasheados**. |
+| **MFA obrigatório para administradores** | Admin sem MFA recebe **428** em todas as rotas (exceto `/auth/*`) até ativar; admin não pode desativar o próprio MFA. Limite de 5 códigos errados → bloqueio temporário. |
+| **Sessões com refresh token rotativo** | Access token de **30 min** com `sid`; refresh opaco de **12 h** guardado hasheado em `sessions`. `POST /auth/refresh` rotaciona; **reuso de refresh revogado derruba todas as sessões** (detecção de roubo). Logout revoga a sessão → access token inválido **imediatamente**. |
+| **Troca de senha obrigatória no 1º acesso** | Usuários reais e usuários criados pelo admin nascem com `must_change_password=true` → **428** até trocar; a troca revoga as outras sessões. |
+| **Usuários reais vs. demonstração** | `admin@asclepio.fiap` e `rodrigo.grosa2011@gmail.com` (admins) são criados com senhas fortes geradas pelo `make setup` (ficam só no `.env`). Os usuários de demonstração (`is_demo=true`) existem apenas se `SEED_DEMO_USERS=true`. |
+| **Gestão de usuários (admin)** | criar (senha temporária forte exibida uma vez), alterar papel/ativo, resetar senha, resetar MFA — tudo auditado; o admin não pode se rebaixar nem se desativar. |
+
 ## 2. Autorização (RBAC)
-Permissões nomeadas `recurso:ação`; cada rota declara `require_permission(...)`.
+Permissões nomeadas `recurso:ação`; cada rota declara `require_permission(...)`; o frontend monta o menu a partir de `User.permissions`.
 
-| Papel | Pode | Não pode |
-|---|---|---|
-| `admin` | tudo (inclui reindexar, trocar modelo, ler auditoria) | — |
-| `medico` | pacientes, contexto anonimizado, assistente, fluxos (executar **e aprovar/rejeitar**), alertas (ler/ack), conhecimento, modelo | auditoria, reindexar, trocar modelo |
-| `enfermagem` | pacientes, assistente, fluxos (executar), alertas (ler/ack), conhecimento, modelo | **aprovar** fluxos, auditoria |
-| `auditor` | auditoria, dashboard, modelo, conhecimento, leitura de fluxos/alertas | dados clínicos de pacientes, assistente |
+| Área | admin | medico | enfermagem | auditor |
+|---|---|---|---|---|
+| Dashboard clínico / "Meu trabalho" | ✔ | ✔ | ✔ | resumo |
+| Pacientes e contexto anonimizado | ✔ | ✔ | ✔ | — |
+| Assistente (chat) | ✔ | ✔ | ✔ | — |
+| Fluxos clínicos: executar / **aprovar** | ✔ / ✔ | ✔ / ✔ | ✔ / — | — |
+| Alertas (ler / reconhecer) | ✔ | ✔ | ✔ | ler |
+| Protocolos e documentos (leitura/busca) | ✔ | ✔ | ✔ | ✔ |
+| Base de conhecimento: reindexar | ✔ | — | — | — |
+| **IA & Modelos** (modelo ativo, fine-tuning, avaliação, troca) | ✔ | — | — | — |
+| Detalhes técnicos (grafos LangGraph) | ✔ | — | — | — |
+| Usuários & profissionais, catálogos (especialidades, setores) | ✔ | — | — | — |
+| Auditoria | ✔ | — | — | ✔ |
 
-A **validação humana** de um fluxo é exclusiva de médico/admin — é o "humano no circuito" exigido pelo desafio.
+A **validação humana** de um fluxo é exclusiva de médico/admin. Médicos precisam de **CRM** e **especialidade** no cadastro (validados contra o catálogo).
 
 ## 3. Dados pessoais (LGPD)
 - **Minimização**: a LLM recebe apenas idade/sexo/setor + dados clínicos; nunca nome, MRN, CPF, telefone, endereço.

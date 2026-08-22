@@ -3,36 +3,30 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, ChevronDown, LogOut, Menu, Sparkles, UserRound } from "lucide-react";
+import { Bell, ChevronDown, KeyRound, LogOut, Menu, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { api } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
 import { cn, ROLE_LABEL } from "@/lib/utils";
 import { Avatar, Breadcrumb } from "@/components/ui/misc";
 import { Badge } from "@/components/ui/badge";
-import { NAV } from "./sidebar";
+import { pageTitle } from "@/lib/nav";
+import { useConfig } from "@/components/providers/config-provider";
 
-const TITLES: Record<string, string> = {
-  "/": "Dashboard",
-  "/assistente": "Assistente",
-  "/pacientes": "Pacientes",
-  "/fluxos": "Fluxos clínicos",
-  "/alertas": "Alertas",
-  "/conhecimento": "Base de conhecimento",
-  "/modelo": "Modelo",
-  "/auditoria": "Auditoria",
+const SUB_TITLES: Record<string, string> = {
+  "/conta/senha": "Alterar senha",
+  "/conta/mfa": "Autenticação em duas etapas",
 };
 
-function crumbsFor(pathname: string) {
+function crumbsFor(pathname: string, rootLabel: string) {
   const parts = pathname.split("/").filter(Boolean);
   const items: { label: string; href?: string }[] = [{ label: "Início", href: "/" }];
   if (parts.length === 0) return [{ label: "Dashboard" }];
   const root = "/" + parts[0];
-  const rootLabel = TITLES[root] ?? parts[0];
   if (parts.length === 1) items.push({ label: rootLabel });
   else {
     items.push({ label: rootLabel, href: root });
-    items.push({ label: parts.slice(1).join("/") });
+    items.push({ label: SUB_TITLES[pathname] ?? parts.slice(1).join("/") });
   }
   return items;
 }
@@ -44,7 +38,8 @@ export function Header({ onMenu }: { onMenu: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const title = TITLES["/" + (pathname.split("/")[1] ?? "")] ?? NAV.find((n) => n.href !== "/" && pathname.startsWith(n.href))?.label ?? "Asclépio";
+  const { config } = useConfig();
+  const title = pageTitle(pathname, user);
   const { data: stats } = useAsync(() => api.dashboard.stats(), [pathname], { pollMs: 60_000 });
 
   useEffect(() => {
@@ -67,8 +62,13 @@ export function Header({ onMenu }: { onMenu: () => void }) {
       </button>
       <div className="min-w-0 flex-1">
         <h1 className="truncate font-display text-base font-bold uppercase tracking-wide text-text">{title}</h1>
-        <div className="hidden sm:block">
-          <Breadcrumb items={crumbsFor(pathname)} />
+        <div className="hidden items-center gap-2 sm:flex">
+          {config.hospital_short_name && (
+            <span className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted" title={config.hospital_name}>
+              {config.hospital_short_name}
+            </span>
+          )}
+          <Breadcrumb items={crumbsFor(pathname, title)} />
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
           <span className="font-mono text-text">{stats.model.name}</span>
           {stats.model.fine_tuned && (
             <Badge tone="primary" size="sm">
-              fine-tuned
+              ajustado
             </Badge>
           )}
         </Link>
@@ -92,8 +92,20 @@ export function Header({ onMenu }: { onMenu: () => void }) {
       </Link>
 
       <div className="relative" ref={menuRef}>
-        <button onClick={() => setMenuOpen((v) => !v)} className="flex items-center gap-2 rounded-full border border-border bg-surface py-1 pl-1 pr-2 hover:border-primary/50" aria-haspopup="menu" aria-expanded={menuOpen}>
-          <Avatar initials={user?.avatar_initials ?? "?"} size="sm" />
+        <button onClick={() => setMenuOpen((v) => !v)} className="flex items-center gap-2 rounded-full border border-border bg-surface py-1 pl-1 pr-2 hover:border-primary/50" aria-haspopup="menu" aria-expanded={menuOpen} aria-label="Menu da conta">
+          <span className="relative">
+            <Avatar initials={user?.avatar_initials ?? "?"} size="sm" />
+            {user?.mfa_enabled && (
+              <span
+                className="absolute -bottom-1 -right-1.5 flex h-[14px] items-center gap-0.5 rounded-full border border-surface bg-success px-1 text-[8px] font-bold leading-none text-white"
+                title="MFA ativo"
+                aria-label="MFA ativo"
+              >
+                <ShieldCheck className="h-2 w-2" aria-hidden />
+                MFA
+              </span>
+            )}
+          </span>
           <span className="hidden text-left sm:block">
             <span className="block max-w-[160px] truncate text-xs font-semibold leading-tight text-text">{user?.name ?? "—"}</span>
             <span className="block text-[10px] leading-tight text-muted">{user ? ROLE_LABEL[user.role] : ""}</span>
@@ -106,11 +118,22 @@ export function Header({ onMenu }: { onMenu: () => void }) {
               <p className="text-sm font-semibold text-text">{user?.name}</p>
               <p className="text-xs text-muted">{user?.email}</p>
               {user?.crm && <p className="mt-1 text-[11px] text-muted">{user.crm}{user.specialty ? ` · ${user.specialty}` : ""}</p>}
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <Badge size="sm" tone="neutral">{user ? ROLE_LABEL[user.role] : ""}</Badge>
+                {user?.mfa_enabled ? (
+                  <Badge size="sm" tone="success" icon={<ShieldCheck className="h-3 w-3" />}>MFA ativo</Badge>
+                ) : (
+                  <Badge size="sm" tone="warning">MFA inativo</Badge>
+                )}
+              </div>
             </div>
             <div className="p-1.5">
-              <div className={cn("flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted")}>
-                <UserRound className="h-4 w-4" /> Papel: <span className="font-semibold text-text">{user ? ROLE_LABEL[user.role] : ""}</span>
-              </div>
+              <Link role="menuitem" href="/conta" onClick={() => setMenuOpen(false)} className={cn("flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text hover:bg-surface-2")}>
+                <UserRound className="h-4 w-4 text-muted" /> Minha conta
+              </Link>
+              <Link role="menuitem" href="/conta/senha" onClick={() => setMenuOpen(false)} className={cn("flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text hover:bg-surface-2")}>
+                <KeyRound className="h-4 w-4 text-muted" /> Alterar senha
+              </Link>
               <button role="menuitem" onClick={onLogout} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-danger hover:bg-danger/10">
                 <LogOut className="h-4 w-4" /> Sair
               </button>

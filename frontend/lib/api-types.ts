@@ -2,22 +2,56 @@ import type {
   Alert, AuditEntry, AuditListResponse, AuditVerifyResponse, ChatRequest, ChatResponse, Conversation, ConversationDetail,
   DashboardStats, DocType, Exam, FeedbackRequest, HealthResponse, KnowledgeDocument, KnowledgeDocumentDetail, KnowledgeSearchResponse,
   LoginResponse, ModelInfo, ModelInfoResponse, Patient, PatientContext, PatientDetail, ReindexResponse, RiskLevel, RunStatus,
-  StreamEvent, User, WorkflowGraph, WorkflowRun, AlertSeverity,
+  StreamEvent, User, WorkflowGraph, WorkflowRun, AlertSeverity, TokenOut, Session, MfaSetup, MfaEnableResponse,
+  UserCreateInput, UserUpdateInput, UserCreateResponse, UsersListParams, PublicConfig, Specialty, Sector, SpecialtyInput, SectorInput,
 } from "./types";
 
 export interface ApiError extends Error {
   status: number;
   detail: string;
+  /** Código opcional retornado pelo backend (ex.: "mfa_required_setup" em 428). */
+  code?: string;
 }
 
 export type StreamHandler = (ev: StreamEvent) => void;
 
 export interface ApiClient {
   health(): Promise<HealthResponse>;
+  /** GET /public/config — sem autenticação (identidade do hospital, versão, demo_mode). */
+  publicConfig(): Promise<PublicConfig>;
   auth: {
+    /** TokenOut (sem MFA) ou MfaChallenge (MFA ativo). 401 credenciais · 423 bloqueado. */
     login(email: string, password: string): Promise<LoginResponse>;
+    /** code = 6 dígitos TOTP ou código de recuperação XXXX-XXXX. */
+    mfaVerify(mfa_token: string, code: string): Promise<TokenOut>;
+    refresh(refresh_token: string): Promise<TokenOut>;
     me(): Promise<User>;
-    logout(): Promise<{ ok: true }>;
+    logout(body?: { refresh_token?: string | null }): Promise<{ ok: true }>;
+    logoutAll(): Promise<{ ok: true; revoked: number }>;
+    changePassword(current_password: string, new_password: string): Promise<{ ok: true }>;
+    mfaSetup(): Promise<MfaSetup>;
+    mfaEnable(code: string): Promise<MfaEnableResponse>;
+    mfaDisable(password: string, code: string): Promise<{ ok: true }>;
+    sessions(): Promise<Session[]>;
+    revokeSession(id: number): Promise<{ ok: true }>;
+  };
+  users: {
+    list(params?: UsersListParams): Promise<User[]>;
+    get(id: number): Promise<User>;
+    create(input: UserCreateInput): Promise<UserCreateResponse>;
+    update(id: number, patch: UserUpdateInput): Promise<User>;
+    resetPassword(id: number): Promise<{ temporary_password: string }>;
+    mfaReset(id: number): Promise<{ ok: true }>;
+  };
+  catalog: {
+    specialties(includeInactive?: boolean): Promise<Specialty[]>;
+    createSpecialty(input: { name: string; code?: string | null }): Promise<Specialty>;
+    updateSpecialty(id: number, patch: SpecialtyInput): Promise<Specialty>;
+    deleteSpecialty(id: number): Promise<{ ok: true }>;
+    sectors(includeInactive?: boolean): Promise<Sector[]>;
+    createSector(input: { name: string; kind: Sector["kind"] }): Promise<Sector>;
+    updateSector(id: number, patch: SectorInput): Promise<Sector>;
+    deleteSector(id: number): Promise<{ ok: true }>;
   };
   dashboard: { stats(): Promise<DashboardStats> };
   patients: {

@@ -2,24 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, BookOpen, Bell, Bot, Cpu, LayoutDashboard, ScrollText, Users, Workflow, X } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/auth-provider";
+import { footerText, useConfig } from "@/components/providers/config-provider";
 import { Logo } from "@/components/brand/logo";
-import type { Role } from "@/lib/types";
-
-export type NavItem = { href: string; label: string; icon: typeof Activity; roles?: Role[] };
-
-export const NAV: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/assistente", label: "Assistente", icon: Bot },
-  { href: "/pacientes", label: "Pacientes", icon: Users },
-  { href: "/fluxos", label: "Fluxos clínicos", icon: Workflow },
-  { href: "/alertas", label: "Alertas", icon: Bell },
-  { href: "/conhecimento", label: "Base de conhecimento", icon: BookOpen },
-  { href: "/modelo", label: "Modelo", icon: Cpu },
-  { href: "/auditoria", label: "Auditoria", icon: ScrollText, roles: ["admin", "auditor"] },
-];
+import { buildNav } from "@/lib/nav";
 
 export function isActivePath(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -29,7 +17,8 @@ export function isActivePath(pathname: string, href: string) {
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const { user } = useAuth();
-  const items = NAV.filter((n) => !n.roles || (user && n.roles.includes(user.role)));
+  const { config } = useConfig();
+  const sections = buildNav(user);
 
   return (
     <>
@@ -50,38 +39,44 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             <X className="h-5 w-5" />
           </button>
         </div>
+        <div className="border-b border-border px-4 py-2.5">
+          <p className="truncate text-xs font-semibold text-text" title={config.hospital_name}>
+            {config.hospital_name}
+          </p>
+          {config.hospital_short_name && <p className="text-[10px] uppercase tracking-wider text-muted">{config.hospital_short_name}</p>}
+        </div>
         <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <p className="section-label mb-2 px-3">Navegação</p>
-          <ul className="space-y-0.5">
-            {items.map((it) => {
-              const active = isActivePath(pathname, it.href);
-              const Icon = it.icon;
-              return (
-                <li key={it.href}>
-                  <Link
-                    href={it.href}
-                    onClick={onClose}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "group relative flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors",
-                      active ? "bg-surface-2 text-text" : "text-muted hover:bg-surface-2/70 hover:text-text",
-                    )}
-                  >
-                    <span className={cn("absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary transition-opacity", active ? "opacity-100" : "opacity-0")} />
-                    <Icon className={cn("h-[18px] w-[18px]", active ? "text-primary" : "text-muted group-hover:text-text")} strokeWidth={1.75} />
-                    {it.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          {sections.map((section) => (
+            <div key={section.id} className="mb-4">
+              <p className="section-label mb-2 px-3">{section.label}</p>
+              <ul className="space-y-0.5">
+                {section.items.map((it) => {
+                  const active = isActivePath(pathname, it.href);
+                  const Icon = it.icon;
+                  return (
+                    <li key={`${section.id}-${it.href}`}>
+                      <Link
+                        href={it.href}
+                        onClick={onClose}
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "group relative flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors",
+                          active ? "bg-surface-2 text-text" : "text-muted hover:bg-surface-2/70 hover:text-text",
+                        )}
+                      >
+                        <span className={cn("absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary transition-opacity", active ? "opacity-100" : "opacity-0")} />
+                        <Icon className={cn("h-[18px] w-[18px]", active ? "text-primary" : "text-muted group-hover:text-text")} strokeWidth={1.75} />
+                        {it.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
         <div className="border-t border-border px-4 py-3">
-          <p className="text-[10px] leading-relaxed text-muted">
-            Hospital Universitário FIAP (fictício)
-            <br />
-            Tech Challenge 8IADT · Fase 3
-          </p>
+          <p className="text-[10px] leading-relaxed text-muted">{footerText(config)}</p>
         </div>
       </aside>
     </>

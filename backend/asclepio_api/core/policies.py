@@ -39,7 +39,7 @@ PERMISSIONS: dict[Role, frozenset[str]] = {
             "alerts:ack",
             "knowledge:read",
             "knowledge:search",
-            "model:read",
+            "catalog:read",
         }
     ),
     "enfermagem": frozenset(
@@ -56,22 +56,36 @@ PERMISSIONS: dict[Role, frozenset[str]] = {
             "alerts:ack",
             "knowledge:read",
             "knowledge:search",
-            "model:read",
+            "catalog:read",
         }
     ),
     "auditor": frozenset(
         {
             "dashboard:read",
             "audit:read",
-            "model:read",
             "knowledge:read",
             "workflows:read",
             "alerts:read",
+            "catalog:read",
         }
     ),
 }
 
-ADMIN_ONLY = frozenset({"knowledge:reindex", "model:switch", "users:manage", "audit:read"})
+ADMIN_ONLY = frozenset(
+    {
+        "knowledge:reindex",
+        "model:read",
+        "model:switch",
+        "users:manage",
+        "audit:read",
+        "system:internals",
+        "catalog:manage",
+        "settings:read",
+    }
+)
+
+# Papéis para os quais o MFA (app autenticador) é obrigatório
+MFA_REQUIRED_ROLES: frozenset[str] = frozenset({"admin"})
 
 
 def has_permission(role: Role, permission: str) -> bool:

@@ -89,7 +89,7 @@ async def runs(
     return [run_to_dict(r, names.get(r.patient_id, "")) for r in rows]
 
 
-@router.get("/graph", dependencies=[require_permission("workflows:read")])
+@router.get("/graph", dependencies=[require_permission("system:internals")])
 async def graph() -> dict[str, Any]:
     return {
         "mermaid": get_workflow_runtime().mermaid(),

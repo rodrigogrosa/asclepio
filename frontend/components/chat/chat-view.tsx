@@ -15,7 +15,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MessageBubble, type UiMessage } from "./message-bubble";
 import { SourcesPanel, explainFromResponse, type Explain } from "./sources-panel";
-import { GraphSteps, CHAT_NODES, type StepState } from "./graph-steps";
+import { GraphSteps, SimpleProgress, CHAT_NODES, type StepState } from "./graph-steps";
+import { useAuth } from "@/components/providers/auth-provider";
+import { hasPermission } from "@/lib/permissions";
 import { PatientPicker } from "./patient-picker";
 
 const DISCLAIMER = "Sugestões do Asclépio são apoio à decisão e exigem validação de um profissional habilitado.";
@@ -29,6 +31,8 @@ const initialSteps = (): Record<string, StepState> => Object.fromEntries(CHAT_NO
 export function ChatView() {
   const params = useSearchParams();
   const toast = useToast();
+  const { user } = useAuth();
+  const internals = hasPermission(user, "system:internals");
 
   const [patients, setPatients] = useState<Patient[]>([]);
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -438,12 +442,15 @@ export function ChatView() {
 
         {/* Entrada */}
         <div className="border-t border-border bg-surface px-3 pb-3 pt-2 md:px-5">
-          {(showSteps || streaming) && (
-            <div className="mb-2 flex items-center gap-2 overflow-x-auto">
-              <span className="section-label shrink-0">Grafo</span>
-              <GraphSteps states={steps} />
-            </div>
-          )}
+          {(showSteps || streaming) &&
+            (internals ? (
+              <div className="mb-2 flex items-center gap-2 overflow-x-auto">
+                <span className="section-label shrink-0">Grafo</span>
+                <GraphSteps states={steps} />
+              </div>
+            ) : (
+              <SimpleProgress states={steps} className="mb-2" />
+            ))}
           {messages.length > 0 && !!suggestions.length && !streaming && (
             <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">
               {suggestions.slice(0, 3).map((s) => (
@@ -498,7 +505,7 @@ export function ChatView() {
         </div>
       )}
 
-      <Modal open={ctxOpen} onClose={() => setCtxOpen(false)} title="Contexto anonimizado do paciente" description="Exatamente o texto enviado à LLM (explicabilidade). PII é removida antes de sair do servidor." size="lg">
+      <Modal open={ctxOpen} onClose={() => setCtxOpen(false)} title="Contexto anonimizado do paciente" description="Texto exatamente como é utilizado pelo assistente. Dados pessoais identificáveis são removidos antes de sair do servidor." size="lg">
         {ctxLoading ? (
           <div className="space-y-2">{[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-4" />)}</div>
         ) : ctx ? (

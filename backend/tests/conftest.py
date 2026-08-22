@@ -25,6 +25,9 @@ os.environ.update(
         "LOGIN_RATE_LIMIT_PER_MINUTE": "1000",
         "LOG_LEVEL": "WARNING",
         "SECRET_KEY": "test-secret-key-not-for-production-0123456789",
+        "ASCLEPIO_ADMIN_PASSWORD": "Admin#Inicial2026",
+        "ASCLEPIO_RODRIGO_PASSWORD": "Rodrigo#Inicial2026",
+        "SEED_DEMO_USERS": "true",
     }
 )
 
@@ -46,21 +49,62 @@ def _login(client: TestClient, email: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {r.json()['access_token']}"}
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def medico(client):
     return _login(client, "dra.ana@asclepio.fiap")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def enfermagem(client):
     return _login(client, "enf.carla@asclepio.fiap")
 
 
+ADMIN_PASSWORD = "Admin#Novo2026!"
+
+
+def admin_onboarding(
+    client: TestClient, email: str, initial_password: str, new_password: str
+) -> dict[str, str]:
+    """Fluxo real do admin: login → troca de senha obrigatória → ativa MFA (TOTP) → login com código."""
+    import pyotp
+
+    r = client.post("/api/v1/auth/login", json={"email": email, "password": initial_password})
+    assert r.status_code == 200, r.text
+    tok = r.json()
+    assert tok.get("must_change_password") is True
+    h = {"Authorization": f"Bearer {tok['access_token']}"}
+    # qualquer rota fora de /auth → 428 enquanto não trocar a senha
+    assert client.get("/api/v1/dashboard/stats", headers=h).status_code == 428
+    r = client.post(
+        "/api/v1/auth/change-password",
+        json={"current_password": initial_password, "new_password": new_password},
+        headers=h,
+    )
+    assert r.status_code == 200, r.text
+    # admin sem MFA → 428 com code mfa_required_setup
+    r = client.get("/api/v1/dashboard/stats", headers=h)
+    assert r.status_code == 428 and r.json()["code"] == "mfa_required_setup"
+    setup = client.get("/api/v1/auth/mfa/setup", headers=h).json()
+    code = pyotp.TOTP(setup["secret"]).now()
+    r = client.post("/api/v1/auth/mfa/enable", json={"code": code}, headers=h)
+    assert r.status_code == 200 and len(r.json()["recovery_codes"]) == 10, r.text
+    # novo login exige MFA
+    r = client.post("/api/v1/auth/login", json={"email": email, "password": new_password})
+    ch = r.json()
+    assert ch.get("mfa_required") is True
+    r = client.post(
+        "/api/v1/auth/mfa/verify",
+        json={"mfa_token": ch["mfa_token"], "code": pyotp.TOTP(setup["secret"]).now()},
+    )
+    assert r.status_code == 200, r.text
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+
 @pytest.fixture(scope="session")
 def admin(client):
-    return _login(client, "admin@asclepio.fiap")
+    return admin_onboarding(client, "admin@asclepio.fiap", "Admin#Inicial2026", ADMIN_PASSWORD)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def auditor(client):
     return _login(client, "auditor@asclepio.fiap")

@@ -3,22 +3,28 @@ import type {
   Alert, AuditEntry, AuditListResponse, AuditVerifyResponse, ChatMessage, ChatRequest, ChatResponse, Conversation,
   ConversationDetail, DashboardStats, Exam, FeedbackRequest, HealthResponse, KnowledgeDocument, KnowledgeDocumentDetail,
   KnowledgeSearchResponse, LoginResponse, ModelInfoResponse, Patient, PatientContext, PatientDetail, ReindexResponse,
-  StreamEvent, User, WorkflowGraph, WorkflowRun, Guardrail, Citation, Intent,
+  StreamEvent, User, WorkflowGraph, WorkflowRun, Guardrail, Citation, Intent, TokenOut, Session, MfaSetup, MfaEnableResponse,
+  UserCreateInput, UserUpdateInput, UserCreateResponse, UsersListParams, PublicConfig, Specialty, Sector, SpecialtyInput, SectorInput,
 } from "@/lib/types";
 import type { ApiClient, ApiError as ApiErrorT } from "@/lib/api-types";
 import {
   ALERTS, AUDIT, AUDIT_ACTIONS, CHAT_GRAPH_MERMAID, CITATIONS, CONVERSATIONS, CONV_MESSAGES, KNOWLEDGE_DOCS, MODEL_ACTIVE, MODEL_INFO,
   PATIENTS, PATIENT_DETAILS, RUNS, SUGGESTIONS_GENERIC, SUGGESTIONS_PATIENT, USERS, WORKFLOW_GRAPH, citationsFor, knowledgeDetail,
+  MOCK_TOTP_CODE, PERMISSIONS_BY_ROLE, PUBLIC_CONFIG, SPECIALTIES, SECTORS, type MockUser,
 } from "./data";
-import { sleep, uid } from "@/lib/utils";
+import { initials, sleep, uid } from "@/lib/utils";
+import { getStoredUser, notifyPrecondition } from "@/lib/session";
+import { hasPermission, type Permission } from "@/lib/permissions";
 
 class MockApiError extends Error implements ApiErrorT {
   status: number;
   detail: string;
-  constructor(status: number, detail: string) {
+  code?: string;
+  constructor(status: number, detail: string, code?: string) {
     super(detail);
     this.status = status;
     this.detail = detail;
+    this.code = code;
   }
 }
 
@@ -31,22 +37,211 @@ const state = {
   model: { ...MODEL_INFO, active: { ...MODEL_ACTIVE } },
   nextMsgId: 5000,
   currentUser: null as User | null,
+  // ---- auth v1.1 (mock) ----
+  users: USERS.map((u) => ({ ...u, recovery_codes: [...u.recovery_codes] })) as MockUser[],
+  sessions: [] as MockSession[],
+  mfaChallenges: new Map<string, { userId: number; attempts: number; expires: number }>(),
+  pendingMfa: new Map<number, string>(), // userId → secret em ativação
+  nextUserId: 100,
+  nextSessionId: 1000,
+  specialties: SPECIALTIES.map((x) => ({ ...x })) as Specialty[],
+  sectors: SECTORS.map((x) => ({ ...x })) as Sector[],
+  nextCatalogId: 500,
 };
+
+type MockSession = { id: number; userId: number; refresh: string; created_at: string; last_used_at: string | null; expires_at: string; ip: string | null; user_agent: string | null };
 
 const latency = (min = 120, max = 420) => sleep(min + Math.random() * (max - min));
 
-function currentUser(): User {
-  if (state.currentUser) return state.currentUser;
-  if (typeof window !== "undefined") {
-    try {
-      const raw = localStorage.getItem("asclepio.user");
-      if (raw) return (state.currentUser = JSON.parse(raw) as User);
-    } catch {
-      /* ignore */
-    }
-  }
-  return USERS[1];
+/** Remove campos privados do usuário mock. */
+function publicUser(u: MockUser): User {
+  const { password: _p, totp_secret: _s, recovery_codes: _r, ...rest } = u;
+  void _p;
+  void _s;
+  void _r;
+  return rest;
 }
+
+function findUserByEmail(email: string) {
+  return state.users.find((x) => x.email.toLowerCase() === email.trim().toLowerCase());
+}
+
+/** Usuário autenticado atual (estado em memória → localStorage → fallback). Sempre reflete o registro vivo em state.users. */
+function currentMockUser(): MockUser {
+  const ref = state.currentUser ?? getStoredUser();
+  const live = ref ? state.users.find((u) => u.id === ref.id) ?? findUserByEmail(ref.email) : undefined;
+  return live ?? state.users.find((u) => u.email === "dra.ana@asclepio.fiap") ?? state.users[0];
+}
+function currentUser(): User {
+  return publicUser(currentMockUser());
+}
+
+const b64 = (s: string) => (typeof btoa === "function" ? btoa(unescape(encodeURIComponent(s))) : s);
+const unb64 = (s: string) => {
+  try {
+    return typeof atob === "function" ? decodeURIComponent(escape(atob(s))) : s;
+  } catch {
+    return "";
+  }
+};
+
+const ACCESS_TTL = 1800; // 30 min
+const REFRESH_TTL = 12 * 3600; // 12 h
+
+function issueTokens(u: MockUser): TokenOut {
+  const sid = state.nextSessionId++;
+  const refresh = `mockrt.${b64(u.email)}.${sid}.${Math.random().toString(36).slice(2, 12)}`;
+  const now = Date.now();
+  state.sessions.push({
+    id: sid,
+    userId: u.id,
+    refresh,
+    created_at: new Date(now).toISOString(),
+    last_used_at: new Date(now).toISOString(),
+    expires_at: new Date(now + REFRESH_TTL * 1000).toISOString(),
+    ip: "127.0.0.1",
+    user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "mock",
+  });
+  u.last_login_at = new Date(now).toISOString();
+  state.currentUser = publicUser(u);
+  return {
+    access_token: `mock.${b64(u.email)}.${sid}.${now}`,
+    refresh_token: refresh,
+    token_type: "bearer",
+    expires_in: ACCESS_TTL,
+    refresh_expires_in: REFRESH_TTL,
+    user: publicUser(u),
+    must_change_password: u.must_change_password,
+  };
+}
+
+/** Sessão atual no mock (derivada do refresh token salvo). */
+function currentSessionId(): number | null {
+  if (typeof window === "undefined") return null;
+  const rt = localStorage.getItem("asclepio.refresh");
+  const parts = rt?.split(".") ?? [];
+  const sid = Number(parts[2]);
+  return Number.isFinite(sid) ? sid : null;
+}
+
+/** Garante que a sessão atual exista em memória (após reload da aba o estado se perde). */
+function ensureCurrentSession(u: MockUser) {
+  const sid = currentSessionId();
+  if (sid == null) return;
+  if (!state.sessions.some((s) => s.id === sid)) {
+    const now = Date.now();
+    state.sessions.push({ id: sid, userId: u.id, refresh: localStorage.getItem("asclepio.refresh") ?? "", created_at: new Date(now - 3600_000).toISOString(), last_used_at: new Date(now).toISOString(), expires_at: new Date(now + REFRESH_TTL * 1000).toISOString(), ip: "127.0.0.1", user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "mock" });
+    // uma segunda sessão "de outro dispositivo" para a demo
+    state.sessions.push({ id: sid + 5000, userId: u.id, refresh: "", created_at: new Date(now - 2 * 86400_000).toISOString(), last_used_at: new Date(now - 5 * 3600_000).toISOString(), expires_at: new Date(now + 3 * 3600_000).toISOString(), ip: "10.20.1.12", user_agent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) Safari/604.1" });
+    if (sid > state.nextSessionId) state.nextSessionId = sid + 1;
+  }
+}
+
+const isTotp = (code: string) => /^\d{6}$/.test(code.replace(/\s/g, ""));
+const normRecovery = (code: string) => code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^(.{4})(.{4})$/, "$1-$2");
+
+function checkMfaCode(u: MockUser, code: string): boolean {
+  const c = code.trim();
+  if (isTotp(c)) return c.replace(/\s/g, "") === MOCK_TOTP_CODE;
+  const rc = normRecovery(c);
+  const idx = u.recovery_codes.indexOf(rc);
+  if (idx === -1) return false;
+  u.recovery_codes.splice(idx, 1); // uso único
+  return true;
+}
+
+function randomSecret(len = 16) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let out = "";
+  for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return out;
+}
+function randomRecoveryCodes(n = 10) {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const chunk = () => Array.from({ length: 4 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+  return Array.from({ length: n }, () => `${chunk()}-${chunk()}`);
+}
+function randomTempPassword() {
+  const U = "ABCDEFGHJKLMNPQRSTUVWXYZ", L = "abcdefghijkmnopqrstuvwxyz", D = "23456789", S = "!@#$%&*";
+  const pick = (s: string) => s[Math.floor(Math.random() * s.length)];
+  const all = U + L + D + S;
+  const arr = [pick(U), pick(L), pick(D), pick(S), ...Array.from({ length: 10 }, () => pick(all))];
+  return arr.sort(() => Math.random() - 0.5).join("");
+}
+
+/** SVG "QR" determinístico para exibição (não é um QR real — o backend gera o verdadeiro). */
+function fakeQrSvg(seed: string) {
+  let h = 2166136261;
+  const rnd = () => {
+    h ^= h << 13; h >>>= 0; h ^= h >> 17; h ^= h << 5; h >>>= 0;
+    return (h % 1000) / 1000;
+  };
+  for (const ch of seed) h = (h ^ ch.charCodeAt(0)) * 16777619;
+  const n = 29, cell = 6, pad = 12;
+  const size = n * cell + pad * 2;
+  const rects: string[] = [];
+  const finder = (x: number, y: number) => {
+    rects.push(`<rect x="${pad + x * cell}" y="${pad + y * cell}" width="${7 * cell}" height="${7 * cell}" fill="#0b0b10"/>`);
+    rects.push(`<rect x="${pad + (x + 1) * cell}" y="${pad + (y + 1) * cell}" width="${5 * cell}" height="${5 * cell}" fill="#fff"/>`);
+    rects.push(`<rect x="${pad + (x + 2) * cell}" y="${pad + (y + 2) * cell}" width="${3 * cell}" height="${3 * cell}" fill="#0b0b10"/>`);
+  };
+  for (let y = 0; y < n; y++)
+    for (let x = 0; x < n; x++) {
+      const inFinder = (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9);
+      if (inFinder) continue;
+      if (rnd() < 0.48) rects.push(`<rect x="${pad + x * cell}" y="${pad + y * cell}" width="${cell}" height="${cell}" fill="#0b0b10"/>`);
+    }
+  finder(0, 0); finder(n - 7, 0); finder(0, n - 7);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="QR code TOTP (mock)"><rect width="100%" height="100%" fill="#fff"/>${rects.join("")}</svg>`;
+}
+
+function passwordPolicyError(pw: string): string | null {
+  if (pw.length < 10) return "A senha deve ter pelo menos 10 caracteres";
+  if (!/[A-Z]/.test(pw)) return "A senha deve conter letra maiúscula";
+  if (!/[a-z]/.test(pw)) return "A senha deve conter letra minúscula";
+  if (!/\d/.test(pw)) return "A senha deve conter dígito";
+  if (!/[^A-Za-z0-9]/.test(pw)) return "A senha deve conter símbolo";
+  return null;
+}
+
+/** Regras 428 do backend: troca de senha obrigatória / MFA obrigatório para admin (em todas as rotas exceto /auth/*). */
+function assertPrecondition() {
+  const u = currentMockUser();
+  if (u.must_change_password) {
+    notifyPrecondition("password");
+    throw new MockApiError(428, "Troca de senha obrigatória", "must_change_password");
+  }
+  if (u.role === "admin" && !u.mfa_enabled) {
+    notifyPrecondition("mfa");
+    throw new MockApiError(428, "MFA obrigatório para administradores", "mfa_required_setup");
+  }
+}
+function requireAdmin() {
+  requirePerm("users:manage", "Apenas administradores podem gerenciar usuários");
+}
+function requirePerm(perm: Permission, msg = "Você não tem permissão para esta ação") {
+  if (!hasPermission(currentMockUser(), perm)) throw new MockApiError(403, msg);
+}
+
+const CRM_RE = /^(CRM\s?)?\d{4,7}-[A-Z]{2}$/i;
+/** Normaliza para "CRM 123456-UF". */
+function normalizeCrm(v: string) {
+  const m = v.trim().toUpperCase().replace(/\s+/g, " ").match(/^(?:CRM\s?)?(\d{4,7})-([A-Z]{2})$/);
+  return m ? `CRM ${m[1]}-${m[2]}` : v.trim();
+}
+function validateProfessional(role: User["role"], crm: string | null | undefined, specialty_id: number | null | undefined) {
+  if (role !== "medico") return;
+  if (!crm || !CRM_RE.test(crm.trim())) throw new MockApiError(422, "CRM obrigatório para médicos no formato CRM 123456-UF");
+  if (!specialty_id) throw new MockApiError(422, "Especialidade obrigatória para médicos");
+}
+function specialtyName(id: number | null | undefined) {
+  return id ? state.specialties.find((s) => s.id === id)?.name ?? null : null;
+}
+function recountCatalog() {
+  state.specialties.forEach((sp) => (sp.professionals_count = state.users.filter((u) => u.specialty_id === sp.id && u.is_active).length));
+  state.sectors.forEach((sc) => (sc.patients_count = PATIENTS.filter((p) => p.ward === sc.name).length));
+}
+recountCatalog();
 
 function detectIntent(message: string, patientId?: number | null): Intent {
   const m = message.toLowerCase();
@@ -159,46 +354,386 @@ function persistChat(req: ChatRequest, built: ReturnType<typeof buildAnswer>, la
   };
 }
 
-export const mockApi: ApiClient = {
+function healthNow(): HealthResponse {
+  return { status: "ok", version: PUBLIC_CONFIG.version, env: "mock", llm: { provider: "ollama", model: state.model.active.name, reachable: true }, embeddings: { provider: "ollama", model: "nomic-embed-text" }, db: "ok", vectorstore: { chunks: 156 } };
+}
+
+const rawMockApi: ApiClient = {
   async health(): Promise<HealthResponse> {
     await latency();
-    return { status: "ok", version: "0.3.0-mock", env: "mock", llm: { provider: "ollama", model: state.model.active.name, reachable: true }, embeddings: { provider: "ollama", model: "nomic-embed-text" }, db: "ok", vectorstore: { chunks: 156 } };
+    return healthNow();
+  },
+  async publicConfig(): Promise<PublicConfig> {
+    await latency(50, 150);
+    return { ...PUBLIC_CONFIG };
   },
   auth: {
     async login(email, password): Promise<LoginResponse> {
       await latency(300, 700);
-      const u = USERS.find((x) => x.email.toLowerCase() === email.trim().toLowerCase());
+      const u = findUserByEmail(email);
       if (!u || u.password !== password) throw new MockApiError(401, "E-mail ou senha inválidos");
-      const { password: _pw, ...user } = u;
-      void _pw;
-      state.currentUser = user;
-      return { access_token: `mock.${btoa(user.email)}.${Date.now()}`, token_type: "bearer", expires_in: 28800, user };
+      if (!u.is_active) throw new MockApiError(423, "Usuário desativado. Procure o administrador.");
+      if (u.mfa_enabled) {
+        const mfa_token = `mfa.${uid("chal")}`;
+        state.mfaChallenges.set(mfa_token, { userId: u.id, attempts: 0, expires: Date.now() + 300_000 });
+        return { mfa_required: true, mfa_token, expires_in: 300, methods: ["totp", "recovery_code"] };
+      }
+      return issueTokens(u);
+    },
+    async mfaVerify(mfa_token, code): Promise<TokenOut> {
+      await latency(250, 600);
+      const ch = state.mfaChallenges.get(mfa_token);
+      if (!ch || ch.expires < Date.now()) throw new MockApiError(401, "Desafio MFA expirado. Faça login novamente.");
+      const u = state.users.find((x) => x.id === ch.userId);
+      if (!u) throw new MockApiError(401, "Desafio MFA inválido");
+      if (!checkMfaCode(u, code)) {
+        ch.attempts += 1;
+        if (ch.attempts >= 5) {
+          state.mfaChallenges.delete(mfa_token);
+          throw new MockApiError(401, "Limite de tentativas excedido. Faça login novamente.");
+        }
+        throw new MockApiError(401, `Código inválido (${5 - ch.attempts} tentativa(s) restante(s))`);
+      }
+      state.mfaChallenges.delete(mfa_token);
+      return issueTokens(u);
+    },
+    async refresh(refresh_token): Promise<TokenOut> {
+      await latency(100, 250);
+      const parts = refresh_token.split(".");
+      if (parts[0] !== "mockrt") throw new MockApiError(401, "Refresh token inválido");
+      const u = findUserByEmail(unb64(parts[1] ?? ""));
+      if (!u || !u.is_active) throw new MockApiError(401, "Refresh token inválido");
+      const sid = Number(parts[2]);
+      const sess = state.sessions.find((s) => s.id === sid);
+      // Rotação: revoga a sessão antiga (se conhecida) e emite nova
+      if (sess) state.sessions = state.sessions.filter((s) => s.id !== sid);
+      return issueTokens(u);
     },
     async me(): Promise<User> {
       await latency(50, 150);
-      return currentUser();
+      const u = currentMockUser();
+      ensureCurrentSession(u);
+      return publicUser(u);
     },
-    async logout() {
+    async logout(body) {
       await latency(50, 150);
+      const rt = body?.refresh_token;
+      if (rt) state.sessions = state.sessions.filter((s) => s.refresh !== rt);
       state.currentUser = null;
+      return { ok: true as const };
+    },
+    async logoutAll() {
+      await latency(100, 250);
+      const u = currentMockUser();
+      const n = state.sessions.filter((s) => s.userId === u.id).length;
+      state.sessions = state.sessions.filter((s) => s.userId !== u.id);
+      state.currentUser = null;
+      return { ok: true as const, revoked: n };
+    },
+    async changePassword(current_password, new_password) {
+      await latency(300, 600);
+      const u = currentMockUser();
+      if (u.password !== current_password) throw new MockApiError(400, "Senha atual incorreta");
+      const err = passwordPolicyError(new_password);
+      if (err) throw new MockApiError(422, err);
+      if (new_password === current_password) throw new MockApiError(422, "A nova senha deve ser diferente da atual");
+      u.password = new_password;
+      u.must_change_password = false;
+      // revoga as OUTRAS sessões
+      const sid = currentSessionId();
+      state.sessions = state.sessions.filter((s) => s.userId !== u.id || s.id === sid);
+      state.currentUser = publicUser(u);
+      return { ok: true as const };
+    },
+    async mfaSetup(): Promise<MfaSetup> {
+      await latency(200, 500);
+      const u = currentMockUser();
+      if (u.mfa_enabled) throw new MockApiError(400, "MFA já está ativo para este usuário");
+      const secret = state.pendingMfa.get(u.id) ?? randomSecret();
+      state.pendingMfa.set(u.id, secret);
+      const label = encodeURIComponent(`Asclépio:${u.email}`);
+      const otpauth_uri = `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent("Asclépio")}&algorithm=SHA1&digits=6&period=30`;
+      return { secret, otpauth_uri, qr_svg: fakeQrSvg(otpauth_uri) };
+    },
+    async mfaEnable(code): Promise<MfaEnableResponse> {
+      await latency(250, 600);
+      const u = currentMockUser();
+      const secret = state.pendingMfa.get(u.id);
+      if (!secret) throw new MockApiError(400, "Inicie a configuração do MFA antes de ativar");
+      if (!isTotp(code) || code.replace(/\s/g, "") !== MOCK_TOTP_CODE) throw new MockApiError(401, "Código inválido. Verifique o horário do dispositivo e tente novamente.");
+      u.totp_secret = secret;
+      u.mfa_enabled = true;
+      u.recovery_codes = randomRecoveryCodes(10);
+      state.pendingMfa.delete(u.id);
+      state.currentUser = publicUser(u);
+      return { ok: true as const, recovery_codes: [...u.recovery_codes] };
+    },
+    async mfaDisable(password, code) {
+      await latency(250, 600);
+      const u = currentMockUser();
+      if (!u.mfa_enabled) throw new MockApiError(400, "MFA não está ativo");
+      if (u.role === "admin") throw new MockApiError(400, "Administradores não podem desativar o MFA");
+      if (u.password !== password) throw new MockApiError(401, "Senha incorreta");
+      if (!checkMfaCode(u, code)) throw new MockApiError(401, "Código inválido");
+      u.mfa_enabled = false;
+      u.totp_secret = null;
+      u.recovery_codes = [];
+      state.currentUser = publicUser(u);
+      return { ok: true as const };
+    },
+    async sessions(): Promise<Session[]> {
+      await latency(150, 350);
+      const u = currentMockUser();
+      ensureCurrentSession(u);
+      const sid = currentSessionId();
+      return state.sessions
+        .filter((s) => s.userId === u.id)
+        .map((s) => ({ id: s.id, created_at: s.created_at, last_used_at: s.last_used_at, expires_at: s.expires_at, ip: s.ip, user_agent: s.user_agent, current: s.id === sid }))
+        .sort((a, b) => Number(b.current) - Number(a.current) || b.created_at.localeCompare(a.created_at));
+    },
+    async revokeSession(id) {
+      await latency(150, 350);
+      const u = currentMockUser();
+      const s = state.sessions.find((x) => x.id === id && x.userId === u.id);
+      if (!s) throw new MockApiError(404, "Sessão não encontrada");
+      state.sessions = state.sessions.filter((x) => x.id !== id);
+      return { ok: true as const };
+    },
+  },
+  users: {
+    async list(params?: UsersListParams): Promise<User[]> {
+      await latency();
+      requireAdmin();
+      const q = (params?.q ?? "").trim().toLowerCase();
+      return state.users
+        .filter((u) => (!params?.role || u.role === params.role) && (params?.active === undefined || params.active === "" || u.is_active === params.active) && (!q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.crm ?? "").toLowerCase().includes(q)))
+        .map(publicUser)
+        .sort((a, b) => a.id - b.id);
+    },
+    async get(id: number): Promise<User> {
+      await latency();
+      requireAdmin();
+      const u = state.users.find((x) => x.id === id);
+      if (!u) throw new MockApiError(404, "Usuário não encontrado");
+      return publicUser(u);
+    },
+    async create(input: UserCreateInput): Promise<UserCreateResponse> {
+      await latency(300, 600);
+      requireAdmin();
+      const email = input.email.trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new MockApiError(422, "E-mail inválido");
+      if (findUserByEmail(email)) throw new MockApiError(409, "Já existe um usuário com este e-mail");
+      if (!input.name.trim()) throw new MockApiError(422, "Nome é obrigatório");
+      validateProfessional(input.role, input.crm, input.specialty_id);
+      if (input.specialty_id && !state.specialties.some((sp) => sp.id === input.specialty_id && sp.active)) throw new MockApiError(422, "Especialidade inválida");
+      if (input.sector_id && !state.sectors.some((sc) => sc.id === input.sector_id)) throw new MockApiError(422, "Setor inválido");
+      let temporary_password: string | null = null;
+      let password = input.password ?? "";
+      if (!password) {
+        temporary_password = randomTempPassword();
+        password = temporary_password;
+      } else {
+        const err = passwordPolicyError(password);
+        if (err) throw new MockApiError(422, err);
+      }
+      const u: MockUser = {
+        id: state.nextUserId++,
+        name: input.name.trim(),
+        email,
+        role: input.role,
+        crm: input.crm?.trim() ? (input.role === "medico" ? normalizeCrm(input.crm) : input.crm.trim()) : null,
+        specialty: specialtyName(input.specialty_id) ?? input.specialty?.trim() ?? null,
+        specialty_id: input.specialty_id ?? null,
+        sector_id: input.sector_id ?? null,
+        avatar_initials: initials(input.name) || "??",
+        permissions: PERMISSIONS_BY_ROLE[input.role],
+        mfa_enabled: false,
+        must_change_password: true,
+        is_active: true,
+        is_demo: false,
+        last_login_at: null,
+        created_at: new Date().toISOString(),
+        password,
+        totp_secret: null,
+        recovery_codes: [],
+      };
+      state.users.push(u);
+      recountCatalog();
+      return { user: publicUser(u), temporary_password };
+    },
+    async update(id: number, patch: UserUpdateInput): Promise<User> {
+      await latency(250, 500);
+      requireAdmin();
+      const me = currentMockUser();
+      const u = state.users.find((x) => x.id === id);
+      if (!u) throw new MockApiError(404, "Usuário não encontrado");
+      if (u.id === me.id && patch.role && patch.role !== "admin") throw new MockApiError(400, "Você não pode remover o próprio papel de administrador");
+      if (u.id === me.id && patch.is_active === false) throw new MockApiError(400, "Você não pode desativar a própria conta");
+      if (patch.name !== undefined) {
+        u.name = patch.name.trim() || u.name;
+        u.avatar_initials = initials(u.name) || u.avatar_initials;
+      }
+      if (patch.role !== undefined) {
+        u.role = patch.role;
+        u.permissions = PERMISSIONS_BY_ROLE[patch.role];
+      }
+      const nextRole = patch.role ?? u.role;
+      const nextCrm = patch.crm !== undefined ? patch.crm : u.crm;
+      const nextSpec = patch.specialty_id !== undefined ? patch.specialty_id : u.specialty_id;
+      validateProfessional(nextRole, nextCrm, nextSpec);
+      if (patch.crm !== undefined) u.crm = patch.crm?.trim() ? (nextRole === "medico" ? normalizeCrm(patch.crm) : patch.crm.trim()) : null;
+      if (patch.specialty_id !== undefined) {
+        if (patch.specialty_id && !state.specialties.some((sp) => sp.id === patch.specialty_id)) throw new MockApiError(422, "Especialidade inválida");
+        u.specialty_id = patch.specialty_id;
+        u.specialty = specialtyName(patch.specialty_id);
+      } else if (patch.specialty !== undefined) u.specialty = patch.specialty?.trim() || null;
+      if (patch.sector_id !== undefined) {
+        if (patch.sector_id && !state.sectors.some((sc) => sc.id === patch.sector_id)) throw new MockApiError(422, "Setor inválido");
+        u.sector_id = patch.sector_id;
+      }
+      if (patch.is_active !== undefined) {
+        u.is_active = patch.is_active;
+        if (!u.is_active) state.sessions = state.sessions.filter((s) => s.userId !== u.id);
+      }
+      recountCatalog();
+      return publicUser(u);
+    },
+    async resetPassword(id: number) {
+      await latency(300, 600);
+      requireAdmin();
+      const u = state.users.find((x) => x.id === id);
+      if (!u) throw new MockApiError(404, "Usuário não encontrado");
+      const temporary_password = randomTempPassword();
+      u.password = temporary_password;
+      u.must_change_password = true;
+      state.sessions = state.sessions.filter((s) => s.userId !== u.id);
+      return { temporary_password };
+    },
+    async mfaReset(id: number) {
+      await latency(250, 500);
+      requireAdmin();
+      const u = state.users.find((x) => x.id === id);
+      if (!u) throw new MockApiError(404, "Usuário não encontrado");
+      u.mfa_enabled = false;
+      u.totp_secret = null;
+      u.recovery_codes = [];
+      state.pendingMfa.delete(u.id);
+      return { ok: true as const };
+    },
+  },
+  catalog: {
+    async specialties(includeInactive?: boolean): Promise<Specialty[]> {
+      await latency(80, 200);
+      requirePerm("catalog:read");
+      recountCatalog();
+      return state.specialties.filter((x) => includeInactive || x.active).map((x) => ({ ...x })).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    },
+    async createSpecialty(input): Promise<Specialty> {
+      await latency(200, 400);
+      requirePerm("catalog:manage");
+      const name = input.name.trim();
+      if (!name) throw new MockApiError(422, "Nome é obrigatório");
+      if (state.specialties.some((x) => x.name.toLowerCase() === name.toLowerCase())) throw new MockApiError(409, "Já existe uma especialidade com este nome");
+      const sp: Specialty = { id: state.nextCatalogId++, name, code: input.code?.trim().toUpperCase() || null, active: true, professionals_count: 0 };
+      state.specialties.push(sp);
+      return { ...sp };
+    },
+    async updateSpecialty(id, patch: SpecialtyInput): Promise<Specialty> {
+      await latency(200, 400);
+      requirePerm("catalog:manage");
+      const sp = state.specialties.find((x) => x.id === id);
+      if (!sp) throw new MockApiError(404, "Especialidade não encontrada");
+      if (patch.name !== undefined) {
+        const name = patch.name.trim();
+        if (!name) throw new MockApiError(422, "Nome é obrigatório");
+        if (state.specialties.some((x) => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) throw new MockApiError(409, "Já existe uma especialidade com este nome");
+        sp.name = name;
+        state.users.filter((u) => u.specialty_id === id).forEach((u) => (u.specialty = name));
+      }
+      if (patch.code !== undefined) sp.code = patch.code?.trim().toUpperCase() || null;
+      if (patch.active !== undefined) sp.active = patch.active;
+      return { ...sp };
+    },
+    async deleteSpecialty(id) {
+      await latency(200, 400);
+      requirePerm("catalog:manage");
+      const sp = state.specialties.find((x) => x.id === id);
+      if (!sp) throw new MockApiError(404, "Especialidade não encontrada");
+      recountCatalog();
+      if (sp.professionals_count > 0) throw new MockApiError(409, `Há ${sp.professionals_count} profissional(is) vinculado(s). Desative em vez de remover.`);
+      state.specialties = state.specialties.filter((x) => x.id !== id);
+      return { ok: true as const };
+    },
+    async sectors(includeInactive?: boolean): Promise<Sector[]> {
+      await latency(80, 200);
+      requirePerm("catalog:read");
+      recountCatalog();
+      return state.sectors.filter((x) => includeInactive || x.active).map((x) => ({ ...x })).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    },
+    async createSector(input): Promise<Sector> {
+      await latency(200, 400);
+      requirePerm("catalog:manage");
+      const name = input.name.trim();
+      if (!name) throw new MockApiError(422, "Nome é obrigatório");
+      if (state.sectors.some((x) => x.name.toLowerCase() === name.toLowerCase())) throw new MockApiError(409, "Já existe um setor com este nome");
+      const sc: Sector = { id: state.nextCatalogId++, name, kind: input.kind, active: true, patients_count: 0 };
+      state.sectors.push(sc);
+      return { ...sc };
+    },
+    async updateSector(id, patch: SectorInput): Promise<Sector> {
+      await latency(200, 400);
+      requirePerm("catalog:manage");
+      const sc = state.sectors.find((x) => x.id === id);
+      if (!sc) throw new MockApiError(404, "Setor não encontrado");
+      if (patch.name !== undefined) {
+        const name = patch.name.trim();
+        if (!name) throw new MockApiError(422, "Nome é obrigatório");
+        if (state.sectors.some((x) => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) throw new MockApiError(409, "Já existe um setor com este nome");
+        sc.name = name;
+      }
+      if (patch.kind !== undefined) sc.kind = patch.kind;
+      if (patch.active !== undefined) sc.active = patch.active;
+      return { ...sc };
+    },
+    async deleteSector(id) {
+      await latency(200, 400);
+      requirePerm("catalog:manage");
+      const sc = state.sectors.find((x) => x.id === id);
+      if (!sc) throw new MockApiError(404, "Setor não encontrado");
+      recountCatalog();
+      if (sc.patients_count > 0) throw new MockApiError(409, `Há ${sc.patients_count} paciente(s) internado(s) neste setor. Desative em vez de remover.`);
+      state.sectors = state.sectors.filter((x) => x.id !== id);
       return { ok: true as const };
     },
   },
   dashboard: {
     async stats(): Promise<DashboardStats> {
       await latency();
+      const me = currentMockUser();
       const dist = { baixo: 0, moderado: 0, alto: 0, critico: 0 };
       PATIENTS.forEach((p) => dist[p.risk_level]++);
+      const canModel = hasPermission(me, "model:read");
+      const canAudit = hasPermission(me, "audit:read");
+      const clinical = hasPermission(me, "workflows:run") && !hasPermission(me, "settings:read");
+      const openAlerts = state.alerts.filter((a) => !a.acknowledged_at);
       return {
         patients: PATIENTS.length,
         patients_critical: dist.critico,
         pending_exams: PATIENTS.reduce((s, p) => s + p.pending_exams_count, 0),
         overdue_exams: PATIENTS.reduce((s, p) => s + p.overdue_exams_count, 0),
-        open_alerts: state.alerts.filter((a) => !a.acknowledged_at).length,
+        open_alerts: openAlerts.length,
         chats_today: 14,
         workflows_today: state.runs.length,
-        guardrail_blocks_today: 2,
-        model: state.model.active,
+        guardrail_blocks_today: canAudit ? 2 : null,
+        model: canModel ? state.model.active : null,
+        system: hasPermission(me, "settings:read") ? healthNow() : null,
+        my_work: clinical
+          ? {
+              pending_approvals: state.runs.filter((r) => r.status === "aguardando_aprovacao").map((r) => ({ ...r, steps: [] })),
+              my_open_alerts: openAlerts.length,
+              my_conversations_today: state.conversations.filter((c) => new Date(c.updated_at).toDateString() === new Date().toDateString()).length || 3,
+            }
+          : null,
         recent_alerts: [...state.alerts].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5),
         recent_runs: [...state.runs].sort((a, b) => b.started_at.localeCompare(a.started_at)).slice(0, 5).map((r) => ({ ...r, steps: [] })),
         risk_distribution: dist,
@@ -330,6 +865,7 @@ export const mockApi: ApiClient = {
     },
     async graph() {
       await latency();
+      requirePerm("system:internals");
       return { mermaid: CHAT_GRAPH_MERMAID };
     },
   },
@@ -391,6 +927,7 @@ export const mockApi: ApiClient = {
     },
     async graph(): Promise<WorkflowGraph> {
       await latency();
+      requirePerm("system:internals");
       return WORKFLOW_GRAPH;
     },
   },
@@ -440,7 +977,7 @@ export const mockApi: ApiClient = {
     },
     async reindex(): Promise<ReindexResponse> {
       await latency(1500, 2500);
-      if (currentUser().role !== "admin") throw new MockApiError(403, "Apenas administradores podem reindexar");
+      requirePerm("knowledge:manage", "Apenas administradores podem reindexar");
       return { documents: KNOWLEDGE_DOCS.length, chunks: KNOWLEDGE_DOCS.reduce((s, d) => s + d.chunks, 0), duration_ms: 18400 };
     },
   },
@@ -451,7 +988,7 @@ export const mockApi: ApiClient = {
     },
     async switch(model) {
       await latency(400, 800);
-      if (currentUser().role !== "admin") throw new MockApiError(403, "Apenas administradores podem trocar o modelo");
+      requirePerm("model:read", "Apenas administradores podem trocar o modelo");
       const m = state.model.available.find((x) => x.name === model);
       if (!m) throw new MockApiError(404, "Modelo não disponível");
       state.model.active = { provider: "ollama", name: m.name, fine_tuned: m.fine_tuned, base_model: m.fine_tuned ? "llama3.1:8b" : null };
@@ -487,4 +1024,35 @@ export const mockApi: ApiClient = {
       return AUDIT_ACTIONS;
     },
   },
+};
+
+/** Aplica a regra 428 (como o backend) a todas as rotas exceto /auth/* e /health. */
+function guardNamespace<T extends object>(ns: T): T {
+  const out: Record<string, unknown> = {};
+  for (const [k, fn] of Object.entries(ns as Record<string, unknown>)) {
+    out[k] =
+      typeof fn === "function"
+        ? async (...args: unknown[]) => {
+            assertPrecondition();
+            return (fn as (...a: unknown[]) => unknown)(...args);
+          }
+        : fn;
+  }
+  return out as T;
+}
+
+export const mockApi: ApiClient = {
+  health: rawMockApi.health,
+  publicConfig: rawMockApi.publicConfig,
+  auth: rawMockApi.auth,
+  users: guardNamespace(rawMockApi.users),
+  catalog: guardNamespace(rawMockApi.catalog),
+  dashboard: guardNamespace(rawMockApi.dashboard),
+  patients: guardNamespace(rawMockApi.patients),
+  assistant: guardNamespace(rawMockApi.assistant),
+  workflows: guardNamespace(rawMockApi.workflows),
+  alerts: guardNamespace(rawMockApi.alerts),
+  knowledge: guardNamespace(rawMockApi.knowledge),
+  model: guardNamespace(rawMockApi.model),
+  audit: guardNamespace(rawMockApi.audit),
 };

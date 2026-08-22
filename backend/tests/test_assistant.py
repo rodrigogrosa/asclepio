@@ -112,6 +112,9 @@ def test_conversations_and_feedback(client, medico, enfermagem):
     ).json()["ok"]
 
 
-def test_suggestions_and_graph(client, medico):
+def test_suggestions_and_graph(client, medico, admin):
     assert client.get(f"{API}/assistant/suggestions", headers=medico).json()["suggestions"]
-    assert "guard_input" in client.get(f"{API}/assistant/graph", headers=medico).json()["mermaid"]
+    assert (
+        client.get(f"{API}/assistant/graph", headers=medico).status_code == 403
+    )  # detalhe técnico: só admin
+    assert "guard_input" in client.get(f"{API}/assistant/graph", headers=admin).json()["mermaid"]

@@ -106,7 +106,10 @@ ci: check ## Alias da CI
 # ---------------------------------------------------------------------
 # 🧠 Machine Learning (fine-tuning) — roda no host (MPS/CUDA); ver ml/README.md
 # ---------------------------------------------------------------------
-prepare: ## Prepara dataset (anonimização, curadoria, splits) → data/processed/
+prepare: ## Prepara dataset (anonimização, curadoria, splits, + amostras PubMedQA/MedQuAD) → data/processed/
+	$(UV) run python -m asclepio_ml prepare --with-public
+
+prepare-offline: ## Prepara dataset sem baixar datasets públicos (só dados institucionais)
 	$(UV) run python -m asclepio_ml prepare
 
 train: ## Fine-tuning LoRA (perfil full) → ml/runs/ + ml/registry.json
@@ -121,7 +124,7 @@ eval: ## Avaliação base vs fine-tuned (+ RAG) → ml/reports/eval_latest.json 
 eval-quick: ## Avaliação rápida (poucas amostras)
 	$(UV) run python -m asclepio_ml evaluate --max-samples 20
 
-finetune: prepare train export eval ## Pipeline completo de ML (prepare → train → export → eval)
+finetune: prepare train export eval docs-metrics ## Pipeline completo de ML (prepare → train → export → eval → docs)
 
 ollama-pull: ## Baixa modelos base no Ollama do host
 	ollama pull nomic-embed-text && ollama pull llama3.1:8b
@@ -131,3 +134,6 @@ ollama-create: ## (Re)cria o modelo asclepio-med no Ollama a partir de ml/models
 
 docs-diagrams: ## Exporta os grafos LangGraph (mermaid) para docs/diagramas/
 	$(UV) run python scripts/export_graphs.py
+
+docs-metrics: ## Atualiza relatório/README com os números de ml/registry.json e ml/reports/eval_latest.json
+	$(UV) run python scripts/update_report_metrics.py

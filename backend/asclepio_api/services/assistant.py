@@ -39,7 +39,7 @@ from ..prompts import (
     PATIENT_CONTEXT_HEADER,
     PRESCRIPTION_REFUSAL_PROMPT,
     RAG_CONTEXT_HEADER,
-    SYSTEM_PROMPT,
+    system_prompt,
 )
 from .knowledge import get_knowledge_service
 from .llm import get_llm_factory
@@ -177,7 +177,7 @@ async def retrieve(state: ChatState) -> ChatState:
 
 def _build_messages(state: ChatState) -> list[Any]:
     intent = state.get("intent", "protocolo")
-    msgs: list[Any] = [SystemMessage(content=SYSTEM_PROMPT)]
+    msgs: list[Any] = [SystemMessage(content=system_prompt())]
     extra = None
     if intent == "prescricao":
         extra = PRESCRIPTION_REFUSAL_PROMPT

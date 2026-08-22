@@ -66,7 +66,11 @@ def test_security_headers_and_request_id(client):
     assert "frame-ancestors" in r.headers["content-security-policy"]
 
 
-def test_logout_audited(client, medico, auditor):
-    assert client.post(f"{API}/auth/logout", headers=medico).json()["ok"] is True
+def test_logout_audited(client, auditor):
+    tok = client.post(
+        f"{API}/auth/login", json={"email": "dra.ana@asclepio.fiap", "password": "Asclepio@2026"}
+    ).json()
+    h = {"Authorization": f"Bearer {tok['access_token']}"}
+    assert client.post(f"{API}/auth/logout", headers=h).json()["ok"] is True
     r = client.get(f"{API}/audit?action=auth.logout", headers=auditor)
     assert r.json()["total"] >= 1

@@ -1,13 +1,12 @@
 {
-  "generated_at": "2026-08-21T08:00:00",
-  "seed": 2026,
-  "disclaimer": "Dados 100% sintéticos/fictícios gerados com Faker para fins acadêmicos (Tech Challenge FIAP).",
+  "generated_at": "2026-08-22T00:29:16",
+  "disclaimer": "Dados 100% sintéticos/fictícios (Faker) — Tech Challenge FIAP.",
   "patients": [
     {
       "mrn": "HU2026001",
       "name": "Liam Montenegro",
       "sex": "M",
-      "birth_date": "1959-01-12",
+      "birth_date": "1959-01-13",
       "age": 67,
       "cpf": "813.465.729-09",
       "phone": "74 93091-1417",
@@ -15,7 +14,7 @@
       "mother_name": "Luana Alves",
       "ward": "Pronto-Socorro",
       "bed": "17B",
-      "admission_date": "2026-08-21T02:00:00",
+      "admission_date": "2026-08-21T18:29:16",
       "primary_diagnosis": "Pneumonia adquirida na comunidade com suspeita de sepse",
       "comorbidities": [
         "Hipertensão arterial",
@@ -31,7 +30,7 @@
       "scenario": "sepse_pac",
       "vitals": [
         {
-          "measured_at": "2026-08-21T02:00:00",
+          "measured_at": "2026-08-21T18:29:16",
           "hr": 98,
           "sbp": 118,
           "dbp": 72,
@@ -41,7 +40,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T05:00:00",
+          "measured_at": "2026-08-21T21:29:16",
           "hr": 108,
           "sbp": 102,
           "dbp": 60,
@@ -51,7 +50,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:30:00",
+          "measured_at": "2026-08-21T23:59:16",
           "hr": 116,
           "sbp": 88,
           "dbp": 54,
@@ -66,9 +65,9 @@
           "name": "Lactato arterial",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T03:00:00",
+          "requested_at": "2026-08-21T19:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T03:48:00",
+          "result_at": "2026-08-21T20:17:16",
           "result_value": "3,4",
           "unit": "mmol/L",
           "reference_range": "0,5–2,0",
@@ -78,8 +77,8 @@
           "name": "Lactato arterial (reavaliação 2h)",
           "category": "laboratorio",
           "status": "atrasado",
-          "requested_at": "2026-08-21T04:00:00",
-          "due_at": "2026-08-21T06:30:00",
+          "requested_at": "2026-08-21T20:29:16",
+          "due_at": "2026-08-21T22:59:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -90,8 +89,8 @@
           "name": "Hemoculturas (2 amostras)",
           "category": "laboratorio",
           "status": "coletado",
-          "requested_at": "2026-08-21T03:00:00",
-          "due_at": "2026-08-23T08:00:00",
+          "requested_at": "2026-08-21T19:29:16",
+          "due_at": "2026-08-24T00:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -102,9 +101,9 @@
           "name": "Hemograma completo",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T03:00:00",
+          "requested_at": "2026-08-21T19:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T04:30:00",
+          "result_at": "2026-08-21T20:59:16",
           "result_value": "Leucócitos 19.800 (bastões 12%)",
           "unit": "/mm³",
           "reference_range": "4.000–10.000",
@@ -114,9 +113,9 @@
           "name": "Leucócitos",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T03:00:00",
+          "requested_at": "2026-08-21T19:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T04:30:00",
+          "result_at": "2026-08-21T20:59:16",
           "result_value": "19800",
           "unit": "/mm³",
           "reference_range": "4000–10000",
@@ -126,9 +125,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T03:00:00",
+          "requested_at": "2026-08-21T19:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T04:30:00",
+          "result_at": "2026-08-21T20:59:16",
           "result_value": "1,9",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -138,9 +137,9 @@
           "name": "PCR",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T03:00:00",
+          "requested_at": "2026-08-21T19:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T04:30:00",
+          "result_at": "2026-08-21T20:59:16",
           "result_value": "212",
           "unit": "mg/L",
           "reference_range": "< 5",
@@ -150,9 +149,9 @@
           "name": "Radiografia de tórax",
           "category": "imagem",
           "status": "concluido",
-          "requested_at": "2026-08-21T03:00:00",
+          "requested_at": "2026-08-21T19:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T04:00:00",
+          "result_at": "2026-08-21T20:29:16",
           "result_value": "Consolidação em lobo inferior direito",
           "unit": null,
           "reference_range": null,
@@ -162,8 +161,8 @@
           "name": "Gasometria arterial",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T07:12:00",
-          "due_at": "2026-08-21T09:00:00",
+          "requested_at": "2026-08-21T23:41:16",
+          "due_at": "2026-08-22T01:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -177,7 +176,7 @@
           "dose": "2 g",
           "route": "EV",
           "frequency": "1x/dia",
-          "started_at": "2026-08-21T04:30:00",
+          "started_at": "2026-08-21T20:59:16",
           "status": "ativo"
         },
         {
@@ -185,7 +184,7 @@
           "dose": "500 mg",
           "route": "EV",
           "frequency": "1x/dia",
-          "started_at": "2026-08-21T04:30:00",
+          "started_at": "2026-08-21T20:59:16",
           "status": "ativo"
         },
         {
@@ -193,7 +192,7 @@
           "dose": "1.000 mL",
           "route": "EV",
           "frequency": "bolus",
-          "started_at": "2026-08-21T05:00:00",
+          "started_at": "2026-08-21T21:29:16",
           "status": "ativo"
         },
         {
@@ -201,25 +200,25 @@
           "dose": "1 g",
           "route": "EV",
           "frequency": "6/6h se dor/febre",
-          "started_at": "2026-08-21T03:00:00",
+          "started_at": "2026-08-21T19:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-21T02:30:00",
+          "created_at": "2026-08-21T18:59:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "admissao",
           "text": "Paciente: Liam Montenegro, 67 anos, CPF 813.465.729-09, telefone 74 93091-1417, residente à Vereda de Barbosa, 91, da Paz dos Dourados - BA. Mãe: Luana Alves. Admitido com tosse produtiva há 4 dias, febre e dispneia progressiva. Ao exame: REG, taquipneico, crepitações em base D. HD: PAC. Iniciado protocolo de sepse (qSOFA 2). Solicitados lactato, hemoculturas, HMG, função renal, RX tórax. Antibiótico em 45 min da triagem."
         },
         {
-          "created_at": "2026-08-21T05:30:00",
+          "created_at": "2026-08-21T21:59:16",
           "author": "Enf. Carla Mendes",
           "type": "evolucao",
           "text": "Paciente Liam Montenegro mantém febre 38,8 °C, PA 102/60, FR 24. Acompanhante (esposa, Sra. Maria Clara Martins, tel +55 13 97536-4556) orientada. Aguardando reavaliação de lactato."
         },
         {
-          "created_at": "2026-08-21T07:18:00",
+          "created_at": "2026-08-21T23:47:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "evolucao",
           "text": "Piora hemodinâmica: PA 88/54 após 1.000 mL de cristaloide, FR 27, sonolento (GCS 14). Lactato de controle ainda não coletado. Considerar reavaliação imediata conforme protocolo."
@@ -230,7 +229,7 @@
       "mrn": "HU2026002",
       "name": "Ayla Guerra",
       "sex": "F",
-      "birth_date": "2002-08-10",
+      "birth_date": "2002-08-11",
       "age": 24,
       "cpf": "987.603.412-03",
       "phone": "67 99788-0932",
@@ -238,7 +237,7 @@
       "mother_name": "Sarah Sampaio",
       "ward": "Pronto-Socorro",
       "bed": "27B",
-      "admission_date": "2026-08-21T05:36:00",
+      "admission_date": "2026-08-21T22:05:16",
       "primary_diagnosis": "Cetoacidose diabética (DM1)",
       "comorbidities": [
         "Diabetes mellitus tipo 1"
@@ -250,7 +249,7 @@
       "scenario": "cad",
       "vitals": [
         {
-          "measured_at": "2026-08-21T06:00:00",
+          "measured_at": "2026-08-21T22:29:16",
           "hr": 118,
           "sbp": 98,
           "dbp": 60,
@@ -260,7 +259,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:42:00",
+          "measured_at": "2026-08-22T00:11:16",
           "hr": 112,
           "sbp": 104,
           "dbp": 64,
@@ -275,9 +274,9 @@
           "name": "Glicemia capilar",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:00:00",
+          "requested_at": "2026-08-21T22:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:06:00",
+          "result_at": "2026-08-21T22:35:16",
           "result_value": "486",
           "unit": "mg/dL",
           "reference_range": "70–99",
@@ -287,9 +286,9 @@
           "name": "Gasometria arterial",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:00:00",
+          "requested_at": "2026-08-21T22:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "pH 7,14 / HCO3 9",
           "unit": "",
           "reference_range": "pH 7,35–7,45",
@@ -299,9 +298,9 @@
           "name": "pH arterial",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:00:00",
+          "requested_at": "2026-08-21T22:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "7,14",
           "unit": "",
           "reference_range": "7,35–7,45",
@@ -311,9 +310,9 @@
           "name": "Bicarbonato",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:00:00",
+          "requested_at": "2026-08-21T22:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "9",
           "unit": "mmol/L",
           "reference_range": "22–26",
@@ -323,9 +322,9 @@
           "name": "Potássio",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:00:00",
+          "requested_at": "2026-08-21T22:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "3,1",
           "unit": "mmol/L",
           "reference_range": "3,5–5,0",
@@ -335,9 +334,9 @@
           "name": "Cetonemia",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:00:00",
+          "requested_at": "2026-08-21T22:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "5,8",
           "unit": "mmol/L",
           "reference_range": "< 0,6",
@@ -347,8 +346,8 @@
           "name": "Potássio (controle 2h)",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T07:30:00",
-          "due_at": "2026-08-21T09:30:00",
+          "requested_at": "2026-08-21T23:59:16",
+          "due_at": "2026-08-22T01:59:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -359,8 +358,8 @@
           "name": "Glicemia capilar horária",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T07:48:00",
-          "due_at": "2026-08-21T08:48:00",
+          "requested_at": "2026-08-22T00:17:16",
+          "due_at": "2026-08-22T01:17:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -374,7 +373,7 @@
           "dose": "1.000 mL/h",
           "route": "EV",
           "frequency": "contínuo",
-          "started_at": "2026-08-21T06:12:00",
+          "started_at": "2026-08-21T22:41:16",
           "status": "ativo"
         },
         {
@@ -382,7 +381,7 @@
           "dose": "0,1 UI/kg/h",
           "route": "EV",
           "frequency": "bomba de infusão",
-          "started_at": "2026-08-21T06:48:00",
+          "started_at": "2026-08-21T23:17:16",
           "status": "ativo"
         },
         {
@@ -390,13 +389,13 @@
           "dose": "20 mEq/L",
           "route": "EV",
           "frequency": "em cada litro de SF",
-          "started_at": "2026-08-21T07:00:00",
+          "started_at": "2026-08-21T23:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-21T06:00:00",
+          "created_at": "2026-08-21T22:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "admissao",
           "text": "Paciente: Ayla Guerra, 24 anos, DM1 há 10 anos, abandono de insulina há 3 dias. Poliúria, polidipsia, vômitos, hálito cetônico. Glicemia 486, pH 7,14, HCO3 9, K 3,1. Iniciado protocolo de CAD: hidratação, reposição de K antes da insulina (K < 3,3), depois insulina EV. CPF 987.603.412-03. Contato: 67 99788-0932."
@@ -407,7 +406,7 @@
       "mrn": "HU2026003",
       "name": "Juan da Mata",
       "sex": "M",
-      "birth_date": "1967-09-18",
+      "birth_date": "1967-09-19",
       "age": 58,
       "cpf": "092.543.618-60",
       "phone": "+55 99 97787-6804",
@@ -415,7 +414,7 @@
       "mother_name": "Clara Machado",
       "ward": "Unidade Coronariana",
       "bed": "23C",
-      "admission_date": "2026-08-21T03:12:00",
+      "admission_date": "2026-08-21T19:41:16",
       "primary_diagnosis": "Síndrome coronariana aguda sem supra de ST (em investigação)",
       "comorbidities": [
         "Diabetes mellitus tipo 2",
@@ -431,7 +430,7 @@
       "scenario": "sca",
       "vitals": [
         {
-          "measured_at": "2026-08-21T04:00:00",
+          "measured_at": "2026-08-21T20:29:16",
           "hr": 92,
           "sbp": 150,
           "dbp": 94,
@@ -441,7 +440,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 84,
           "sbp": 138,
           "dbp": 86,
@@ -456,9 +455,9 @@
           "name": "ECG 12 derivações",
           "category": "cardiologia",
           "status": "concluido",
-          "requested_at": "2026-08-21T04:00:00",
+          "requested_at": "2026-08-21T20:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T04:06:00",
+          "result_at": "2026-08-21T20:35:16",
           "result_value": "Infradesnivelamento de ST 1,5 mm em V4-V6",
           "unit": null,
           "reference_range": null,
@@ -468,9 +467,9 @@
           "name": "Troponina ultrassensível (0h)",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T04:00:00",
+          "requested_at": "2026-08-21T20:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T05:00:00",
+          "result_at": "2026-08-21T21:29:16",
           "result_value": "68",
           "unit": "ng/L",
           "reference_range": "< 14 (p99)",
@@ -480,8 +479,8 @@
           "name": "Troponina ultrassensível (3h)",
           "category": "laboratorio",
           "status": "atrasado",
-          "requested_at": "2026-08-21T07:00:00",
-          "due_at": "2026-08-21T07:30:00",
+          "requested_at": "2026-08-21T23:29:16",
+          "due_at": "2026-08-21T23:59:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -492,8 +491,8 @@
           "name": "Ecocardiograma transtorácico",
           "category": "cardiologia",
           "status": "pendente",
-          "requested_at": "2026-08-21T06:00:00",
-          "due_at": "2026-08-21T20:00:00",
+          "requested_at": "2026-08-21T22:29:16",
+          "due_at": "2026-08-22T12:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -504,9 +503,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T04:00:00",
+          "requested_at": "2026-08-21T20:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T05:00:00",
+          "result_at": "2026-08-21T21:29:16",
           "result_value": "1,1",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -516,9 +515,9 @@
           "name": "Hemoglobina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T04:00:00",
+          "requested_at": "2026-08-21T20:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T05:00:00",
+          "result_at": "2026-08-21T21:29:16",
           "result_value": "13,8",
           "unit": "g/dL",
           "reference_range": "13–17",
@@ -531,7 +530,7 @@
           "dose": "300 mg ataque, 75 mg/dia",
           "route": "VO",
           "frequency": "1x/dia",
-          "started_at": "2026-08-21T04:30:00",
+          "started_at": "2026-08-21T20:59:16",
           "status": "ativo"
         },
         {
@@ -539,7 +538,7 @@
           "dose": "1 mg/kg",
           "route": "SC",
           "frequency": "12/12h",
-          "started_at": "2026-08-21T04:30:00",
+          "started_at": "2026-08-21T20:59:16",
           "status": "ativo"
         },
         {
@@ -547,7 +546,7 @@
           "dose": "80 mg",
           "route": "VO",
           "frequency": "1x/dia (noite)",
-          "started_at": "2026-08-21T04:30:00",
+          "started_at": "2026-08-21T20:59:16",
           "status": "ativo"
         },
         {
@@ -555,13 +554,13 @@
           "dose": "25 mg",
           "route": "VO",
           "frequency": "12/12h",
-          "started_at": "2026-08-21T05:00:00",
+          "started_at": "2026-08-21T21:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-21T04:00:00",
+          "created_at": "2026-08-21T20:29:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "admissao",
           "text": "Paciente: Juan da Mata, 58 anos, dor torácica opressiva há 2h irradiada para MSE, sudorese. ECG com infra de ST V4-V6. Troponina 0h 68 ng/L. HEART score 6. Alergia a AAS — usar clopidogrel. Aguardando troponina 3h (ATRASADA) e eco. CPF 092.543.618-60, telefone +55 99 97787-6804."
@@ -572,7 +571,7 @@
       "mrn": "HU2026004",
       "name": "Ísis Barros",
       "sex": "F",
-      "birth_date": "1954-01-06",
+      "birth_date": "1954-01-07",
       "age": 72,
       "cpf": "938.046.271-96",
       "phone": "+55 66 90599-7283",
@@ -580,7 +579,7 @@
       "mother_name": "Maria Julia Barbosa",
       "ward": "Pronto-Socorro",
       "bed": "03C",
-      "admission_date": "2026-08-21T06:33:36",
+      "admission_date": "2026-08-21T23:02:52",
       "primary_diagnosis": "AVC isquêmico agudo em janela terapêutica",
       "comorbidities": [
         "Fibrilação atrial (sem anticoagulação)",
@@ -593,7 +592,7 @@
       "scenario": "avc",
       "vitals": [
         {
-          "measured_at": "2026-08-21T06:48:00",
+          "measured_at": "2026-08-21T23:17:16",
           "hr": 96,
           "sbp": 178,
           "dbp": 98,
@@ -603,7 +602,7 @@
           "gcs": 14
         },
         {
-          "measured_at": "2026-08-21T07:48:00",
+          "measured_at": "2026-08-22T00:17:16",
           "hr": 92,
           "sbp": 172,
           "dbp": 96,
@@ -618,9 +617,9 @@
           "name": "Tomografia de crânio sem contraste",
           "category": "imagem",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:54:00",
+          "requested_at": "2026-08-21T23:23:16",
           "due_at": null,
-          "result_at": "2026-08-21T07:18:00",
+          "result_at": "2026-08-21T23:47:16",
           "result_value": "Sem sinais de hemorragia; ASPECTS 9",
           "unit": null,
           "reference_range": null,
@@ -630,9 +629,9 @@
           "name": "Glicemia capilar",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:48:00",
+          "requested_at": "2026-08-21T23:17:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:51:00",
+          "result_at": "2026-08-21T23:20:16",
           "result_value": "132",
           "unit": "mg/dL",
           "reference_range": "70–99",
@@ -642,9 +641,9 @@
           "name": "Plaquetas",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:54:00",
+          "requested_at": "2026-08-21T23:23:16",
           "due_at": null,
-          "result_at": "2026-08-21T07:24:00",
+          "result_at": "2026-08-21T23:53:16",
           "result_value": "245",
           "unit": "mil/mm³",
           "reference_range": "150–450",
@@ -654,9 +653,9 @@
           "name": "INR",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:54:00",
+          "requested_at": "2026-08-21T23:23:16",
           "due_at": null,
-          "result_at": "2026-08-21T07:24:00",
+          "result_at": "2026-08-21T23:53:16",
           "result_value": "1,0",
           "unit": "",
           "reference_range": "0,8–1,2",
@@ -666,8 +665,8 @@
           "name": "Angiotomografia de vasos cervicais e intracranianos",
           "category": "imagem",
           "status": "pendente",
-          "requested_at": "2026-08-21T07:24:00",
-          "due_at": "2026-08-21T08:18:00",
+          "requested_at": "2026-08-21T23:53:16",
+          "due_at": "2026-08-22T00:47:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -678,7 +677,7 @@
       "medications": [],
       "notes": [
         {
-          "created_at": "2026-08-21T06:48:00",
+          "created_at": "2026-08-21T23:17:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "admissao",
           "text": "Paciente: Ísis Barros, 72 anos, trazida pelo SAMU com hemiparesia direita e afasia, início dos sintomas há 80 min (testemunhado pela filha, Sra. Luiz Felipe Ramos, tel +55 66 90599-7283). NIHSS 14. Glicemia 132. TC sem sangramento. PA 178/98 — acima do alvo para trombólise (≤ 185/110 ok). Discutir trombólise/trombectomia com neurologia. Acompanhante informa CPF 938.046.271-96."
@@ -689,7 +688,7 @@
       "mrn": "HU2026005",
       "name": "Apollo Alves",
       "sex": "M",
-      "birth_date": "1947-07-23",
+      "birth_date": "1947-07-24",
       "age": 79,
       "cpf": "875.923.601-95",
       "phone": "84 99922-9836",
@@ -697,7 +696,7 @@
       "mother_name": "Vitória Cunha",
       "ward": "Clínica Médica",
       "bed": "07C",
-      "admission_date": "2026-08-18T08:00:00",
+      "admission_date": "2026-08-19T00:29:16",
       "primary_diagnosis": "Lesão renal aguda com hipercalemia",
       "comorbidities": [
         "Doença renal crônica estágio 3b",
@@ -713,7 +712,7 @@
       "scenario": "hipercalemia_lra",
       "vitals": [
         {
-          "measured_at": "2026-08-21T00:00:00",
+          "measured_at": "2026-08-21T16:29:16",
           "hr": 58,
           "sbp": 128,
           "dbp": 76,
@@ -723,7 +722,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 52,
           "sbp": 118,
           "dbp": 70,
@@ -738,9 +737,9 @@
           "name": "Potássio",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T05:00:00",
+          "requested_at": "2026-08-21T21:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "6,4",
           "unit": "mmol/L",
           "reference_range": "3,5–5,0",
@@ -750,9 +749,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T05:00:00",
+          "requested_at": "2026-08-21T21:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "3,6",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -762,9 +761,9 @@
           "name": "Ureia",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T05:00:00",
+          "requested_at": "2026-08-21T21:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "138",
           "unit": "mg/dL",
           "reference_range": "15–45",
@@ -774,8 +773,8 @@
           "name": "ECG 12 derivações",
           "category": "cardiologia",
           "status": "atrasado",
-          "requested_at": "2026-08-21T06:36:00",
-          "due_at": "2026-08-21T07:06:00",
+          "requested_at": "2026-08-21T23:05:16",
+          "due_at": "2026-08-21T23:35:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -786,8 +785,8 @@
           "name": "Gasometria venosa",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T06:48:00",
-          "due_at": "2026-08-21T08:30:00",
+          "requested_at": "2026-08-21T23:17:16",
+          "due_at": "2026-08-22T00:59:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -801,7 +800,7 @@
           "dose": "25 mg",
           "route": "VO",
           "frequency": "1x/dia",
-          "started_at": "2026-08-18T08:00:00",
+          "started_at": "2026-08-19T00:29:16",
           "status": "suspenso"
         },
         {
@@ -809,7 +808,7 @@
           "dose": "10 mg",
           "route": "VO",
           "frequency": "12/12h",
-          "started_at": "2026-08-18T08:00:00",
+          "started_at": "2026-08-19T00:29:16",
           "status": "suspenso"
         },
         {
@@ -817,7 +816,7 @@
           "dose": "40 mg",
           "route": "EV",
           "frequency": "12/12h",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         },
         {
@@ -825,19 +824,19 @@
           "dose": "12 UI",
           "route": "SC",
           "frequency": "manhã",
-          "started_at": "2026-08-18T08:00:00",
+          "started_at": "2026-08-19T00:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T12:00:00",
+          "created_at": "2026-08-21T04:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "Paciente: Apollo Alves, 79 anos, internado por descompensação de IC. Evolui com oligúria (débito 15 mL/h) e piora de função renal. Suspensos IECA e espironolactona. CPF 875.923.601-95."
         },
         {
-          "created_at": "2026-08-21T06:48:00",
+          "created_at": "2026-08-21T23:17:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "K 6,4 mmol/L e creatinina 3,6. ECG solicitado com urgência, ainda não realizado. Bradicardia 52 bpm. Avaliar medidas para hipercalemia e parecer da nefrologia."
@@ -848,7 +847,7 @@
       "mrn": "HU2026006",
       "name": "Maria Julia da Mata",
       "sex": "F",
-      "birth_date": "1945-09-03",
+      "birth_date": "1945-09-04",
       "age": 81,
       "cpf": "689.703.251-40",
       "phone": "+55 73 94776-4725",
@@ -856,7 +855,7 @@
       "mother_name": "Maria Novais",
       "ward": "Cardiologia",
       "bed": "03A",
-      "admission_date": "2026-08-20T17:36:00",
+      "admission_date": "2026-08-21T10:05:16",
       "primary_diagnosis": "Insuficiência cardíaca descompensada (perfil B: quente e úmido)",
       "comorbidities": [
         "IC com FE reduzida (30%)",
@@ -870,7 +869,7 @@
       "scenario": "icc",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 102,
           "sbp": 134,
           "dbp": 82,
@@ -880,7 +879,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T06:00:00",
+          "measured_at": "2026-08-21T22:29:16",
           "hr": 96,
           "sbp": 128,
           "dbp": 80,
@@ -895,9 +894,9 @@
           "name": "BNP",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T18:00:00",
+          "requested_at": "2026-08-21T10:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T20:00:00",
+          "result_at": "2026-08-21T12:29:16",
           "result_value": "1.840",
           "unit": "pg/mL",
           "reference_range": "< 100",
@@ -907,9 +906,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T18:00:00",
+          "requested_at": "2026-08-21T10:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T20:00:00",
+          "result_at": "2026-08-21T12:29:16",
           "result_value": "1,6",
           "unit": "mg/dL",
           "reference_range": "0,6–1,1",
@@ -919,9 +918,9 @@
           "name": "Potássio",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T18:00:00",
+          "requested_at": "2026-08-21T10:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T20:00:00",
+          "result_at": "2026-08-21T12:29:16",
           "result_value": "4,2",
           "unit": "mmol/L",
           "reference_range": "3,5–5,0",
@@ -931,9 +930,9 @@
           "name": "Radiografia de tórax",
           "category": "imagem",
           "status": "concluido",
-          "requested_at": "2026-08-20T18:00:00",
+          "requested_at": "2026-08-21T10:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T19:00:00",
+          "result_at": "2026-08-21T11:29:16",
           "result_value": "Congestão hilar bilateral, derrame pleural D pequeno",
           "unit": null,
           "reference_range": null,
@@ -943,8 +942,8 @@
           "name": "Ecocardiograma",
           "category": "cardiologia",
           "status": "pendente",
-          "requested_at": "2026-08-20T22:00:00",
-          "due_at": "2026-08-22T04:00:00",
+          "requested_at": "2026-08-21T14:29:16",
+          "due_at": "2026-08-22T20:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -955,8 +954,8 @@
           "name": "Eletrólitos (controle)",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T06:00:00",
-          "due_at": "2026-08-21T12:00:00",
+          "requested_at": "2026-08-21T22:29:16",
+          "due_at": "2026-08-22T04:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -970,7 +969,7 @@
           "dose": "40 mg",
           "route": "EV",
           "frequency": "8/8h",
-          "started_at": "2026-08-20T20:00:00",
+          "started_at": "2026-08-21T12:29:16",
           "status": "ativo"
         },
         {
@@ -978,7 +977,7 @@
           "dose": "2,5 mg",
           "route": "VO",
           "frequency": "12/12h",
-          "started_at": "2026-08-17T08:00:00",
+          "started_at": "2026-08-18T00:29:16",
           "status": "ativo"
         },
         {
@@ -986,7 +985,7 @@
           "dose": "6,25 mg",
           "route": "VO",
           "frequency": "12/12h",
-          "started_at": "2026-08-17T08:00:00",
+          "started_at": "2026-08-18T00:29:16",
           "status": "ativo"
         },
         {
@@ -994,13 +993,13 @@
           "dose": "24/26 mg",
           "route": "VO",
           "frequency": "12/12h",
-          "started_at": "2026-08-17T08:00:00",
+          "started_at": "2026-08-18T00:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T18:00:00",
+          "created_at": "2026-08-21T10:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "admissao",
           "text": "Paciente: Maria Julia da Mata, 81 anos, dispneia progressiva, ortopneia, edema MMII 3+/4+. Ganho de 4 kg em 1 semana. BNP 1.840. Iniciado diurético EV. Monitorar diurese, eletrólitos e função renal. Telefone +55 73 94776-4725."
@@ -1011,7 +1010,7 @@
       "mrn": "HU2026007",
       "name": "Heitor Nunes",
       "sex": "M",
-      "birth_date": "1955-10-31",
+      "birth_date": "1955-11-01",
       "age": 70,
       "cpf": "492.076.385-92",
       "phone": "+55 32 95218-5491",
@@ -1019,7 +1018,7 @@
       "mother_name": "Marcela Dias",
       "ward": "Clínica Médica",
       "bed": "26A",
-      "admission_date": "2026-08-16T08:00:00",
+      "admission_date": "2026-08-17T00:29:16",
       "primary_diagnosis": "Hipoglicemia em paciente com DM2 em uso de sulfonilureia",
       "comorbidities": [
         "Diabetes mellitus tipo 2",
@@ -1033,7 +1032,7 @@
       "scenario": "hipoglicemia",
       "vitals": [
         {
-          "measured_at": "2026-08-21T05:00:00",
+          "measured_at": "2026-08-21T21:29:16",
           "hr": 88,
           "sbp": 140,
           "dbp": 84,
@@ -1043,7 +1042,7 @@
           "gcs": 13
         },
         {
-          "measured_at": "2026-08-21T07:30:00",
+          "measured_at": "2026-08-21T23:59:16",
           "hr": 80,
           "sbp": 136,
           "dbp": 82,
@@ -1058,9 +1057,9 @@
           "name": "Glicemia capilar",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T05:00:00",
+          "requested_at": "2026-08-21T21:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T05:03:00",
+          "result_at": "2026-08-21T21:32:16",
           "result_value": "42",
           "unit": "mg/dL",
           "reference_range": "70–99",
@@ -1070,9 +1069,9 @@
           "name": "Glicemia capilar (15 min)",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T05:18:00",
+          "requested_at": "2026-08-21T21:47:16",
           "due_at": null,
-          "result_at": "2026-08-21T05:21:00",
+          "result_at": "2026-08-21T21:50:16",
           "result_value": "78",
           "unit": "mg/dL",
           "reference_range": "70–99",
@@ -1082,9 +1081,9 @@
           "name": "Glicemia capilar (1 h)",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:00:00",
+          "requested_at": "2026-08-21T22:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:06:00",
+          "result_at": "2026-08-21T22:35:16",
           "result_value": "96",
           "unit": "mg/dL",
           "reference_range": "70–99",
@@ -1094,9 +1093,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T05:00:00",
+          "requested_at": "2026-08-21T21:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:30:00",
+          "result_at": "2026-08-21T22:59:16",
           "result_value": "2,1",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -1106,8 +1105,8 @@
           "name": "Glicemia capilar (controle 4/4h)",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T07:30:00",
-          "due_at": "2026-08-21T11:00:00",
+          "requested_at": "2026-08-21T23:59:16",
+          "due_at": "2026-08-22T03:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1121,7 +1120,7 @@
           "dose": "5 mg",
           "route": "VO",
           "frequency": "12/12h",
-          "started_at": "2026-08-16T08:00:00",
+          "started_at": "2026-08-17T00:29:16",
           "status": "suspenso"
         },
         {
@@ -1129,7 +1128,7 @@
           "dose": "40 mL",
           "route": "EV",
           "frequency": "bolus (feito)",
-          "started_at": "2026-08-21T05:06:00",
+          "started_at": "2026-08-21T21:35:16",
           "status": "ativo"
         },
         {
@@ -1137,19 +1136,19 @@
           "dose": "60 mL/h",
           "route": "EV",
           "frequency": "contínuo",
-          "started_at": "2026-08-21T05:30:00",
+          "started_at": "2026-08-21T21:59:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-21T05:00:00",
+          "created_at": "2026-08-21T21:29:16",
           "author": "Enf. Carla Mendes",
           "type": "evolucao",
           "text": "Paciente: Heitor Nunes encontrado sonolento, sudoreico, glicemia capilar 42 mg/dL. Administrada glicose 50% conforme protocolo, médico acionado. Recuperou consciência em 10 min."
         },
         {
-          "created_at": "2026-08-21T05:30:00",
+          "created_at": "2026-08-21T21:59:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "Hipoglicemia por sulfonilureia em DRC (meia-vida prolongada). Suspensa glibenclamida; manter SG10% e glicemias 4/4h por 24-48h pelo risco de recorrência."
@@ -1160,7 +1159,7 @@
       "mrn": "HU2026008",
       "name": "Helena Peixoto",
       "sex": "F",
-      "birth_date": "1995-04-14",
+      "birth_date": "1995-04-15",
       "age": 31,
       "cpf": "761.524.893-00",
       "phone": "44 90604-5414",
@@ -1168,7 +1167,7 @@
       "mother_name": "Liz Alves",
       "ward": "Pronto-Socorro",
       "bed": "22C",
-      "admission_date": "2026-08-21T06:04:48",
+      "admission_date": "2026-08-21T22:34:04",
       "primary_diagnosis": "Exacerbação grave de asma",
       "comorbidities": [
         "Asma persistente moderada",
@@ -1183,7 +1182,7 @@
       "scenario": "asma",
       "vitals": [
         {
-          "measured_at": "2026-08-21T06:30:00",
+          "measured_at": "2026-08-21T22:59:16",
           "hr": 124,
           "sbp": 128,
           "dbp": 80,
@@ -1193,7 +1192,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:42:00",
+          "measured_at": "2026-08-22T00:11:16",
           "hr": 110,
           "sbp": 124,
           "dbp": 78,
@@ -1208,9 +1207,9 @@
           "name": "Peak flow",
           "category": "outros",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:30:00",
+          "requested_at": "2026-08-21T22:59:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:33:00",
+          "result_at": "2026-08-21T23:02:16",
           "result_value": "38% do previsto",
           "unit": null,
           "reference_range": null,
@@ -1220,9 +1219,9 @@
           "name": "Gasometria arterial",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:48:00",
+          "requested_at": "2026-08-21T23:17:16",
           "due_at": null,
-          "result_at": "2026-08-21T07:12:00",
+          "result_at": "2026-08-21T23:41:16",
           "result_value": "pH 7,38 / PaCO2 41 / PaO2 62",
           "unit": "",
           "reference_range": "",
@@ -1232,9 +1231,9 @@
           "name": "PaCO2",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:48:00",
+          "requested_at": "2026-08-21T23:17:16",
           "due_at": null,
-          "result_at": "2026-08-21T07:12:00",
+          "result_at": "2026-08-21T23:41:16",
           "result_value": "41",
           "unit": "mmHg",
           "reference_range": "35–45",
@@ -1244,8 +1243,8 @@
           "name": "Radiografia de tórax",
           "category": "imagem",
           "status": "pendente",
-          "requested_at": "2026-08-21T07:30:00",
-          "due_at": "2026-08-21T09:00:00",
+          "requested_at": "2026-08-21T23:59:16",
+          "due_at": "2026-08-22T01:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1256,8 +1255,8 @@
           "name": "Peak flow (controle 1h)",
           "category": "outros",
           "status": "pendente",
-          "requested_at": "2026-08-21T07:36:00",
-          "due_at": "2026-08-21T08:36:00",
+          "requested_at": "2026-08-22T00:05:16",
+          "due_at": "2026-08-22T01:05:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1271,7 +1270,7 @@
           "dose": "4 jatos",
           "route": "INAL",
           "frequency": "a cada 20 min (3x)",
-          "started_at": "2026-08-21T06:36:00",
+          "started_at": "2026-08-21T23:05:16",
           "status": "ativo"
         },
         {
@@ -1279,7 +1278,7 @@
           "dose": "4 jatos",
           "route": "INAL",
           "frequency": "a cada 20 min (3x)",
-          "started_at": "2026-08-21T06:36:00",
+          "started_at": "2026-08-21T23:05:16",
           "status": "ativo"
         },
         {
@@ -1287,7 +1286,7 @@
           "dose": "50 mg",
           "route": "VO",
           "frequency": "dose única",
-          "started_at": "2026-08-21T06:48:00",
+          "started_at": "2026-08-21T23:17:16",
           "status": "ativo"
         },
         {
@@ -1295,13 +1294,13 @@
           "dose": "2 L/min",
           "route": "CN",
           "frequency": "alvo SpO2 93-95%",
-          "started_at": "2026-08-21T06:36:00",
+          "started_at": "2026-08-21T23:05:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-21T06:30:00",
+          "created_at": "2026-08-21T22:59:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "admissao",
           "text": "Paciente: Helena Peixoto, 31 anos, crise asmática há 6h sem resposta ao salbutamol domiciliar. Fala frases curtas, tiragem, sibilos difusos, SpO2 90%. Peak flow 38%. Iniciado protocolo de exacerbação grave. Atenção: PaCO2 41 em crise grave (normocapnia) — risco de fadiga; reavaliar em 1h. Alergia: dipirona. Contato: 44 90604-5414."
@@ -1312,7 +1311,7 @@
       "mrn": "HU2026009",
       "name": "Matheus Garcia",
       "sex": "M",
-      "birth_date": "1941-10-06",
+      "birth_date": "1941-10-07",
       "age": 84,
       "cpf": "369.815.024-70",
       "phone": "+55 98 92300-4876",
@@ -1320,7 +1319,7 @@
       "mother_name": "Sophia Cassiano",
       "ward": "Geriatria",
       "bed": "19C",
-      "admission_date": "2026-08-19T08:00:00",
+      "admission_date": "2026-08-20T00:29:16",
       "primary_diagnosis": "Delirium hiperativo pós-operatório (fratura de fêmur)",
       "comorbidities": [
         "Demência leve",
@@ -1334,7 +1333,7 @@
       "scenario": "delirium",
       "vitals": [
         {
-          "measured_at": "2026-08-20T22:00:00",
+          "measured_at": "2026-08-21T14:29:16",
           "hr": 92,
           "sbp": 146,
           "dbp": 84,
@@ -1344,7 +1343,7 @@
           "gcs": 14
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 98,
           "sbp": 150,
           "dbp": 86,
@@ -1359,9 +1358,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T22:00:00",
+          "requested_at": "2026-08-21T14:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T00:00:00",
+          "result_at": "2026-08-21T16:29:16",
           "result_value": "Hb 10,1 / Leuco 12.300",
           "unit": "",
           "reference_range": "",
@@ -1371,9 +1370,9 @@
           "name": "Hemoglobina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T22:00:00",
+          "requested_at": "2026-08-21T14:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T00:00:00",
+          "result_at": "2026-08-21T16:29:16",
           "result_value": "10,1",
           "unit": "g/dL",
           "reference_range": "13–17",
@@ -1383,9 +1382,9 @@
           "name": "Sódio",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T22:00:00",
+          "requested_at": "2026-08-21T14:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T00:00:00",
+          "result_at": "2026-08-21T16:29:16",
           "result_value": "131",
           "unit": "mmol/L",
           "reference_range": "135–145",
@@ -1395,8 +1394,8 @@
           "name": "Urina tipo 1 + urocultura",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T02:00:00",
-          "due_at": "2026-08-22T02:00:00",
+          "requested_at": "2026-08-21T18:29:16",
+          "due_at": "2026-08-22T18:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1407,9 +1406,9 @@
           "name": "Glicemia capilar",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T07:00:00",
+          "requested_at": "2026-08-21T23:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T07:06:00",
+          "result_at": "2026-08-21T23:35:16",
           "result_value": "118",
           "unit": "mg/dL",
           "reference_range": "70–99",
@@ -1419,8 +1418,8 @@
           "name": "Radiografia de tórax",
           "category": "imagem",
           "status": "atrasado",
-          "requested_at": "2026-08-21T00:00:00",
-          "due_at": "2026-08-21T06:00:00",
+          "requested_at": "2026-08-21T16:29:16",
+          "due_at": "2026-08-21T22:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1434,7 +1433,7 @@
           "dose": "40 mg",
           "route": "SC",
           "frequency": "1x/dia",
-          "started_at": "2026-08-19T08:00:00",
+          "started_at": "2026-08-20T00:29:16",
           "status": "ativo"
         },
         {
@@ -1442,7 +1441,7 @@
           "dose": "1 g",
           "route": "EV",
           "frequency": "6/6h",
-          "started_at": "2026-08-19T08:00:00",
+          "started_at": "2026-08-20T00:29:16",
           "status": "ativo"
         },
         {
@@ -1450,7 +1449,7 @@
           "dose": "2 mg",
           "route": "EV",
           "frequency": "se dor intensa",
-          "started_at": "2026-08-19T08:00:00",
+          "started_at": "2026-08-20T00:29:16",
           "status": "ativo"
         },
         {
@@ -1458,19 +1457,19 @@
           "dose": "0,4 mg",
           "route": "VO",
           "frequency": "1x/dia",
-          "started_at": "2026-08-19T08:00:00",
+          "started_at": "2026-08-20T00:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-19T08:00:00",
+          "created_at": "2026-08-20T00:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "admissao",
           "text": "Paciente: Matheus Garcia, 84 anos, POI de osteossíntese de fêmur D. Residente à Loteamento Raquel Sá, 10, Melo - AL. Filha Maria Cecília Vieira (+55 98 92300-4876) como contato."
         },
         {
-          "created_at": "2026-08-21T06:30:00",
+          "created_at": "2026-08-21T22:59:16",
           "author": "Enf. Carla Mendes",
           "type": "evolucao",
           "text": "Paciente Matheus Garcia agitado, desorientado, tentando retirar acesso venoso. CAM-ICU positivo. Febrícula 37,8 °C. Sonda vesical de demora desde cirurgia (48h). Médico comunicado — investigar causas (infecção, dor, retenção, medicações)."
@@ -1481,7 +1480,7 @@
       "mrn": "HU2026010",
       "name": "Kamilly Fernandes",
       "sex": "F",
-      "birth_date": "1981-06-24",
+      "birth_date": "1981-06-25",
       "age": 45,
       "cpf": "358.976.421-09",
       "phone": "+55 79 92627-0586",
@@ -1489,7 +1488,7 @@
       "mother_name": "Zoe Moreira",
       "ward": "Pronto-Socorro",
       "bed": "18A",
-      "admission_date": "2026-08-21T04:24:00",
+      "admission_date": "2026-08-21T20:53:16",
       "primary_diagnosis": "Anafilaxia após contraste iodado (resolvida, em observação)",
       "comorbidities": [
         "Asma leve"
@@ -1503,7 +1502,7 @@
       "scenario": "anafilaxia",
       "vitals": [
         {
-          "measured_at": "2026-08-21T05:00:00",
+          "measured_at": "2026-08-21T21:29:16",
           "hr": 128,
           "sbp": 78,
           "dbp": 44,
@@ -1513,7 +1512,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T06:00:00",
+          "measured_at": "2026-08-21T22:29:16",
           "hr": 104,
           "sbp": 104,
           "dbp": 66,
@@ -1523,7 +1522,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:30:00",
+          "measured_at": "2026-08-21T23:59:16",
           "hr": 88,
           "sbp": 118,
           "dbp": 74,
@@ -1538,8 +1537,8 @@
           "name": "Triptase sérica",
           "category": "laboratorio",
           "status": "coletado",
-          "requested_at": "2026-08-21T05:30:00",
-          "due_at": "2026-08-22T08:00:00",
+          "requested_at": "2026-08-21T21:59:16",
+          "due_at": "2026-08-23T00:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1550,9 +1549,9 @@
           "name": "ECG",
           "category": "cardiologia",
           "status": "concluido",
-          "requested_at": "2026-08-21T05:12:00",
+          "requested_at": "2026-08-21T21:41:16",
           "due_at": null,
-          "result_at": "2026-08-21T05:18:00",
+          "result_at": "2026-08-21T21:47:16",
           "result_value": "Taquicardia sinusal",
           "unit": null,
           "reference_range": null,
@@ -1565,7 +1564,7 @@
           "dose": "0,5 mg",
           "route": "IM",
           "frequency": "dose única (vasto lateral)",
-          "started_at": "2026-08-21T05:06:00",
+          "started_at": "2026-08-21T21:35:16",
           "status": "ativo"
         },
         {
@@ -1573,7 +1572,7 @@
           "dose": "1.000 mL",
           "route": "EV",
           "frequency": "bolus",
-          "started_at": "2026-08-21T05:12:00",
+          "started_at": "2026-08-21T21:41:16",
           "status": "ativo"
         },
         {
@@ -1581,7 +1580,7 @@
           "dose": "200 mg",
           "route": "EV",
           "frequency": "dose única",
-          "started_at": "2026-08-21T05:18:00",
+          "started_at": "2026-08-21T21:47:16",
           "status": "ativo"
         },
         {
@@ -1589,13 +1588,13 @@
           "dose": "50 mg",
           "route": "EV",
           "frequency": "dose única",
-          "started_at": "2026-08-21T05:18:00",
+          "started_at": "2026-08-21T21:47:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-21T05:00:00",
+          "created_at": "2026-08-21T21:29:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "evolucao",
           "text": "Paciente: Kamilly Fernandes, 45 anos, durante TC contrastada apresentou urticária difusa, angioedema labial, broncoespasmo e hipotensão 78/44. Adrenalina IM 0,5 mg imediata, decúbito, O2, cristaloide. Melhora em 15 min. Observação mínima de 6-8h pelo risco de reação bifásica. Prescrever adrenalina autoinjetável na alta e registrar alergia. CPF 358.976.421-09."
@@ -1606,7 +1605,7 @@
       "mrn": "HU2026011",
       "name": "Diego Siqueira",
       "sex": "M",
-      "birth_date": "1970-09-15",
+      "birth_date": "1970-09-16",
       "age": 55,
       "cpf": "654.207.183-08",
       "phone": "19 98452-6309",
@@ -1614,7 +1613,7 @@
       "mother_name": "Liz Cunha",
       "ward": "Pronto-Socorro",
       "bed": "17B",
-      "admission_date": "2026-08-21T05:36:00",
+      "admission_date": "2026-08-21T22:05:16",
       "primary_diagnosis": "Emergência hipertensiva com encefalopatia",
       "comorbidities": [
         "Hipertensão arterial (má adesão)",
@@ -1627,7 +1626,7 @@
       "scenario": "crise_hipertensiva",
       "vitals": [
         {
-          "measured_at": "2026-08-21T06:00:00",
+          "measured_at": "2026-08-21T22:29:16",
           "hr": 94,
           "sbp": 226,
           "dbp": 134,
@@ -1637,7 +1636,7 @@
           "gcs": 14
         },
         {
-          "measured_at": "2026-08-21T07:36:00",
+          "measured_at": "2026-08-22T00:05:16",
           "hr": 90,
           "sbp": 204,
           "dbp": 120,
@@ -1652,9 +1651,9 @@
           "name": "Tomografia de crânio",
           "category": "imagem",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:12:00",
+          "requested_at": "2026-08-21T22:41:16",
           "due_at": null,
-          "result_at": "2026-08-21T06:48:00",
+          "result_at": "2026-08-21T23:17:16",
           "result_value": "Sem hemorragia ou isquemia aguda",
           "unit": null,
           "reference_range": null,
@@ -1664,9 +1663,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:12:00",
+          "requested_at": "2026-08-21T22:41:16",
           "due_at": null,
-          "result_at": "2026-08-21T07:00:00",
+          "result_at": "2026-08-21T23:29:16",
           "result_value": "1,4",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -1676,9 +1675,9 @@
           "name": "Troponina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T06:12:00",
+          "requested_at": "2026-08-21T22:41:16",
           "due_at": null,
-          "result_at": "2026-08-21T07:00:00",
+          "result_at": "2026-08-21T23:29:16",
           "result_value": "9",
           "unit": "ng/L",
           "reference_range": "< 14",
@@ -1688,8 +1687,8 @@
           "name": "Fundoscopia",
           "category": "outros",
           "status": "pendente",
-          "requested_at": "2026-08-21T06:30:00",
-          "due_at": "2026-08-21T10:00:00",
+          "requested_at": "2026-08-21T22:59:16",
+          "due_at": "2026-08-22T02:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1700,8 +1699,8 @@
           "name": "Urina tipo 1",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T06:30:00",
-          "due_at": "2026-08-21T10:00:00",
+          "requested_at": "2026-08-21T22:59:16",
+          "due_at": "2026-08-22T02:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1715,13 +1714,13 @@
           "dose": "0,5 mcg/kg/min (titulando)",
           "route": "EV",
           "frequency": "bomba de infusão",
-          "started_at": "2026-08-21T06:30:00",
+          "started_at": "2026-08-21T22:59:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-21T06:00:00",
+          "created_at": "2026-08-21T22:29:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "admissao",
           "text": "Paciente: Diego Siqueira, 55 anos, cefaleia intensa, confusão mental, PA 226/134. TC sem sangramento. HD: emergência hipertensiva (encefalopatia). Alvo: reduzir PAM ≤ 25% na 1ª hora. Leito de UTI solicitado. Telefone 19 98452-6309."
@@ -1732,7 +1731,7 @@
       "mrn": "HU2026012",
       "name": "Isadora Cardoso",
       "sex": "F",
-      "birth_date": "1962-11-10",
+      "birth_date": "1962-11-11",
       "age": 63,
       "cpf": "157.086.392-02",
       "phone": "+55 51 95771-8835",
@@ -1740,7 +1739,7 @@
       "mother_name": "Emanuelly Costa",
       "ward": "Clínica Médica",
       "bed": "10C",
-      "admission_date": "2026-08-20T08:00:00",
+      "admission_date": "2026-08-21T00:29:16",
       "primary_diagnosis": "Pielonefrite aguda (ITU complicada)",
       "comorbidities": [
         "Diabetes mellitus tipo 2",
@@ -1755,7 +1754,7 @@
       "scenario": "itu_complicada",
       "vitals": [
         {
-          "measured_at": "2026-08-20T12:00:00",
+          "measured_at": "2026-08-21T04:29:16",
           "hr": 104,
           "sbp": 112,
           "dbp": 70,
@@ -1765,7 +1764,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 88,
           "sbp": 120,
           "dbp": 76,
@@ -1780,8 +1779,8 @@
           "name": "Urocultura",
           "category": "laboratorio",
           "status": "coletado",
-          "requested_at": "2026-08-20T10:00:00",
-          "due_at": "2026-08-22T10:00:00",
+          "requested_at": "2026-08-21T02:29:16",
+          "due_at": "2026-08-23T02:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1792,8 +1791,8 @@
           "name": "Hemoculturas",
           "category": "laboratorio",
           "status": "coletado",
-          "requested_at": "2026-08-20T10:00:00",
-          "due_at": "2026-08-22T10:00:00",
+          "requested_at": "2026-08-21T02:29:16",
+          "due_at": "2026-08-23T02:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1804,9 +1803,9 @@
           "name": "Urina tipo 1",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T10:00:00",
+          "requested_at": "2026-08-21T02:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T12:00:00",
+          "result_at": "2026-08-21T04:29:16",
           "result_value": "Leucocitúria > 100/campo, nitrito +, bacteriúria",
           "unit": null,
           "reference_range": null,
@@ -1816,9 +1815,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T10:00:00",
+          "requested_at": "2026-08-21T02:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T12:00:00",
+          "result_at": "2026-08-21T04:29:16",
           "result_value": "1,3",
           "unit": "mg/dL",
           "reference_range": "0,6–1,1",
@@ -1828,8 +1827,8 @@
           "name": "Ultrassom de rins e vias urinárias",
           "category": "imagem",
           "status": "pendente",
-          "requested_at": "2026-08-20T14:00:00",
-          "due_at": "2026-08-21T14:00:00",
+          "requested_at": "2026-08-21T06:29:16",
+          "due_at": "2026-08-22T06:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -1843,7 +1842,7 @@
           "dose": "1 g",
           "route": "EV",
           "frequency": "1x/dia",
-          "started_at": "2026-08-20T11:00:00",
+          "started_at": "2026-08-21T03:29:16",
           "status": "ativo"
         },
         {
@@ -1851,13 +1850,13 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h se febre",
-          "started_at": "2026-08-20T11:00:00",
+          "started_at": "2026-08-21T03:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T10:00:00",
+          "created_at": "2026-08-21T02:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "admissao",
           "text": "Paciente: Isadora Cardoso, 63 anos, febre, calafrios, dor lombar D, Giordano +. Diabética. ITU complicada — iniciado ceftriaxona conforme protocolo, após coleta de culturas. US solicitado para afastar obstrução (litíase). Alergia a sulfa. CPF 157.086.392-02."
@@ -1868,7 +1867,7 @@
       "mrn": "HU2026013",
       "name": "Luiz Fernando Jesus",
       "sex": "M",
-      "birth_date": "1984-05-23",
+      "birth_date": "1984-05-24",
       "age": 42,
       "cpf": "963.174.852-91",
       "phone": "34 91547-4284",
@@ -1876,7 +1875,7 @@
       "mother_name": "Ísis Moreira",
       "ward": "Cirurgia Geral",
       "bed": "13A",
-      "admission_date": "2026-08-20T08:00:00",
+      "admission_date": "2026-08-21T00:29:16",
       "primary_diagnosis": "Pós-operatório de colecistectomia videolaparoscópica (POI 1)",
       "comorbidities": [
         "Obesidade grau I"
@@ -1888,7 +1887,7 @@
       "scenario": "pos_op_estavel",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 84,
           "sbp": 126,
           "dbp": 78,
@@ -1898,7 +1897,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T06:00:00",
+          "measured_at": "2026-08-21T22:29:16",
           "hr": 78,
           "sbp": 122,
           "dbp": 76,
@@ -1913,9 +1912,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T20:00:00",
+          "requested_at": "2026-08-21T12:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T22:00:00",
+          "result_at": "2026-08-21T14:29:16",
           "result_value": "Hb 14,2 / Leuco 9.800",
           "unit": null,
           "reference_range": null,
@@ -1925,9 +1924,9 @@
           "name": "Hemoglobina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T20:00:00",
+          "requested_at": "2026-08-21T12:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T22:00:00",
+          "result_at": "2026-08-21T14:29:16",
           "result_value": "14,2",
           "unit": "g/dL",
           "reference_range": "13–17",
@@ -1940,7 +1939,7 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         },
         {
@@ -1948,7 +1947,7 @@
           "dose": "40 mg",
           "route": "SC",
           "frequency": "1x/dia",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         },
         {
@@ -1956,13 +1955,13 @@
           "dose": "4 mg",
           "route": "EV",
           "frequency": "8/8h se náusea",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T12:00:00",
+          "created_at": "2026-08-21T04:29:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "evolucao",
           "text": "Paciente: Luiz Fernando Jesus, POI colecistectomia VL sem intercorrências. Dor controlada (EVA 2). Deambulando. Previsão de alta amanhã. CPF 963.174.852-91."
@@ -1973,7 +1972,7 @@
       "mrn": "HU2026014",
       "name": "Bento Guerra",
       "sex": "M",
-      "birth_date": "1957-08-12",
+      "birth_date": "1957-08-13",
       "age": 69,
       "cpf": "204.759.136-80",
       "phone": "86 97500-3145",
@@ -1981,7 +1980,7 @@
       "mother_name": "Gabrielly Pereira",
       "ward": "Pneumologia",
       "bed": "27B",
-      "admission_date": "2026-08-20T08:00:00",
+      "admission_date": "2026-08-21T00:29:16",
       "primary_diagnosis": "Exacerbação de DPOC",
       "comorbidities": [
         "DPOC GOLD 3",
@@ -1995,7 +1994,7 @@
       "scenario": "dpoc",
       "vitals": [
         {
-          "measured_at": "2026-08-20T08:00:00",
+          "measured_at": "2026-08-21T00:29:16",
           "hr": 98,
           "sbp": 132,
           "dbp": 80,
@@ -2005,7 +2004,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T06:00:00",
+          "measured_at": "2026-08-21T22:29:16",
           "hr": 90,
           "sbp": 128,
           "dbp": 78,
@@ -2020,9 +2019,9 @@
           "name": "Gasometria arterial",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T08:00:00",
+          "requested_at": "2026-08-21T00:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T09:00:00",
+          "result_at": "2026-08-21T01:29:16",
           "result_value": "pH 7,33 / PaCO2 58 / PaO2 56",
           "unit": null,
           "reference_range": null,
@@ -2032,9 +2031,9 @@
           "name": "PaCO2",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T08:00:00",
+          "requested_at": "2026-08-21T00:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T09:00:00",
+          "result_at": "2026-08-21T01:29:16",
           "result_value": "58",
           "unit": "mmHg",
           "reference_range": "35–45",
@@ -2044,9 +2043,9 @@
           "name": "Radiografia de tórax",
           "category": "imagem",
           "status": "concluido",
-          "requested_at": "2026-08-20T08:00:00",
+          "requested_at": "2026-08-21T00:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T10:00:00",
+          "result_at": "2026-08-21T02:29:16",
           "result_value": "Hiperinsuflação, sem consolidação",
           "unit": null,
           "reference_range": null,
@@ -2056,8 +2055,8 @@
           "name": "Gasometria arterial (controle)",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T06:00:00",
-          "due_at": "2026-08-21T10:00:00",
+          "requested_at": "2026-08-21T22:29:16",
+          "due_at": "2026-08-22T02:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -2071,7 +2070,7 @@
           "dose": "nebulização",
           "route": "INAL",
           "frequency": "4/4h",
-          "started_at": "2026-08-20T09:00:00",
+          "started_at": "2026-08-21T01:29:16",
           "status": "ativo"
         },
         {
@@ -2079,7 +2078,7 @@
           "dose": "40 mg",
           "route": "VO",
           "frequency": "1x/dia (5 dias)",
-          "started_at": "2026-08-20T09:00:00",
+          "started_at": "2026-08-21T01:29:16",
           "status": "ativo"
         },
         {
@@ -2087,7 +2086,7 @@
           "dose": "875/125 mg",
           "route": "VO",
           "frequency": "12/12h",
-          "started_at": "2026-08-20T09:00:00",
+          "started_at": "2026-08-21T01:29:16",
           "status": "ativo"
         },
         {
@@ -2095,13 +2094,13 @@
           "dose": "1 L/min",
           "route": "CN",
           "frequency": "alvo SpO2 88-92%",
-          "started_at": "2026-08-20T09:00:00",
+          "started_at": "2026-08-21T01:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T08:00:00",
+          "created_at": "2026-08-21T00:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "admissao",
           "text": "Paciente: Bento Guerra, 69 anos, piora de dispneia e escarro purulento. Gasometria com hipercapnia crônica agudizada leve. Alvo de SpO2 88-92% (retentor de CO2). Contato: 86 97500-3145."
@@ -2112,7 +2111,7 @@
       "mrn": "HU2026015",
       "name": "Maria Vitória Silva",
       "sex": "F",
-      "birth_date": "1949-12-22",
+      "birth_date": "1949-12-23",
       "age": 76,
       "cpf": "892.067.354-38",
       "phone": "97 93755-5597",
@@ -2120,7 +2119,7 @@
       "mother_name": "Maria Sophia Azevedo",
       "ward": "Ortopedia",
       "bed": "16B",
-      "admission_date": "2026-08-20T20:00:00",
+      "admission_date": "2026-08-21T12:29:16",
       "primary_diagnosis": "Fratura de quadril aguardando cirurgia",
       "comorbidities": [
         "Osteoporose",
@@ -2136,7 +2135,7 @@
       "scenario": "tev_risco",
       "vitals": [
         {
-          "measured_at": "2026-08-20T22:00:00",
+          "measured_at": "2026-08-21T14:29:16",
           "hr": 86,
           "sbp": 138,
           "dbp": 82,
@@ -2146,7 +2145,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 84,
           "sbp": 134,
           "dbp": 80,
@@ -2161,9 +2160,9 @@
           "name": "Hemoglobina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T22:00:00",
+          "requested_at": "2026-08-21T14:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T00:00:00",
+          "result_at": "2026-08-21T16:29:16",
           "result_value": "11,2",
           "unit": "g/dL",
           "reference_range": "12–16",
@@ -2173,9 +2172,9 @@
           "name": "Plaquetas",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T22:00:00",
+          "requested_at": "2026-08-21T14:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T00:00:00",
+          "result_at": "2026-08-21T16:29:16",
           "result_value": "198",
           "unit": "mil/mm³",
           "reference_range": "150–450",
@@ -2185,8 +2184,8 @@
           "name": "Risco cirúrgico (cardiologia)",
           "category": "cardiologia",
           "status": "pendente",
-          "requested_at": "2026-08-20T23:00:00",
-          "due_at": "2026-08-21T14:00:00",
+          "requested_at": "2026-08-21T15:29:16",
+          "due_at": "2026-08-22T06:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -2200,7 +2199,7 @@
           "dose": "2,5 mg",
           "route": "SC",
           "frequency": "1x/dia",
-          "started_at": "2026-08-20T23:00:00",
+          "started_at": "2026-08-21T15:29:16",
           "status": "ativo"
         },
         {
@@ -2208,7 +2207,7 @@
           "dose": "1 g",
           "route": "EV",
           "frequency": "6/6h",
-          "started_at": "2026-08-20T22:00:00",
+          "started_at": "2026-08-21T14:29:16",
           "status": "ativo"
         },
         {
@@ -2216,13 +2215,13 @@
           "dose": "50 mg",
           "route": "EV",
           "frequency": "8/8h se dor",
-          "started_at": "2026-08-20T22:00:00",
+          "started_at": "2026-08-21T14:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T22:00:00",
+          "created_at": "2026-08-21T14:29:16",
           "author": "Dr. Marcos Vinícius Lima",
           "type": "admissao",
           "text": "Paciente: Maria Vitória Silva, 76 anos, queda da própria altura, fratura transtrocanteriana. Imobilizada. Alto risco de TEV (Caprini 9). Alergia a heparina (HIT) — profilaxia com fondaparinux conforme protocolo. Endereço: Jardim Maria Flor Costa, 94, da Rosa do Oeste - RJ."
@@ -2233,7 +2232,7 @@
       "mrn": "HU2026016",
       "name": "Thomas Moreira",
       "sex": "M",
-      "birth_date": "1991-06-29",
+      "birth_date": "1991-06-30",
       "age": 35,
       "cpf": "957.286.403-38",
       "phone": "+55 73 94886-1930",
@@ -2241,7 +2240,7 @@
       "mother_name": "Daniela Siqueira",
       "ward": "Cirurgia Geral",
       "bed": "16B",
-      "admission_date": "2026-08-20T08:00:00",
+      "admission_date": "2026-08-21T00:29:16",
       "primary_diagnosis": "Pós-operatório de apendicectomia aberta (POI 1) com dor mal controlada",
       "comorbidities": [],
       "allergies": [
@@ -2253,7 +2252,7 @@
       "scenario": "dor_pos_op",
       "vitals": [
         {
-          "measured_at": "2026-08-21T02:00:00",
+          "measured_at": "2026-08-21T18:29:16",
           "hr": 96,
           "sbp": 130,
           "dbp": 82,
@@ -2263,7 +2262,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 100,
           "sbp": 134,
           "dbp": 84,
@@ -2278,9 +2277,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T20:00:00",
+          "requested_at": "2026-08-21T12:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T22:00:00",
+          "result_at": "2026-08-21T14:29:16",
           "result_value": "Hb 13,5 / Leuco 11.200",
           "unit": null,
           "reference_range": null,
@@ -2293,7 +2292,7 @@
           "dose": "1 g",
           "route": "EV",
           "frequency": "6/6h",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         },
         {
@@ -2301,13 +2300,13 @@
           "dose": "100 mg",
           "route": "EV",
           "frequency": "8/8h",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-21T07:00:00",
+          "created_at": "2026-08-21T23:29:16",
           "author": "Enf. Carla Mendes",
           "type": "evolucao",
           "text": "Paciente Thomas Moreira refere dor EVA 8/10 mesmo após tramadol. Médico comunicado para reavaliar analgesia (escada analgésica). Contraindicado AINE por úlcera prévia."
@@ -2318,7 +2317,7 @@
       "mrn": "HU2026017",
       "name": "Ana Liz Rios",
       "sex": "F",
-      "birth_date": "1973-11-05",
+      "birth_date": "1973-11-06",
       "age": 52,
       "cpf": "048.615.237-53",
       "phone": "+55 54 97220-2269",
@@ -2326,7 +2325,7 @@
       "mother_name": "Aylla Fogaça",
       "ward": "Clínica Médica",
       "bed": "17A",
-      "admission_date": "2026-08-20T00:48:00",
+      "admission_date": "2026-08-20T17:17:16",
       "primary_diagnosis": "Pneumonia adquirida na comunidade (CURB-65 = 1) em melhora",
       "comorbidities": [
         "Hipotireoidismo"
@@ -2338,7 +2337,7 @@
       "scenario": "pac_estavel",
       "vitals": [
         {
-          "measured_at": "2026-08-20T02:00:00",
+          "measured_at": "2026-08-20T18:29:16",
           "hr": 100,
           "sbp": 124,
           "dbp": 78,
@@ -2348,7 +2347,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T06:00:00",
+          "measured_at": "2026-08-21T22:29:16",
           "hr": 82,
           "sbp": 120,
           "dbp": 76,
@@ -2363,9 +2362,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T02:00:00",
+          "requested_at": "2026-08-20T18:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T04:00:00",
+          "result_at": "2026-08-20T20:29:16",
           "result_value": "Leuco 15.200",
           "unit": null,
           "reference_range": null,
@@ -2375,9 +2374,9 @@
           "name": "PCR",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T02:00:00",
+          "requested_at": "2026-08-20T18:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T04:00:00",
+          "result_at": "2026-08-20T20:29:16",
           "result_value": "98",
           "unit": "mg/L",
           "reference_range": "< 5",
@@ -2387,8 +2386,8 @@
           "name": "PCR (controle 48h)",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T02:00:00",
-          "due_at": "2026-08-22T02:00:00",
+          "requested_at": "2026-08-21T18:29:16",
+          "due_at": "2026-08-22T18:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -2402,7 +2401,7 @@
           "dose": "875/125 mg",
           "route": "VO",
           "frequency": "12/12h",
-          "started_at": "2026-08-20T03:00:00",
+          "started_at": "2026-08-20T19:29:16",
           "status": "ativo"
         },
         {
@@ -2410,13 +2409,13 @@
           "dose": "500 mg",
           "route": "VO",
           "frequency": "1x/dia",
-          "started_at": "2026-08-20T03:00:00",
+          "started_at": "2026-08-20T19:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T02:00:00",
+          "created_at": "2026-08-20T18:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "admissao",
           "text": "Paciente: Ana Liz Rios, 52 anos, PAC CURB-65 1, internada por hipoxemia leve. Melhora clínica em 24h. Previsão de alta em 48h se afebril. CPF 048.615.237-53."
@@ -2427,7 +2426,7 @@
       "mrn": "HU2026018",
       "name": "Enrico Montenegro",
       "sex": "M",
-      "birth_date": "1964-11-03",
+      "birth_date": "1964-11-04",
       "age": 61,
       "cpf": "316.598.402-60",
       "phone": "92 93528-6675",
@@ -2435,7 +2434,7 @@
       "mother_name": "Marina Correia",
       "ward": "Clínica Médica",
       "bed": "08C",
-      "admission_date": "2026-08-20T08:00:00",
+      "admission_date": "2026-08-21T00:29:16",
       "primary_diagnosis": "Celulite de membro inferior em paciente com DM2 (hiperglicemia hospitalar)",
       "comorbidities": [
         "Diabetes mellitus tipo 2",
@@ -2449,7 +2448,7 @@
       "scenario": "controle_glicemico",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 90,
           "sbp": 138,
           "dbp": 86,
@@ -2459,7 +2458,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T06:00:00",
+          "measured_at": "2026-08-21T22:29:16",
           "hr": 86,
           "sbp": 136,
           "dbp": 84,
@@ -2474,9 +2473,9 @@
           "name": "Glicemia capilar (pré-café)",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-21T05:00:00",
+          "requested_at": "2026-08-21T21:29:16",
           "due_at": null,
-          "result_at": "2026-08-21T05:06:00",
+          "result_at": "2026-08-21T21:35:16",
           "result_value": "248",
           "unit": "mg/dL",
           "reference_range": "70–99",
@@ -2486,9 +2485,9 @@
           "name": "HbA1c",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T08:00:00",
+          "requested_at": "2026-08-21T00:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T12:00:00",
+          "result_at": "2026-08-21T04:29:16",
           "result_value": "9,4",
           "unit": "%",
           "reference_range": "< 7",
@@ -2498,8 +2497,8 @@
           "name": "Glicemia capilar (pré-almoço)",
           "category": "laboratorio",
           "status": "pendente",
-          "requested_at": "2026-08-21T07:00:00",
-          "due_at": "2026-08-21T12:00:00",
+          "requested_at": "2026-08-21T23:29:16",
+          "due_at": "2026-08-22T04:29:16",
           "result_at": null,
           "result_value": null,
           "unit": null,
@@ -2513,7 +2512,7 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h",
-          "started_at": "2026-08-20T08:00:00",
+          "started_at": "2026-08-21T00:29:16",
           "status": "ativo"
         },
         {
@@ -2521,7 +2520,7 @@
           "dose": "14 UI",
           "route": "SC",
           "frequency": "noite",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         },
         {
@@ -2529,13 +2528,13 @@
           "dose": "conforme glicemia",
           "route": "SC",
           "frequency": "pré-refeições",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T08:00:00",
+          "created_at": "2026-08-21T00:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "admissao",
           "text": "Paciente: Enrico Montenegro, 61 anos, celulite em MIE. Glicemias persistentemente > 180 — iniciado esquema basal-bolus conforme protocolo de controle glicêmico do internado (alvo 140-180). Telefone 92 93528-6675."
@@ -2546,7 +2545,7 @@
       "mrn": "HU2026019",
       "name": "Juliana da Paz",
       "sex": "F",
-      "birth_date": "1978-08-16",
+      "birth_date": "1978-08-17",
       "age": 48,
       "cpf": "560.348.219-24",
       "phone": "+55 62 91283-5769",
@@ -2554,7 +2553,7 @@
       "mother_name": "Vitória Machado",
       "ward": "Clínica Médica",
       "bed": "07C",
-      "admission_date": "2026-08-20T08:00:00",
+      "admission_date": "2026-08-21T00:29:16",
       "primary_diagnosis": "Lombalgia mecânica em investigação",
       "comorbidities": [
         "Hipertensão arterial"
@@ -2566,7 +2565,7 @@
       "scenario": "estavel_1",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 71,
           "sbp": 138,
           "dbp": 85,
@@ -2576,7 +2575,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 90,
           "sbp": 133,
           "dbp": 83,
@@ -2591,9 +2590,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "Sem alterações relevantes",
           "unit": null,
           "reference_range": null,
@@ -2603,9 +2602,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "0,9",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -2618,13 +2617,13 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h se dor",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T12:00:00",
+          "created_at": "2026-08-21T04:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "Paciente: Juliana da Paz, 48 anos, estável, sem intercorrências. CPF 560.348.219-24. Tel +55 62 91283-5769."
@@ -2635,7 +2634,7 @@
       "mrn": "HU2026020",
       "name": "Rhavi Nogueira",
       "sex": "M",
-      "birth_date": "1945-12-06",
+      "birth_date": "1945-12-07",
       "age": 80,
       "cpf": "025.197.348-41",
       "phone": "+55 98 90019-8152",
@@ -2643,7 +2642,7 @@
       "mother_name": "Olívia Pastor",
       "ward": "Ortopedia",
       "bed": "30A",
-      "admission_date": "2026-08-18T08:00:00",
+      "admission_date": "2026-08-19T00:29:16",
       "primary_diagnosis": "Pós-operatório de artroplastia de joelho (POI 2)",
       "comorbidities": [
         "Osteoartrose"
@@ -2655,7 +2654,7 @@
       "scenario": "estavel_2",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 78,
           "sbp": 110,
           "dbp": 83,
@@ -2665,7 +2664,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 75,
           "sbp": 121,
           "dbp": 80,
@@ -2680,9 +2679,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "Sem alterações relevantes",
           "unit": null,
           "reference_range": null,
@@ -2692,9 +2691,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "0,7",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -2707,13 +2706,13 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h se dor",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T12:00:00",
+          "created_at": "2026-08-21T04:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "Paciente: Rhavi Nogueira, 80 anos, estável, sem intercorrências. CPF 025.197.348-41. Tel +55 98 90019-8152."
@@ -2724,7 +2723,7 @@
       "mrn": "HU2026021",
       "name": "Theo Cunha",
       "sex": "M",
-      "birth_date": "1968-09-05",
+      "birth_date": "1968-09-06",
       "age": 57,
       "cpf": "607.912.543-99",
       "phone": "12 96905-9828",
@@ -2732,7 +2731,7 @@
       "mother_name": "Valentina da Mata",
       "ward": "Clínica Médica",
       "bed": "22A",
-      "admission_date": "2026-08-20T08:00:00",
+      "admission_date": "2026-08-21T00:29:16",
       "primary_diagnosis": "Gastroenterite aguda com desidratação leve",
       "comorbidities": [],
       "allergies": [],
@@ -2742,7 +2741,7 @@
       "scenario": "estavel_3",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 84,
           "sbp": 132,
           "dbp": 86,
@@ -2752,7 +2751,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 75,
           "sbp": 124,
           "dbp": 81,
@@ -2767,9 +2766,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "Sem alterações relevantes",
           "unit": null,
           "reference_range": null,
@@ -2779,9 +2778,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "0,9",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -2794,13 +2793,13 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h se dor",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T12:00:00",
+          "created_at": "2026-08-21T04:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "Paciente: Theo Cunha, 57 anos, estável, sem intercorrências. CPF 607.912.543-99. Tel 12 96905-9828."
@@ -2811,7 +2810,7 @@
       "mrn": "HU2026022",
       "name": "Arthur Miguel Cunha",
       "sex": "M",
-      "birth_date": "1965-12-15",
+      "birth_date": "1965-12-16",
       "age": 60,
       "cpf": "817.450.239-41",
       "phone": "97 90370-4121",
@@ -2819,7 +2818,7 @@
       "mother_name": "Ágatha Fogaça",
       "ward": "Cardiologia",
       "bed": "29A",
-      "admission_date": "2026-08-20T08:00:00",
+      "admission_date": "2026-08-21T00:29:16",
       "primary_diagnosis": "Fibrilação atrial paroxística (controle de ritmo)",
       "comorbidities": [
         "Hipertensão arterial"
@@ -2833,7 +2832,7 @@
       "scenario": "estavel_4",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 76,
           "sbp": 126,
           "dbp": 76,
@@ -2843,7 +2842,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 80,
           "sbp": 126,
           "dbp": 68,
@@ -2858,9 +2857,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "Sem alterações relevantes",
           "unit": null,
           "reference_range": null,
@@ -2870,9 +2869,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "1,0",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -2885,13 +2884,13 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h se dor",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T12:00:00",
+          "created_at": "2026-08-21T04:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "Paciente: Arthur Miguel Cunha, 60 anos, estável, sem intercorrências. CPF 817.450.239-41. Tel 97 90370-4121."
@@ -2902,7 +2901,7 @@
       "mrn": "HU2026023",
       "name": "Caio da Cruz",
       "sex": "M",
-      "birth_date": "1968-04-18",
+      "birth_date": "1968-04-19",
       "age": 58,
       "cpf": "096.348.725-65",
       "phone": "+55 71 93283-8564",
@@ -2910,7 +2909,7 @@
       "mother_name": "Maria Helena Borges",
       "ward": "Cirurgia Geral",
       "bed": "14C",
-      "admission_date": "2026-08-17T08:00:00",
+      "admission_date": "2026-08-18T00:29:16",
       "primary_diagnosis": "Hérnia inguinal — pré-operatório",
       "comorbidities": [
         "Tabagismo"
@@ -2922,7 +2921,7 @@
       "scenario": "estavel_5",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 79,
           "sbp": 138,
           "dbp": 75,
@@ -2932,7 +2931,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 85,
           "sbp": 125,
           "dbp": 85,
@@ -2947,9 +2946,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "Sem alterações relevantes",
           "unit": null,
           "reference_range": null,
@@ -2959,9 +2958,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "0,9",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -2974,13 +2973,13 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h se dor",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T12:00:00",
+          "created_at": "2026-08-21T04:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "Paciente: Caio da Cruz, 58 anos, estável, sem intercorrências. CPF 096.348.725-65. Tel +55 71 93283-8564."
@@ -2991,7 +2990,7 @@
       "mrn": "HU2026024",
       "name": "Lucca Moraes",
       "sex": "M",
-      "birth_date": "1971-04-01",
+      "birth_date": "1971-04-02",
       "age": 55,
       "cpf": "510.928.743-05",
       "phone": "22 99992-4800",
@@ -2999,7 +2998,7 @@
       "mother_name": "Clara Jesus",
       "ward": "Clínica Médica",
       "bed": "06B",
-      "admission_date": "2026-08-17T08:00:00",
+      "admission_date": "2026-08-18T00:29:16",
       "primary_diagnosis": "Anemia ferropriva em investigação",
       "comorbidities": [],
       "allergies": [],
@@ -3009,7 +3008,7 @@
       "scenario": "estavel_6",
       "vitals": [
         {
-          "measured_at": "2026-08-20T20:00:00",
+          "measured_at": "2026-08-21T12:29:16",
           "hr": 73,
           "sbp": 136,
           "dbp": 76,
@@ -3019,7 +3018,7 @@
           "gcs": 15
         },
         {
-          "measured_at": "2026-08-21T07:00:00",
+          "measured_at": "2026-08-21T23:29:16",
           "hr": 78,
           "sbp": 135,
           "dbp": 84,
@@ -3034,9 +3033,9 @@
           "name": "Hemograma",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "Sem alterações relevantes",
           "unit": null,
           "reference_range": null,
@@ -3046,9 +3045,9 @@
           "name": "Creatinina",
           "category": "laboratorio",
           "status": "concluido",
-          "requested_at": "2026-08-20T12:00:00",
+          "requested_at": "2026-08-21T04:29:16",
           "due_at": null,
-          "result_at": "2026-08-20T14:00:00",
+          "result_at": "2026-08-21T06:29:16",
           "result_value": "0,8",
           "unit": "mg/dL",
           "reference_range": "0,7–1,2",
@@ -3061,13 +3060,13 @@
           "dose": "1 g",
           "route": "VO",
           "frequency": "6/6h se dor",
-          "started_at": "2026-08-20T12:00:00",
+          "started_at": "2026-08-21T04:29:16",
           "status": "ativo"
         }
       ],
       "notes": [
         {
-          "created_at": "2026-08-20T12:00:00",
+          "created_at": "2026-08-21T04:29:16",
           "author": "Dra. Ana Beatriz Souza",
           "type": "evolucao",
           "text": "Paciente: Lucca Moraes, 55 anos, estável, sem intercorrências. CPF 510.928.743-05. Tel 22 99992-4800."

@@ -107,7 +107,7 @@ export function PatientDetailView({ id }: { id: number }) {
           </div>
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row lg:flex-col">
             <Button onClick={() => setWfOpen(true)}>
-              <Workflow className="h-4 w-4" /> Executar fluxo clínico (LangGraph)
+              <Workflow className="h-4 w-4" /> Executar revisão clínica
             </Button>
             <Link href={`/assistente?patient_id=${p.id}`}>
               <Button variant="outline" className="w-full">
@@ -270,8 +270,8 @@ export function PatientDetailView({ id }: { id: number }) {
       <Modal
         open={wfOpen}
         onClose={() => !running && setWfOpen(false)}
-        title="Executar fluxo clínico (LangGraph)"
-        description="O grafo carrega e anonimiza o prontuário, verifica exames e valores críticos, calcula o risco, consulta protocolos (RAG), gera sugestões com a LLM e pausa para validação humana."
+        title="Executar revisão clínica"
+        description="A revisão anonimiza o prontuário, verifica exames pendentes e valores críticos, calcula o risco, consulta os protocolos institucionais, gera sugestões e aguarda a validação de um profissional."
         footer={
           <>
             <Button variant="ghost" onClick={() => setWfOpen(false)} disabled={running}>Cancelar</Button>

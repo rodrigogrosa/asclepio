@@ -1,4 +1,4 @@
-// Tipos do contrato da API — docs/CONTRATO_API.md (v1)
+// Tipos do contrato da API — docs/CONTRATO_API.md (v1 + auth v1.1)
 
 export type Role = "admin" | "medico" | "enfermagem" | "auditor";
 export type User = {
@@ -9,6 +9,15 @@ export type User = {
   crm: string | null;
   specialty: string | null;
   avatar_initials: string;
+  specialty_id: number | null;
+  sector_id: number | null;
+  permissions: string[];
+  mfa_enabled: boolean;
+  must_change_password: boolean;
+  is_active: boolean;
+  is_demo: boolean;
+  last_login_at: string | null;
+  created_at: string;
 };
 
 export type RiskLevel = "baixo" | "moderado" | "alto" | "critico";
@@ -243,12 +252,60 @@ export type KnowledgeDocument = {
 export type KnowledgeDocumentDetail = KnowledgeDocument & { content: string };
 
 // ---- Respostas compostas ----
-export type LoginResponse = {
+/** Resposta de login/refresh/mfa-verify (contrato v1.1). */
+export type TokenOut = {
   access_token: string;
+  refresh_token: string;
   token_type: "bearer";
   expires_in: number;
+  refresh_expires_in: number;
   user: User;
+  must_change_password: boolean;
 };
+/** Resposta de login quando o usuário tem MFA ativo (HTTP 200). */
+export type MfaChallenge = {
+  mfa_required: true;
+  mfa_token: string;
+  expires_in: number;
+  methods: ("totp" | "recovery_code")[];
+};
+export type LoginResponse = TokenOut | MfaChallenge;
+export function isMfaChallenge(r: LoginResponse): r is MfaChallenge {
+  return (r as MfaChallenge).mfa_required === true;
+}
+export type Session = {
+  id: number;
+  created_at: string;
+  last_used_at: string | null;
+  expires_at: string;
+  ip: string | null;
+  user_agent: string | null;
+  current: boolean;
+};
+export type MfaSetup = { secret: string; otpauth_uri: string; qr_svg: string };
+export type MfaEnableResponse = { ok: true; recovery_codes: string[] };
+
+// ---- Gestão de usuários (admin) ----
+export type UserCreateInput = { name: string; email: string; role: Role; crm?: string | null; specialty?: string | null; specialty_id?: number | null; sector_id?: number | null; password?: string };
+export type UserUpdateInput = { name?: string; role?: Role; crm?: string | null; specialty?: string | null; specialty_id?: number | null; sector_id?: number | null; is_active?: boolean };
+export type UserCreateResponse = { user: User; temporary_password: string | null };
+export type UsersListParams = { role?: Role | ""; active?: boolean | ""; q?: string };
+
+// ---- Plataforma (v1.2): configuração pública e catálogos ----
+export type PublicConfig = {
+  app_name: string;
+  hospital_name: string;
+  hospital_short_name: string;
+  version: string;
+  demo_mode: boolean;
+  mfa_required_roles: string[];
+  support_email: string | null;
+};
+export type Specialty = { id: number; name: string; code: string | null; active: boolean; professionals_count: number };
+export type SectorKind = "pronto_socorro" | "internacao" | "uti" | "ambulatorio" | "cirurgico" | "outro";
+export type Sector = { id: number; name: string; kind: SectorKind; active: boolean; patients_count: number };
+export type SpecialtyInput = { name?: string; code?: string | null; active?: boolean };
+export type SectorInput = { name?: string; kind?: SectorKind; active?: boolean };
 
 export type DashboardStats = {
   patients: number;
@@ -258,12 +315,19 @@ export type DashboardStats = {
   open_alerts: number;
   chats_today: number;
   workflows_today: number;
-  guardrail_blocks_today: number;
-  model: ModelInfo;
+  /** null para quem não tem `audit:read` */
+  guardrail_blocks_today: number | null;
+  /** null para quem não tem `model:read` */
+  model: ModelInfo | null;
+  /** status do sistema (admin) — null para os demais */
+  system: HealthResponse | null;
+  /** bloco "Meu trabalho" (medico/enfermagem) — null para os demais */
+  my_work: MyWork | null;
   recent_alerts: Alert[];
   recent_runs: WorkflowRun[];
   risk_distribution: Record<RiskLevel, number>;
 };
+export type MyWork = { pending_approvals: WorkflowRun[]; my_open_alerts: number; my_conversations_today: number };
 
 export type PatientContext = { anonymized_context: string; pii_redacted: number };
 

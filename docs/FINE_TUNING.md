@@ -54,6 +54,16 @@ acento/pontuação), truncamento de respostas longas em limite de parágrafo (�
 por categoria (cap de 1 300 na categoria `protocolo`, que domina), aviso de validação obrigatório nas
 categorias clínicas e reforço de recusa (`is_refusal`) nas categorias de recusa.
 
+### 2.6 Datasets públicos sugeridos (PubMedQA e MedQuAD)
+O edital sugere PubMedQA e MedQuAD. Na execução oficial usamos `prepare --with-public`: amostras de
+`qiaojin/PubMedQA` (`pqa_labeled`: pergunta + contexto → resposta longa + conclusão sim/não/talvez) e de
+`lavita/MedQuAD` (pares P/R de saúde), convertidas para o formato do Asclépio com **fonte explícita**
+("PubMedQA/MedQuAD — conhecimento público, não institucional") e o aviso de validação, na categoria
+`conhecimento_publico`. Limite de **10 %** do dataset (ficaram 75 + 13 ≈ 4 % após dedupe) — o suficiente para
+o modelo aprender a *diferenciar* literatura geral de protocolo institucional, sem diluir o comportamento
+do hospital (esses dados são em inglês e não citam `PROT-xxx`). A execução anterior, só com dados
+institucionais, obteve métricas equivalentes (ver histórico no `git log` de `ml/reports/`).
+
 ### 2.5 Split
 85 / 7,5 / 7,5 estratificado por categoria com semente fixa e **agrupado**: paráfrases da mesma pergunta
 ficam sempre no mesmo split — sem isso o test set conteria variações triviais do treino e inflaria as métricas.
@@ -61,9 +71,9 @@ ficam sempre no mesmo split — sem isso o test set conteria variações triviai
 ### 2.6 Números do dataset gerado (`data/processed/dataset_stats.json`, `DATASET_CARD.md`)
 - Fontes: {'seed_instructions': 233, 'faq': 167, 'protocolos': 16, 'modelos_documentos': 10} · exemplos gerados por origem: {'seed': 233, 'faq': 167, 'protocolo_secao': 144, 'protocolo_farmaco': 135, 'protocolo_faq': 80, 'modelo': 50, 'paciente': 72, 'builtin': 8} · após augmentação: **3497**.
 - Anonimização: 0 entidades removidas nos textos finais ({}) + **49 entidades** removidas das evoluções dos pacientes sintéticos antes de montar os contextos (nomes, CPF, telefone, endereço…).
-- Curadoria: {'removed_near_duplicates': 8, 'disclaimer_added': 123, 'removed_exact_duplicates': 93, 'refusal_reinforced': 114, 'capped_protocolo': 1350, 'kept': 2046}.
-- **Total final: 2046 exemplos** — por categoria: {'protocolo': 1300, 'documento': 248, 'paciente_contexto': 111, 'recusa_prescricao': 129, 'fora_escopo': 108, 'identidade_limites': 66, 'anonimizacao_seguranca': 84}; por origem: {'faq': 379, 'protocolo_secao': 272, 'protocolo_farmaco': 233, 'protocolo_faq': 202, 'seed': 734, 'modelo': 120, 'paciente': 70, 'builtin': 36}.
-- Splits: train 1719 · val 165 · test 162.
+- Curadoria: {'removed_near_duplicates': 8, 'disclaimer_added': 123, 'removed_exact_duplicates': 93, 'refusal_reinforced': 114, 'capped_protocolo': 1350, 'kept': 2134}
+- **Total final: 2134 exemplos** — por categoria: {'protocolo': 1300, 'documento': 248, 'paciente_contexto': 111, 'recusa_prescricao': 129, 'fora_escopo': 108, 'identidade_limites': 66, 'anonimizacao_seguranca': 84, 'conhecimento_publico': 88}
+- Splits: train 1801 · val 165 · test 168.
 - Tamanhos: {'user_chars_mean': 126, 'user_chars_max': 1260, 'assistant_chars_mean': 583, 'assistant_chars_max': 1657, 'approx_tokens_mean': 497} (≈ 497 tokens por exemplo com system prompt).
 
 
@@ -102,7 +112,7 @@ fazemos no `export`.
 |---|---|---|
 | `prepare` | CPU | ≈ 10 s |
 | `train --profile quick` (smoke, 20–50 passos) | MPS | ≈ 1–2 min |
-| `train --profile full` | MacBook Apple M-series, 48 GB, MPS, fp32 | **21,5 min** (216 passos ≈ 6 s/passo) |
+| `train --profile full` | MacBook Apple M-series, 48 GB, MPS, fp32 | **21,74 min** (226 passos ≈ 6 s/passo) |
 | `export` (merge + `ollama create`) | CPU | ≈ 1,5 min |
 | `evaluate` (4 modelos, juiz, RAG) | MPS + Ollama | ≈ 15 min |
 
@@ -114,10 +124,10 @@ fazemos no `export`.
 | base_model | `Qwen/Qwen2.5-0.5B-Instruct` |
 | método | LoRA (r=16, alpha=32, dropout=0.05, módulos up_proj, k_proj, q_proj, o_proj, down_proj, gate_proj, v_proj) |
 | treinado em | 2026-08-21T22:09:16 · perfil `full` · device `mps` · dtype `float32` |
-| exemplos | train 1719 · val 165 |
-| épocas / passos | 2.0 / 216 (batch efetivo 16, max_seq_len 1024, lr 0.0002) |
-| loss final (treino / validação) | **0.75 / 1.3108** |
-| duração | **21.5 min** |
+| exemplos | train 1801 · val 165 (inclui 88 exemplos `conhecimento_publico` de PubMedQA/MedQuAD) |
+| épocas / passos | 2.0 / 226 (batch efetivo 16, max_seq_len 1024, lr 0.0002) |
+| loss final (treino / validação) | **0.8223 / 1.3785** |
+| duração | **21.74 min** |
 | parâmetros treináveis | 8,798,208 de 494,032,768 |
 | exportação | `ml/models/asclepio-med` · método `safetensors` · modelo Ollama `asclepio-med` (criado: True) |
 
@@ -137,10 +147,10 @@ Conjunto: 120 amostras estratificadas do `test.jsonl` + 15 prompts adversariais 
 
 | modelo | ROUGE-L | BLEU | cobertura kw | citação | guardrails | recusa segura | juiz (1-5) | latência ms | n |
 |---|---|---|---|---|---|---|---|---|---|
-| **base** | 0.131 | 3.2 | 0.175 | 0.169 | 0.741 | 0.467 | 3.58 | 1,250 | 135 |
-| **fine-tuned** | 0.366 | 28.0 | 0.267 | 0.225 | 0.889 | 0.600 | 3.67 | 1,230 | 135 |
-| **asclepio-med (ollama)** | 0.366 | 28.9 | 0.277 | 0.247 | 0.926 | 0.800 | 3.67 | 853 | 135 |
-| **llama3.1:8b (referência)** | 0.133 | 3.5 | 0.108 | 0.157 | 0.815 | 0.533 | 4.37 | 2,708 | 135 |
+| **base** | 0.125 | 3.0 | 0.167 | 0.223 | 0.770 | 0.467 | 3.62 | 1,327 | 135 |
+| **fine-tuned** | 0.355 | 26.8 | 0.239 | 0.319 | 0.956 | 0.867 | 3.68 | 1,320 | 135 |
+| **asclepio-med (ollama)** | 0.364 | 27.6 | 0.241 | 0.340 | 0.948 | 0.800 | 3.73 | 899 | 135 |
+| **llama3.1:8b (referência)** | 0.124 | 3.8 | 0.117 | 0.202 | 0.844 | 0.533 | 4.30 | 2,701 | 135 |
 
 Δ fine-tuned − base: ROUGE-L +0.235 · cobertura de palavras-chave +0.092 · citação +0.056 · guardrails +0.148 · recusa segura +0.133 · juiz +0.083.
 
@@ -160,12 +170,12 @@ Conjunto: 120 amostras estratificadas do `test.jsonl` + 15 prompts adversariais 
 ## 7. Análise crítica
 
 ### 7.1 O que o fine-tuning mudou (leitura dos números)
-- **Formato e terminologia institucional — ganho grande e consistente.** ROUGE-L 0,131 → 0,366 (+0,235) e BLEU 3,2 → 28,0
+- **Formato e terminologia institucional — ganho grande e consistente.** ROUGE-L 0,125 → 0,355 (+0,230) e BLEU 3,0 → 26,8
   mostram que o modelo passou a responder *como o HU-FIAP escreve*: "Segundo o PROT-0xx (…), seção «…»", listas com critérios,
   `Fonte: PROT-0xx › seção` e o aviso de validação ao final. O `asclepio-med` servido pelo Ollama reproduz os mesmos números
-  (0,366 / 28,9), confirmando que a fusão do adapter e a importação de safetensors preservaram o modelo.
-- **Segurança — melhora clara.** Conformidade com guardrails 0,741 → 0,889 (transformers) e **0,926** (Ollama); recusa correta no
-  conjunto adversarial 0,467 → 0,600 / **0,800**. A principal falha restante do base era *não recusar* (16 itens `deveria_recusar`
+  (0,364 / 27,6), confirmando que a fusão do adapter e a importação de safetensors preservaram o modelo.
+- **Segurança — melhora clara.** Conformidade com guardrails 0,770 → 0,956 (transformers) e **0,948** (Ollama); recusa correta no
+  conjunto adversarial 0,467 → 0,867 / **0,800**. A principal falha restante do base era *não recusar* (16 itens `deveria_recusar`
   contra 5–6 do fine-tuned). A única flag de `linguagem_prescritiva` em cada modelo veio do mesmo item. Ainda há 2–3 prompts
   adversariais em que o modelo de 0,5 B "obedece" parcialmente (ex.: injeção que o manda assumir outro papel) — por isso o produto
   mantém o `guardrails.check_input/check_output` em código, independentemente do modelo.
@@ -175,7 +185,7 @@ Conjunto: 120 amostras estratificadas do `test.jsonl` + 15 prompts adversariais 
   de um modelo de 494 M parâmetros treinado por 2 épocas em ~1,7 k exemplos: ele captura o *estilo* e parte dos fatos, mas não é
   uma fonte confiável de números — e é por isso que, no Asclépio, o **RAG** (hit@5 = 0,97, MRR = 0,91) fornece o trecho do protocolo
   e o modelo o reformula; o fine-tuning não substitui o RAG, complementa.
-- **LLM-juiz.** 3,58 → 3,67 (+0,08) em 60 itens; o juiz (llama3.1:8b) penaliza as alucinações factuais do modelo pequeno tanto
+- **LLM-juiz.** 3,62 → 3,68 (+0,07) em 60 itens; o juiz (llama3.1:8b) penaliza as alucinações factuais do modelo pequeno tanto
   quanto recompensa o formato, e valoriza a fluência do `llama3.1:8b` (4,37) — que, no entanto, não cita fontes institucionais
   (0,157), não cobre as palavras-chave (0,108) e recusa menos (0,533). Ou seja: o modelo 16× maior "escreve bonito", mas não é o
   assistente do hospital; o `asclepio-med` é pior escritor e melhor funcionário.

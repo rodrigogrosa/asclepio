@@ -131,3 +131,94 @@ type KnowledgeDocument = { id: string; title: string; doc_type: DocType; path: s
 
 ## Ações de auditoria (valores de `action`)
 `auth.login`, `auth.login_failed`, `auth.logout`, `patient.view`, `assistant.chat`, `assistant.blocked`, `assistant.feedback`, `workflow.start`, `workflow.alert`, `workflow.decision`, `workflow.finalize`, `alert.ack`, `knowledge.reindex`, `knowledge.search`, `model.switch`, `audit.verify`.
+
+---
+
+## Autenticação real (v1.1): MFA TOTP, sessões/refresh, troca de senha, gestão de usuários
+
+### Tipos adicionais
+```ts
+type User = { id: number; name: string; email: string; role: Role; crm: string | null; specialty: string | null; avatar_initials: string; permissions: string[];
+  mfa_enabled: boolean; must_change_password: boolean; is_active: boolean; is_demo: boolean; last_login_at: string | null; created_at: string };
+type TokenOut = { access_token: string; refresh_token: string; token_type: "bearer"; expires_in: number; refresh_expires_in: number; user: User; must_change_password: boolean };
+type MfaChallenge = { mfa_required: true; mfa_token: string; expires_in: number; methods: ["totp", "recovery_code"] };
+type Session = { id: number; created_at: string; last_used_at: string | null; expires_at: string; ip: string | null; user_agent: string | null; current: boolean };
+```
+
+### Endpoints de auth (novos/alterados)
+- `POST /auth/login` `{email, password}` → **`TokenOut`** se o usuário não tem MFA, ou **`MfaChallenge`** (HTTP 200) se tem MFA ativo. 401 credenciais inválidas · 423 bloqueado.
+- `POST /auth/mfa/verify` `{mfa_token, code}` → `TokenOut` (`code` = 6 dígitos do app autenticador **ou** um código de recuperação `XXXX-XXXX`). 401 código inválido (limite de tentativas).
+- `POST /auth/refresh` `{refresh_token}` → `TokenOut` (rotação: o refresh antigo é revogado; reutilização de refresh revogado derruba **todas** as sessões do usuário — detecção de roubo).
+- `POST /auth/logout` `{refresh_token?}` → `{ok:true}` (revoga a sessão atual; o access token deixa de valer imediatamente porque carrega `sid`).
+- `POST /auth/logout-all` → `{ok:true, revoked:n}`.
+- `POST /auth/change-password` `{current_password, new_password}` → `{ok:true}` (política de senha; revoga as **outras** sessões; limpa `must_change_password`).
+- `GET /auth/mfa/setup` → `{secret, otpauth_uri, qr_svg}` (só se MFA ainda não ativo; `qr_svg` é um SVG inline para exibir).
+- `POST /auth/mfa/enable` `{code}` → `{ok:true, recovery_codes: string[]}` (10 códigos de uso único — mostrar **uma vez**).
+- `POST /auth/mfa/disable` `{password, code}` → `{ok:true}`.
+- `GET /auth/sessions` → `Session[]` · `DELETE /auth/sessions/{id}` → `{ok:true}`.
+- `GET /auth/me` → `User` (com os campos novos).
+
+### Regras
+- Access token: **30 min** (`ACCESS_TOKEN_EXPIRE_MINUTES`), claims `sub, role, sid, jti, iat, exp, iss`. Refresh token: **12 h** (`REFRESH_TOKEN_EXPIRE_HOURS`), opaco, guardado **hasheado** (SHA-256) na tabela `sessions`.
+- Toda rota autenticada valida a sessão (`sid` ativo, não revogado, não expirado) além da assinatura do JWT.
+- `must_change_password=true` → o frontend deve forçar a troca antes de usar o sistema (o backend bloqueia todas as rotas exceto `/auth/*` com **428 Precondition Required**).
+- **Admins são obrigados a ter MFA**: se `role=admin` e `mfa_enabled=false`, o backend responde **428** com `{"detail":"MFA obrigatório para administradores", "code":"mfa_required_setup"}` em todas as rotas exceto `/auth/*` — o frontend leva para a tela de configuração do MFA.
+- Segredo TOTP guardado **criptografado** (Fernet derivado do `SECRET_KEY`); códigos de recuperação guardados hasheados.
+
+### Gestão de usuários (admin) — `users:manage`
+- `GET /users` → `User[]`
+- `POST /users` `{name, email, role, crm?, specialty?, password?}` → `{user: User, temporary_password: string | null}` (se `password` omitido, gera senha temporária forte; `must_change_password=true`).
+- `PATCH /users/{id}` `{name?, role?, crm?, specialty?, is_active?}` → `User` (admin não pode remover o próprio papel de admin nem se desativar).
+- `POST /users/{id}/reset-password` → `{temporary_password}` (revoga sessões do usuário; força troca).
+- `POST /users/{id}/mfa/reset` → `{ok:true}` (desativa MFA do usuário — para quando perdeu o celular; auditado).
+- Todas auditadas: `user.create`, `user.update`, `user.reset_password`, `user.mfa_reset`, `auth.mfa_enable`, `auth.mfa_disable`, `auth.mfa_verify`, `auth.mfa_failed`, `auth.refresh`, `auth.refresh_reuse_detected`, `auth.password_change`, `auth.session_revoke`.
+
+### Usuários iniciais (seed)
+| email | papel | senha | observação |
+|---|---|---|---|
+| `admin@asclepio.fiap` | admin | `ASCLEPIO_ADMIN_PASSWORD` (gerada pelo `make setup`, exibida uma vez, salva no `.env`) | `must_change_password=true`; MFA obrigatório no 1º acesso |
+| `rodrigo.grosa2011@gmail.com` (Rodrigo Rosa) | admin | `ASCLEPIO_RODRIGO_PASSWORD` (idem) | idem |
+| usuários de demonstração (dra.ana, dr.marcos, enf.carla, auditor) | medico/enfermagem/auditor | `Asclepio@2026` | só se `SEED_DEMO_USERS=true` (padrão em dev; **false em produção**); `is_demo=true` |
+
+---
+
+## Plataforma real (v1.2): perfis, catálogos e configuração
+
+### Perfis e o que cada um vê (RBAC revisado)
+| Área | admin | medico | enfermagem | auditor |
+|---|---|---|---|---|
+| Dashboard (clínico: pacientes/alertas/fluxos; admin: + sistema/modelo) | ✔ | ✔ (clínico) | ✔ (clínico) | ✔ (resumo) |
+| Pacientes, contexto anonimizado | ✔ | ✔ | ✔ | — |
+| Assistente (chat) | ✔ | ✔ | ✔ | — |
+| Fluxos clínicos: executar | ✔ | ✔ | ✔ | — |
+| Fluxos clínicos: aprovar/rejeitar | ✔ | ✔ | — | — |
+| Alertas (ler/reconhecer) | ✔ | ✔ | ✔ | ler |
+| Protocolos e documentos (leitura/busca) | ✔ | ✔ | ✔ | ✔ |
+| Base de conhecimento: reindexar/gerir | ✔ | — | — | — |
+| **IA & Modelos (modelo ativo, fine-tuning, avaliação, troca de modelo)** | ✔ | — | — | — |
+| Detalhes técnicos dos grafos (LangGraph) | ✔ | — | — | — |
+| Usuários / profissionais (CRM, especialidade) | ✔ | — | — | — |
+| Catálogos (especialidades, setores) — gerir | ✔ | — | — | — |
+| Auditoria | ✔ | — | — | ✔ |
+| Configurações do sistema | ✔ | — | — | — |
+
+Permissões novas: `system:internals` (grafos/mermaid — admin), `catalog:read` (todos), `catalog:manage` (admin), `settings:read` (admin). `model:read` passa a ser **somente admin**. `GET /assistant/graph` e `GET /workflows/graph` exigem `system:internals`. O campo `User.permissions` continua vindo no login — o frontend monta o menu a partir dele (não por papel fixo).
+
+### Configuração pública (sem autenticação)
+- `GET /public/config` → `{app_name, hospital_name, hospital_short_name, version, demo_mode: boolean, mfa_required_roles: string[], support_email: string | null}`
+  - `demo_mode` = `SEED_DEMO_USERS` (mostra a lista de usuários de demonstração no login **somente** quando true).
+  - `hospital_name` vem de `APP_HOSPITAL_NAME` (padrão "Hospital Universitário"), `hospital_short_name` de `APP_HOSPITAL_SHORT_NAME` (padrão "HU"). **A interface não deve mostrar "fictício", "Tech Challenge" ou "FIAP"** — isso fica só na documentação.
+
+### Catálogos
+```ts
+type Specialty = { id: number; name: string; code: string | null; active: boolean; professionals_count: number };
+type Sector = { id: number; name: string; kind: "pronto_socorro" | "internacao" | "uti" | "ambulatorio" | "cirurgico" | "outro"; active: boolean; patients_count: number };
+```
+- `GET /catalog/specialties?include_inactive=false` → `Specialty[]` (`catalog:read`) · `POST /catalog/specialties` `{name, code?}` · `PATCH /catalog/specialties/{id}` `{name?, code?, active?}` · `DELETE /catalog/specialties/{id}` (só se sem profissionais; senão 409) — `catalog:manage`.
+- `GET /catalog/sectors` → `Sector[]` · `POST/PATCH/DELETE /catalog/sectors/...` idem.
+- Seed: ~30 especialidades médicas brasileiras (CFM) e os setores usados pelos pacientes.
+- `User` ganha `specialty_id: number | null` e `sector_id: number | null` (além de `specialty`/`crm` textuais para exibição). `POST/PATCH /users` aceitam `specialty_id`, `sector_id`; para `role=medico` o `crm` é **obrigatório** (formato `CRM 123456-UF` ou `123456-UF`) e a especialidade obrigatória.
+- `GET /users?role=&active=&q=` com filtros; `GET /users/{id}`.
+
+### Dashboard por perfil
+`GET /dashboard/stats` devolve **sempre** os indicadores clínicos; os campos `model`, `guardrail_blocks_today`, `system` só aparecem para quem tem `model:read`/`audit:read` (para os demais vêm `null`). Novo bloco `my_work` (para medico/enfermagem): `{pending_approvals: WorkflowRun[] (aguardando_aprovacao), my_open_alerts: number, my_conversations_today: number}`.

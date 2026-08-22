@@ -55,6 +55,39 @@ async def init_db() -> None:
             await conn.exec_driver_sql("PRAGMA journal_mode=WAL")
             await conn.exec_driver_sql("PRAGMA foreign_keys=ON")
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_ensure_columns)
+
+
+def _ensure_columns(sync_conn) -> None:  # type: ignore[no-untyped-def]
+    """Migração leve: adiciona colunas novas a tabelas já existentes (bancos criados por versões anteriores)."""
+    from sqlalchemy import inspect, text
+
+    insp = inspect(sync_conn)
+    for table in Base.metadata.sorted_tables:
+        if not insp.has_table(table.name):
+            continue
+        existing = {c["name"] for c in insp.get_columns(table.name)}
+        for col in table.columns:
+            if col.name in existing:
+                continue
+            ctype = col.type.compile(dialect=sync_conn.dialect)
+            default = ""
+            if (
+                col.default is not None
+                and getattr(col.default, "arg", None) is not None
+                and not callable(col.default.arg)
+            ):
+                arg = col.default.arg
+                if isinstance(arg, bool):
+                    is_pg = sync_conn.dialect.name == "postgresql"
+                    default = f" DEFAULT {('TRUE' if arg else 'FALSE') if is_pg else ('1' if arg else '0')}"
+                else:
+                    default = f" DEFAULT {arg!r}"
+            elif col.type.__class__.__name__ == "JSON":
+                default = " DEFAULT '[]'"
+            sync_conn.execute(
+                text(f'ALTER TABLE {table.name} ADD COLUMN "{col.name}" {ctype}{default}')
+            )
 
 
 async def dispose_db() -> None:

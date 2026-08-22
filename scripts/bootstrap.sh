@@ -52,6 +52,19 @@ else
   ok ".env já existe (mantido)"
 fi
 
+# ---------- 2b) senhas dos usuários reais (geradas uma vez, guardadas no .env) ----------
+gen_pwd() { python3 -c 'import secrets,string; a=string.ascii_letters+string.digits; p="".join(secrets.choice(a) for _ in range(14)); print(p+secrets.choice("!@#$%&*")+secrets.choice("23456789")+"Aa9")' 2>/dev/null || echo "$(openssl rand -base64 12 | tr -d '/+=')!Aa9"; }
+NEW_PWDS=()
+for var in ASCLEPIO_ADMIN_PASSWORD ASCLEPIO_RODRIGO_PASSWORD; do
+  cur=$(grep -E "^${var}=" .env | cut -d= -f2- || true)
+  if [[ -z "$cur" ]]; then
+    pw=$(gen_pwd)
+    if grep -q "^${var}=" .env; then sed -i.bak "s|^${var}=.*|${var}=${pw}|" .env && rm -f .env.bak; else echo "${var}=${pw}" >> .env; fi
+    NEW_PWDS+=("${var}=${pw}")
+  fi
+done
+[[ ${#NEW_PWDS[@]} -gt 0 ]] && ok "senhas iniciais dos usuários reais geradas e salvas no .env (serão exibidas no final)"
+
 # ---------- 3) Ollama: host ou container? ----------
 PROFILES=()
 OLLAMA_URL_FOR_CONTAINERS="http://ollama:11434"
@@ -83,10 +96,11 @@ fi
 # ---------- 3b) portas ----------
 API_PORT=$(grep -E '^API_PORT=' .env | cut -d= -f2 || true); API_PORT=${API_PORT:-8000}
 WEB_PORT=$(grep -E '^WEB_PORT=' .env | cut -d= -f2 || true); WEB_PORT=${WEB_PORT:-3000}
-for spec in "API:$API_PORT" "Web:$WEB_PORT"; do
+for spec in "API:$API_PORT" "WEB:$WEB_PORT"; do
   name=${spec%%:*}; port=${spec##*:}
-  if lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
-    warn "porta $port ($name) já está em uso no host. Ajuste ${name^^}_PORT no .env (ex.: API_PORT=8001 / WEB_PORT=3001) ou libere a porta."
+  holder=$(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | awk 'NR==2{print $1}')
+  if [[ -n "$holder" && "$holder" != com.docke* ]]; then
+    warn "porta $port ($name) já está em uso no host por '$holder'. Ajuste ${name}_PORT no .env (ex.: API_PORT=8001 / WEB_PORT=3001) ou libere a porta."
   fi
 done
 
@@ -131,4 +145,9 @@ LANGFUSE_PORT=$(grep -E '^LANGFUSE_PORT=' .env | cut -d= -f2 || true); LANGFUSE_
 [[ "$PROFILE_EXTRA" == "observability" || "$PROFILE_EXTRA" == "gateway" ]] && echo -e "  🔀 LiteLLM UI: http://localhost:${LITELLM_PORT}/ui  (chave: sk-asclepio-dev)"
 [[ "$PROFILE_EXTRA" == "observability" ]] && echo -e "  🔭 Langfuse:   http://localhost:${LANGFUSE_PORT}  (admin@asclepio.fiap / Asclepio@2026)"
 echo -e "  👤 Login demo: dra.ana@asclepio.fiap / Asclepio@2026  (outros em docs/CONTRATO_API.md)"
+ADMIN_PW=$(grep -E '^ASCLEPIO_ADMIN_PASSWORD=' .env | cut -d= -f2-); RODRIGO_PW=$(grep -E '^ASCLEPIO_RODRIGO_PASSWORD=' .env | cut -d= -f2-)
+echo -e "  🔐 Admins reais (troca de senha + app autenticador obrigatórios no 1º acesso):"
+echo -e "     admin@asclepio.fiap            senha inicial: ${ADMIN_PW}"
+echo -e "     rodrigo.grosa2011@gmail.com    senha inicial: ${RODRIGO_PW}"
+echo -e "     (guardadas em .env → ASCLEPIO_ADMIN_PASSWORD / ASCLEPIO_RODRIGO_PASSWORD; o .env nunca vai para o git)"
 echo ""

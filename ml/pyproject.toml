@@ -1,6 +1,6 @@
 [project]
 name = "asclepio-ml"
-version = "1.0.0"
+version = "1.2.0"
 description = "Pipeline de ML do Asclépio — preparação de dados, anonimização, fine-tuning (LoRA), exportação para Ollama e avaliação"
 requires-python = ">=3.11,<3.13"
 dependencies = [

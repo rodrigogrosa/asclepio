@@ -81,12 +81,13 @@ def test_low_risk_patient_no_immediate_alert(client, medico):
     assert not any(s["node"] == "emit_immediate_alerts" for s in run["steps"])
 
 
-def test_runs_listing_and_graph(client, medico, enfermagem):
+def test_runs_listing_and_graph(client, medico, enfermagem, admin):
     runs = client.get(f"{API}/workflows/runs", headers=enfermagem).json()
     assert runs and runs[0]["run_id"]
     one = client.get(f"{API}/workflows/runs/{runs[0]['run_id']}", headers=medico).json()
     assert one["steps"]
-    g = client.get(f"{API}/workflows/graph", headers=medico).json()
+    assert client.get(f"{API}/workflows/graph", headers=medico).status_code == 403
+    g = client.get(f"{API}/workflows/graph", headers=admin).json()
     assert "human_review" in g["mermaid"] and len(g["nodes"]) == 10
     assert client.get(f"{API}/workflows/runs/nao-existe", headers=medico).status_code == 404
 

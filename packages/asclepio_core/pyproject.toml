@@ -1,6 +1,6 @@
 [project]
 name = "asclepio-core"
-version = "1.0.0"
+version = "1.2.0"
 description = "Núcleo compartilhado do Asclépio: anonimização, regras clínicas, guardrails, base de conhecimento e dados sintéticos"
 requires-python = ">=3.11,<3.13"
 dependencies = [

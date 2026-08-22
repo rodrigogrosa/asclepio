@@ -7,6 +7,8 @@ import { ConfidenceBadge, DocTypeBadge, GuardrailBadge, IntentBadge } from "@/co
 import { ScoreBar } from "@/components/ui/misc";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useAuth } from "@/components/providers/auth-provider";
+import { hasPermission } from "@/lib/permissions";
 
 export type Explain = {
   citations: Citation[];
@@ -41,11 +43,13 @@ export function CitationCard({ c, highlighted, id }: { c: Citation; highlighted?
 }
 
 export function SourcesPanel({ explain, highlight, className }: { explain: Explain | null; highlight?: number | null; className?: string }) {
+  const { user } = useAuth();
+  const internals = hasPermission(user, "system:internals");
   return (
     <aside className={cn("flex h-full flex-col overflow-hidden", className)} aria-label="Fontes e explicabilidade">
       <div className="border-b border-border px-4 py-3">
         <h2 className="font-display text-xs font-bold uppercase tracking-wider text-text">Fontes & Explicabilidade</h2>
-        <p className="text-[11px] text-muted">Selecione uma resposta para ver como ela foi gerada.</p>
+        <p className="text-[11px] text-muted">Selecione uma resposta para ver as fontes e as verificações aplicadas.</p>
       </div>
       {!explain ? (
         <EmptyState icon={<Sparkles className="h-5 w-5" />} title="Nenhuma resposta selecionada" description="As citações, o guardrail e os metadados da resposta aparecem aqui." />
@@ -58,18 +62,22 @@ export function SourcesPanel({ explain, highlight, className }: { explain: Expla
               {explain.confidence && <ConfidenceBadge confidence={explain.confidence} />}
             </div>
             <dl className="grid grid-cols-2 gap-2 rounded-control border border-border bg-surface-2/40 p-3 text-[11px]">
-              <div className="flex items-center gap-1.5 text-muted"><Cpu className="h-3.5 w-3.5" /> Modelo</div>
-              <dd className="truncate text-right font-mono text-text">
-                {explain.model?.name ?? "—"}
-                {explain.model?.fine_tuned && <span className="ml-1 text-primary">●</span>}
-              </dd>
+              {internals && (
+                <>
+                  <div className="flex items-center gap-1.5 text-muted"><Cpu className="h-3.5 w-3.5" /> Modelo</div>
+                  <dd className="truncate text-right font-mono text-text">
+                    {explain.model?.name ?? "—"}
+                    {explain.model?.fine_tuned && <span className="ml-1 text-primary">●</span>}
+                  </dd>
+                </>
+              )}
               <div className="flex items-center gap-1.5 text-muted"><Clock className="h-3.5 w-3.5" /> Latência</div>
               <dd className="text-right font-mono text-text">{fmtDuration(explain.latency_ms)}</dd>
               <div className="flex items-center gap-1.5 text-muted"><EyeOff className="h-3.5 w-3.5" /> PII redigida</div>
               <dd className="text-right font-mono text-text">{explain.guardrail?.pii_redacted ?? 0}</dd>
               <div className="flex items-center gap-1.5 text-muted"><Target className="h-3.5 w-3.5" /> Injeção</div>
               <dd className={cn("text-right font-mono", explain.guardrail?.injection_detected ? "text-danger" : "text-success")}>{explain.guardrail?.injection_detected ? "detectada" : "não"}</dd>
-              {explain.trace_id && (
+              {internals && explain.trace_id && (
                 <>
                   <div className="flex items-center gap-1.5 text-muted"><Gauge className="h-3.5 w-3.5" /> Trace</div>
                   <dd className="truncate text-right font-mono text-muted">{explain.trace_id}</dd>

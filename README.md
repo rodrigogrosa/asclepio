@@ -30,15 +30,23 @@
 | **Fluxos de decisão automatizados e seguros** (verificar exames pendentes, sugerir tratamentos, emitir alertas) | Grafo **LangGraph** de revisão clínica com 10 nós, regras determinísticas (qSOFA/NEWS2/valores críticos), alertas à equipe e **validação humana obrigatória** (`interrupt`) antes de concluir. |
 | **Segurança e validação**: limites (nunca prescrever sem validação humana), logging detalhado, explainability | Guardrails de entrada/saída em código testável; auditoria **append-only com cadeia de hashes**; citações `[n]` com documento/seção/score e visualização do **contexto exato enviado à LLM**; JWT + RBAC + rate limit + Langfuse. |
 | **Código modularizado em Python + README completo** | Monorepo `uv` (core / backend / ml), FastAPI, testes, CI, Docker, docs e ADRs. Frontend Next.js para demonstração. |
-| **Dataset anonimizado / sintético** | 24 prontuários sintéticos (Faker, PII fictícia de propósito), 16 protocolos, 10 modelos de documento, 167 FAQs, 233 instruções seed → dataset SFT em `data/processed/`. |
+| **Dataset anonimizado / sintético** | 24 prontuários sintéticos (Faker, PII fictícia de propósito), 16 protocolos, 10 modelos de documento, 167 FAQs, 233 instruções seed + amostras dos datasets sugeridos (**PubMedQA** e **MedQuAD**, ≤ 10 %) → dataset SFT em `data/processed/`. |
 | **Diagrama do fluxo LangChain** | Gerados pelo próprio LangGraph em [`docs/diagramas/`](docs/diagramas/) e exibidos na UI (`/fluxos`). |
 
 ## 🚀 Instalação em 1 comando
 
-Pré-requisitos: **Docker Desktop** (ou Docker + Compose v2). Recomendado em Mac Apple Silicon: [Ollama](https://ollama.com) nativo instalado (usa a GPU Metal; o bootstrap detecta e usa automaticamente — senão sobe um Ollama em container).
+**Opção A — instalador de 1 linha** (macOS ou Linux; no Windows use WSL2/Ubuntu). Instala o que faltar (git, Docker, Ollama), clona o repositório em `~/asclepio` e sobe tudo:
 
 ```bash
-git clone https://github.com/<seu-usuario>/asclepio.git && cd asclepio
+curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh | bash
+```
+
+> Variáveis opcionais: `ASCLEPIO_DIR=/outro/caminho`, `ASCLEPIO_FULL=1` (sobe também LiteLLM + Langfuse), `ASCLEPIO_NO_OLLAMA=1` (usa Ollama em container em vez de instalar). Exemplo: `ASCLEPIO_FULL=1 bash <(curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh)`.
+
+**Opção B — já tem Docker** (e, de preferência, [Ollama](https://ollama.com) nativo — em Mac Apple Silicon usa a GPU Metal; o bootstrap detecta e usa automaticamente, senão sobe um Ollama em container):
+
+```bash
+git clone https://github.com/rodrigogrosa/asclepio.git && cd asclepio
 make setup
 ```
 
@@ -46,9 +54,11 @@ O `make setup` (script [`scripts/bootstrap.sh`](scripts/bootstrap.sh)) verifica 
 
 | Serviço | URL | Credenciais demo |
 |---|---|---|
-| 🌐 Web (Next.js) | http://localhost:3000 | `dra.ana@asclepio.fiap` / `Asclepio@2026` |
+| 🌐 Web (Next.js) | http://localhost:3000 | admins reais (senha gerada) ou demo `dra.ana@asclepio.fiap` / `Asclepio@2026` |
 | 🔌 API (FastAPI / Swagger) | http://localhost:8000/docs | Bearer JWT |
 | 📈 Métricas Prometheus | http://localhost:8000/metrics | — |
+
+Personalize o hospital no `.env`: `APP_HOSPITAL_NAME="Hospital Santa Casa"`, `APP_HOSPITAL_SHORT_NAME=HSC` (aparece na interface e nos prompts). Em produção defina `SEED_DEMO_USERS=false`.
 
 Outros perfis:
 
@@ -58,7 +68,8 @@ make down         # para tudo
 make logs         # acompanha api/web
 ```
 
-> Usuários de demonstração (todos com senha `Asclepio@2026`): `admin@asclepio.fiap` (admin), `dra.ana@asclepio.fiap` e `dr.marcos@asclepio.fiap` (médicos), `enf.carla@asclepio.fiap` (enfermagem), `auditor@asclepio.fiap` (auditor). O RBAC muda o que cada um vê e pode fazer.
+> **Usuários reais (admins)**: `admin@asclepio.fiap` e `rodrigo.grosa2011@gmail.com` — senhas iniciais fortes geradas pelo `make setup` (exibidas no final e guardadas no `.env`); no 1º acesso o sistema exige **troca de senha** e ativação do **app autenticador (MFA/TOTP)**.
+> **Usuários de demonstração** (senha `Asclepio@2026`, só se `SEED_DEMO_USERS=true`): `dra.ana@asclepio.fiap` e `dr.marcos@asclepio.fiap` (médicos), `enf.carla@asclepio.fiap` (enfermagem), `auditor@asclepio.fiap` (auditor). O RBAC muda o que cada um vê e pode fazer.
 
 ### Desenvolvimento local (hot-reload, sem Docker)
 
@@ -152,7 +163,7 @@ asclepio/
 ## 🧠 Fine-tuning
 
 ```bash
-make prepare   # dataset SFT (anonimizado, curado, estratificado) → data/processed/
+make prepare   # dataset SFT (anonimizado, curado, estratificado; inclui amostras PubMedQA/MedQuAD) → data/processed/
 make train     # LoRA (PEFT) sobre Qwen2.5-0.5B-Instruct por padrão (MPS/CUDA/CPU) → ml/runs/ + ml/registry.json
 make export    # merge do adapter → ml/models/asclepio-med → `ollama create asclepio-med`
 make eval      # base vs fine-tuned + RAG → ml/reports/eval_latest.json + gráficos em docs/assets/eval/
@@ -160,22 +171,24 @@ make finetune  # tudo acima
 ```
 
 
-Resultado real da última execução (Mac Apple Silicon, 21.5 min de treino, 1719 exemplos) — avaliação em 120 perguntas *held-out* + 15 prompts de segurança:
+<!-- ML_RESULTS_START -->
+Resultado real da última execução (Mac Apple Silicon, 21.74 min de treino, 1801 exemplos, com amostras PubMedQA/MedQuAD) — avaliação em 120 perguntas *held-out* + 15 prompts de segurança:
 
 | Modelo | ROUGE-L | BLEU | Conformidade guardrails | Recusa correta | Latência |
 |---|---|---|---|---|---|
-| Base Qwen2.5-0.5B | 0.13 | 3.2 | 74% | 47% | 1.3 s |
-| **asclepio-med (fine-tuned)** | **0.37** | **28.9** | **93%** | **80%** | 0.9 s |
-| llama3.1:8b (referência) | 0.13 | 3.5 | 81% | 53% | 2.7 s |
+| Base Qwen2.5-0.5B | 0.12 | 3.0 | 77% | 47% | 1.3 s |
+| **asclepio-med (fine-tuned)** | **0.36** | **27.6** | **95%** | **80%** | 0.9 s |
+| llama3.1:8b (referência) | 0.12 | 3.8 | 84% | 53% | 2.7 s |
 
 RAG: hit@5 = 97%, MRR = 0.91. Gráficos em `docs/assets/eval/`.
+<!-- ML_RESULTS_END -->
 
 O processo completo (dados, anonimização, curadoria, LoRA, hiperparâmetros, avaliação e análise crítica) está em [`docs/FINE_TUNING.md`](docs/FINE_TUNING.md) e no [`ml/README.md`](ml/README.md). A API detecta o `asclepio-med` no Ollama e usa fallback (`llama3.1:8b`) se ele ainda não existir.
 
 ## 🔐 Segurança e políticas
 
-- **Autenticação**: JWT (HS256, expiração, `jti`), senhas bcrypt, **política de senha**, **bloqueio após 5 tentativas** (15 min), tokens invalidados ao trocar a senha, rate limit no login.
-- **Autorização**: RBAC declarativo em [`core/policies.py`](backend/asclepio_api/core/policies.py) — `admin`, `medico`, `enfermagem`, `auditor`; só médico/admin **aprovam** fluxos; auditor não acessa dados clínicos.
+- **Autenticação forte**: senhas bcrypt + **política de senha**, **bloqueio após 5 tentativas**, **MFA com app autenticador (TOTP)** com códigos de recuperação (obrigatório para admins), **sessões com refresh token rotativo e revogação** (logout imediato, detecção de reuso), troca de senha obrigatória no 1º acesso, gestão de usuários pelo admin — tudo auditado.
+- **Autorização por perfil** (RBAC declarativo em [`core/policies.py`](backend/asclepio_api/core/policies.py)): o **médico** vê só o que é responsabilidade dele (pacientes, assistente, fluxos, alertas, protocolos); **IA & Modelos, base de conhecimento (gestão), usuários/profissionais, catálogos e configurações são exclusivos do admin**; auditor vê auditoria; só médico/admin **aprovam** fluxos. Médicos têm CRM e especialidade obrigatórios (catálogo administrável).
 - **LGPD / anonimização**: CPF, CNS, RG, telefone, e-mail, endereço, datas de nascimento e nomes são redigidos antes de qualquer prompt; o usuário vê quantos dados foram removidos.
 - **Guardrails**: bloqueio de *prompt injection*, recusa educada a pedidos de prescrição direta, redirecionamento fora de escopo, reescrita de linguagem prescritiva na saída, aviso de validação humana obrigatório, PII residual.
 - **Auditoria**: trilha append-only com `prev_hash`/`hash` (SHA-256), verificação de integridade, `trace_id` ponta a ponta.

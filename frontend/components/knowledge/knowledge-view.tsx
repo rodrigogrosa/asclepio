@@ -7,6 +7,7 @@ import { useAsync } from "@/lib/hooks";
 import type { DocType, KnowledgeDocument, KnowledgeDocumentDetail, KnowledgeSearchResponse } from "@/lib/types";
 import { cn, fmtDate, fmtNumber } from "@/lib/utils";
 import { useAuth } from "@/components/providers/auth-provider";
+import { hasPermission } from "@/lib/permissions";
 import { useToast } from "@/components/providers/toast-provider";
 import { Card, CardBody } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,8 @@ import { CitationCard } from "@/components/chat/sources-panel";
 const TYPES: DocType[] = ["protocolo", "faq", "modelo", "prontuario"];
 
 export function KnowledgeView() {
-  const { hasRole } = useAuth();
+  const { user } = useAuth();
+  const canManage = hasPermission(user, "knowledge:manage");
   const toast = useToast();
   const [type, setType] = useState<DocType | "">("");
   const [query, setQuery] = useState("");
@@ -86,10 +88,10 @@ export function KnowledgeView() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Base de conhecimento"
-        description="Protocolos, FAQs, modelos de documento e prontuários sintéticos indexados para o RAG."
+        title={canManage ? "Base de conhecimento" : "Protocolos e documentos"}
+        description={canManage ? "Protocolos, FAQs, modelos de documento e prontuários indexados para consulta pelo assistente. Reindexe após atualizar os arquivos." : "Protocolos institucionais, perguntas frequentes e modelos de documento. Use a busca para encontrar condutas e prazos."}
         actions={
-          hasRole("admin") && (
+          canManage && (
             <Button variant="outline" onClick={reindex} loading={reindexing}>
               <RefreshCw className="h-4 w-4" /> Reindexar
             </Button>
@@ -97,11 +99,15 @@ export function KnowledgeView() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className={cn("grid gap-3", canManage ? "sm:grid-cols-3" : "sm:grid-cols-1")}>
         {[
           { l: "Documentos", v: totals.docs, i: FileText },
-          { l: "Chunks indexados", v: totals.chunks, i: Layers },
-          { l: "Caracteres", v: fmtNumber(totals.chars), i: Hash },
+          ...(canManage
+            ? [
+                { l: "Trechos indexados", v: totals.chunks, i: Layers },
+                { l: "Caracteres", v: fmtNumber(totals.chars), i: Hash },
+              ]
+            : []),
         ].map((k) => (
           <Card key={k.l} className="flex items-center gap-3 px-4 py-3">
             <k.i className="h-5 w-5 text-primary" />
@@ -117,7 +123,7 @@ export function KnowledgeView() {
       <Card>
         <CardBody>
           <form onSubmit={search} className="flex flex-col gap-2 sm:flex-row">
-            <Input placeholder="Busca semântica: ex. “prazo para coleta de hemocultura na sepse”" value={query} onChange={(e) => setQuery(e.target.value)} leftIcon={<Search className="h-4 w-4" />} wrapperClassName="flex-1" aria-label="Busca semântica" />
+            <Input placeholder="Buscar nos protocolos: ex. “prazo para coleta de hemocultura na sepse”" value={query} onChange={(e) => setQuery(e.target.value)} leftIcon={<Search className="h-4 w-4" />} wrapperClassName="flex-1" aria-label="Busca semântica" />
             <Select value={type} onChange={(e) => setType(e.target.value as DocType | "")} wrapperClassName="sm:w-44" aria-label="Tipo de documento">
               <option value="">Todos os tipos</option>
               {TYPES.map((t) => <option key={t} value={t}>{DOC_TYPE_LABEL[t]}</option>)}
@@ -128,7 +134,7 @@ export function KnowledgeView() {
             <div className="mt-4">
               <div className="mb-2 flex items-center justify-between">
                 <p className="section-label">Resultados ({results.results.length})</p>
-                <p className="inline-flex items-center gap-1 text-[11px] text-muted"><Clock className="h-3 w-3" /> {results.latency_ms} ms · embeddings + similaridade</p>
+                <p className="inline-flex items-center gap-1 text-[11px] text-muted"><Clock className="h-3 w-3" /> {results.latency_ms} ms{canManage ? " · embeddings + similaridade" : ""}</p>
               </div>
               {results.results.length ? (
                 <ol className="grid gap-2 lg:grid-cols-2">
@@ -164,12 +170,12 @@ export function KnowledgeView() {
                       <p className="font-semibold leading-snug text-text group-hover:text-primary-hover">{d.title}</p>
                       <DocTypeBadge type={d.doc_type} />
                     </div>
-                    <p className="mt-1 truncate font-mono text-[10px] text-muted">{d.path}</p>
+                    {canManage && <p className="mt-1 truncate font-mono text-[10px] text-muted">{d.path}</p>}
                     <div className="mt-3 flex flex-wrap gap-1">
                       {d.tags.map((tg) => <Badge key={tg} tone="neutral" size="sm" icon={<Tag className="h-2.5 w-2.5" />}>{tg}</Badge>)}
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
-                      <span className="inline-flex items-center gap-1"><Layers className="h-3 w-3" /> {d.chunks} chunks</span>
+                      {canManage && <span className="inline-flex items-center gap-1"><Layers className="h-3 w-3" /> {d.chunks} trechos</span>}
                       {d.version && <span>v{d.version}</span>}
                       {d.category && <span>{d.category}</span>}
                       {d.updated_at && <span className="ml-auto">{fmtDate(d.updated_at)}</span>}
@@ -183,7 +189,7 @@ export function KnowledgeView() {
       )}
       {data && !data.length && <EmptyState icon={<Database className="h-5 w-5" />} title="Nenhum documento" description="A base está vazia para este filtro." />}
 
-      <Drawer open={docLoading || !!doc} onClose={() => { setDoc(null); setDocLoading(false); }} title={doc?.title ?? "Carregando…"} description={doc ? `${doc.path}${doc.version ? ` · v${doc.version}` : ""} · ${doc.chunks} chunks` : undefined}>
+      <Drawer open={docLoading || !!doc} onClose={() => { setDoc(null); setDocLoading(false); }} title={doc?.title ?? "Carregando…"} description={doc ? (canManage ? `${doc.path}${doc.version ? ` · v${doc.version}` : ""} · ${doc.chunks} trechos` : `${DOC_TYPE_LABEL[doc.doc_type]}${doc.version ? ` · versão ${doc.version}` : ""}`) : undefined}>
         {docLoading || !doc ? (
           <div className="space-y-2">{[0, 1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className={cn("h-4", i % 3 === 0 && "w-2/3")} />)}</div>
         ) : (
