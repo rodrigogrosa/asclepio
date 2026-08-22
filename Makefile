@@ -138,5 +138,6 @@ docs-diagrams: ## Exporta os grafos LangGraph (mermaid) para docs/diagramas/
 docs-metrics: ## Atualiza relatório/README com os números de ml/registry.json e ml/reports/eval_latest.json
 	$(UV) run python scripts/update_report_metrics.py
 
-docs-pdf: ## Gera docs/RELATORIO_TECNICO.pdf (capa + relatório + anexos, Mermaid renderizado; requer Google Chrome)
-	$(UV) run --with markdown python scripts/build_report_pdf.py
+docs-pdf: ## Gera docs/RELATORIO_TECNICO.pdf e docs/GUIA_INSTALACAO.pdf (capa + conteúdo + anexos; requer Google Chrome)
+	$(UV) run --with markdown python scripts/build_report_pdf.py relatorio
+	$(UV) run --with markdown python scripts/build_report_pdf.py guia

@@ -206,7 +206,7 @@ Tudo documentado em [`docs/POLITICAS.md`](docs/POLITICAS.md).
 
 | Documento | Conteúdo |
 |---|---|
-| [`docs/GUIA_INSTALACAO.md`](docs/GUIA_INSTALACAO.md) | Passo a passo de instalação para avaliação (links, acesso, credenciais, demo, troubleshooting) |
+| [`docs/GUIA_INSTALACAO.md`](docs/GUIA_INSTALACAO.md) · [PDF](docs/GUIA_INSTALACAO.pdf) | Passo a passo de instalação para avaliação (links, acesso, credenciais, demo, troubleshooting) |
 | [`docs/EVIDENCIAS.md`](docs/EVIDENCIAS.md) | **Onde cada exigência do Tech Challenge aparece no sistema** (tela + arquivo + comando) — guia para avaliação |
 | [`docs/RELATORIO_TECNICO.md`](docs/RELATORIO_TECNICO.md) · [PDF](docs/RELATORIO_TECNICO.pdf) | Relatório técnico da Fase 3 (fine-tuning, assistente, diagramas, avaliação e resultados) — PDF com anexos via `make docs-pdf` |
 | [`docs/FINE_TUNING.md`](docs/FINE_TUNING.md) | Processo de fine-tuning em detalhe, métricas e análise |

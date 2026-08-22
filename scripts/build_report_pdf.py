@@ -18,17 +18,35 @@ import markdown
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
-OUT_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else DOCS
-OUT_PDF = OUT_DIR / "RELATORIO_TECNICO.pdf"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-SECTIONS = [
-    ("", DOCS / "RELATORIO_TECNICO.md"),
-    ("Anexo A — Fine-tuning em detalhe", DOCS / "FINE_TUNING.md"),
-    ("Anexo B — Arquitetura", DOCS / "ARQUITETURA.md"),
-    ("Anexo C — Políticas de segurança e acesso", DOCS / "POLITICAS.md"),
-    ("Anexo D — Evidências: onde cada exigência aparece", DOCS / "EVIDENCIAS.md"),
-]
+# Documentos disponíveis: `python scripts/build_report_pdf.py [relatorio|guia] [out_dir]`
+DOC_KIND = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("/") else "relatorio"
+OUT_DIR = Path(sys.argv[2]) if len(sys.argv) > 2 else (Path(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].startswith("/") else DOCS)
+
+DOCUMENTS = {
+    "relatorio": {
+        "out": "RELATORIO_TECNICO.pdf",
+        "title": "Relatório Técnico",
+        "subtitle": "LLM fine-tunada · LangChain/LangGraph · Guardrails · RAG com fontes · Auditoria",
+        "sections": [
+            ("", DOCS / "RELATORIO_TECNICO.md"),
+            ("Anexo A — Fine-tuning em detalhe", DOCS / "FINE_TUNING.md"),
+            ("Anexo B — Arquitetura", DOCS / "ARQUITETURA.md"),
+            ("Anexo C — Políticas de segurança e acesso", DOCS / "POLITICAS.md"),
+            ("Anexo D — Evidências: onde cada exigência aparece", DOCS / "EVIDENCIAS.md"),
+        ],
+    },
+    "guia": {
+        "out": "GUIA_INSTALACAO.pdf",
+        "title": "Guia de Instalação",
+        "subtitle": "Passo a passo para instalar e avaliar o Asclépio em qualquer máquina (macOS · Linux · Windows/WSL2)",
+        "sections": [("", DOCS / "GUIA_INSTALACAO.md"), ("Anexo — Evidências: onde cada exigência aparece", DOCS / "EVIDENCIAS.md")],
+    },
+}
+DOC = DOCUMENTS[DOC_KIND]
+OUT_PDF = OUT_DIR / DOC["out"]
+SECTIONS = DOC["sections"]
 
 CSS = """
 @page { size: A4; margin: 18mm 16mm 18mm 16mm; }
@@ -101,9 +119,9 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     logo = img_data_uri(DOCS / "assets" / "brand" / "asclepio-logo-horizontal.svg")
     parts = [
-        f'<div class="cover"><img class="logo" src="{logo}"><h1>Relatório Técnico</h1>'
+        f'<div class="cover"><img class="logo" src="{logo}"><h1>{DOC["title"]}</h1>'
         f'<div class="sub">Asclépio — Assistente Clínico Inteligente</div>'
-        f'<div class="sub">LLM fine-tunada · LangChain/LangGraph · Guardrails · RAG com fontes · Auditoria</div>'
+        f'<div class="sub">{DOC["subtitle"]}</div>'
         f'<div class="badge">TECH CHALLENGE · FASE 3 · FIAP PÓS-TECH IA PARA DEVS (8IADT)</div>'
         f'<div class="meta">Repositório: https://github.com/rodrigogrosa/asclepio<br>Gerado em {date.today().strftime("%d/%m/%Y")}</div></div>'
     ]
@@ -114,7 +132,7 @@ def main() -> None:
         cls = ' class="annex"' if title else ""
         parts.append(f"<section{cls}>{convert(text, path.parent)}</section>")
     body = "\n".join(parts)
-    html = f"""<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório Técnico — Asclépio</title>
+    html = f"""<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>{DOC["title"]} — Asclépio</title>
 <style>{CSS}</style>
 <script type="module">
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
@@ -122,7 +140,7 @@ mermaid.initialize({{ startOnLoad: false, theme: "neutral", securityLevel: "loos
 await mermaid.run({{ querySelector: ".mermaid" }});
 document.body.dataset.ready = "1";
 </script></head><body>{body}</body></html>"""
-    html_path = OUT_DIR / "RELATORIO_TECNICO.html"
+    html_path = OUT_DIR / (DOC["out"].replace(".pdf", ".html"))
     html_path.write_text(html, encoding="utf-8")
     cmd = [CHROME, "--headless=new", "--disable-gpu", "--no-sandbox", "--run-all-compositor-stages-before-draw", "--virtual-time-budget=20000", "--no-pdf-header-footer", f"--print-to-pdf={OUT_PDF}", str(html_path)]
     subprocess.run(cmd, check=True, capture_output=True, timeout=180)
