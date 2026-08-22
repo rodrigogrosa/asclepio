@@ -135,12 +135,25 @@ def new_totp_secret() -> str:
     return pyotp.random_base32()
 
 
-def totp_uri(secret: str, email: str, issuer: str = "Asclépio HU-FIAP") -> str:
-    return pyotp.TOTP(secret).provisioning_uri(name=email, issuer_name=issuer)
+def totp_uri(secret: str, email: str, issuer: str | None = None) -> str:
+    """URI otpauth:// curta e compatível (issuer ASCII sem espaços, '@' sem percent-encoding,
+    parâmetros explícitos) — QR menos denso e aceito por Google Authenticator/Authy/1Password/Microsoft."""
+    import unicodedata
+    from urllib.parse import quote
+
+    if issuer is None:
+        issuer = get_settings().app_name
+    issuer_ascii = unicodedata.normalize("NFKD", issuer).encode("ascii", "ignore").decode()
+    issuer_ascii = "".join(ch for ch in issuer_ascii if ch.isalnum() or ch in "-_.") or "Asclepio"
+    label = quote(f"{issuer_ascii}:{email}", safe="@:")
+    return f"otpauth://totp/{label}?secret={secret}&issuer={issuer_ascii}&algorithm=SHA1&digits=6&period=30"
 
 
 def totp_qr_svg(uri: str) -> str:
-    return segno.make(uri, error="m").svg_inline(scale=5, dark="#0B0B10", light="#FFFFFF", border=2)
+    """SVG inline do QR (nível de correção M, borda quieta de 4 módulos, módulos grandes) — fácil de escanear da tela."""
+    return segno.make(uri, error="m", boost_error=False).svg_inline(
+        scale=8, dark="#0B0B10", light="#FFFFFF", border=4
+    )
 
 
 def verify_totp(secret: str, code: str) -> bool:
