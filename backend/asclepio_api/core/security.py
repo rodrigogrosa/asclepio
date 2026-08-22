@@ -146,7 +146,7 @@ def totp_uri(secret: str, email: str, issuer: str | None = None) -> str:
     issuer_ascii = unicodedata.normalize("NFKD", issuer).encode("ascii", "ignore").decode()
     issuer_ascii = "".join(ch for ch in issuer_ascii if ch.isalnum() or ch in "-_.") or "Asclepio"
     label = quote(f"{issuer_ascii}:{email}", safe="@:")
-    return f"otpauth://totp/{label}?secret={secret}&issuer={issuer_ascii}&algorithm=SHA1&digits=6&period=30"
+    return f"otpauth://totp/{label}?secret={secret}&issuer={issuer_ascii}"
 
 
 def totp_qr_svg(uri: str) -> str:
