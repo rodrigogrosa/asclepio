@@ -1,0 +1,41 @@
+# LiteLLM Proxy — gateway único (OpenAI-compatible) para todos os modelos do Asclépio.
+# A API pode usar LLM_PROVIDER=litellm e apontar para http://litellm:4000 (ou localhost:4000).
+# Vantagens: chaves virtuais, limites por chave, fallback entre modelos, custo/uso e tracing no Langfuse.
+model_list:
+  - model_name: asclepio-med            # modelo fine-tunado (criado pelo pipeline de ML no Ollama)
+    litellm_params:
+      model: ollama_chat/asclepio-med
+      api_base: os.environ/OLLAMA_BASE_URL
+  - model_name: llama3.1:8b
+    litellm_params:
+      model: ollama_chat/llama3.1:8b
+      api_base: os.environ/OLLAMA_BASE_URL
+  - model_name: llama3.2:3b
+    litellm_params:
+      model: ollama_chat/llama3.2:3b
+      api_base: os.environ/OLLAMA_BASE_URL
+  - model_name: nomic-embed-text          # embeddings
+    litellm_params:
+      model: ollama/nomic-embed-text
+      api_base: os.environ/OLLAMA_BASE_URL
+  # Exemplo de provedor externo (descomente e defina OPENAI_API_KEY no .env):
+  # - model_name: gpt-4o-mini
+  #   litellm_params:
+  #     model: openai/gpt-4o-mini
+  #     api_key: os.environ/OPENAI_API_KEY
+
+router_settings:
+  fallbacks:
+    - asclepio-med: ["llama3.1:8b", "llama3.2:3b"]   # se o fine-tunado não existir/falhar
+  num_retries: 2
+  timeout: 120
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+  # Tracing automático de todas as chamadas no Langfuse (se as chaves estiverem definidas)
+  success_callback: ["langfuse"]
+  failure_callback: ["langfuse"]
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

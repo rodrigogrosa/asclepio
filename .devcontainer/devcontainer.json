@@ -1,0 +1,17 @@
+{
+  "name": "Asclépio Dev",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/va-h/devcontainers-features/uv:1": {}
+  },
+  "postCreateCommand": "make install",
+  "forwardPorts": [3000, 8000, 4000, 3001],
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "charliermarsh.ruff", "dbaeumer.vscode-eslint", "bradlc.vscode-tailwindcss", "ms-azuretools.vscode-docker", "bierner.markdown-mermaid"],
+      "settings": { "python.defaultInterpreterPath": ".venv/bin/python", "editor.formatOnSave": true }
+    }
+  }
+}

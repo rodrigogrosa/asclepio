@@ -1,0 +1,16 @@
+.git
+.venv
+**/__pycache__
+**/*.pyc
+frontend/node_modules
+frontend/.next
+data/vectorstore
+data/checkpoints
+data/*.sqlite*
+ml/runs
+ml/models
+ml/.cache
+ml/artifacts
+docs
+*.md
+!README.md

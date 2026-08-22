@@ -1,0 +1,17 @@
+graph TD;
+	__start__([Início])
+	guard_input(guard_input)
+	classify_intent(classify_intent)
+	retrieve(retrieve)
+	generate(generate)
+	guard_output(guard_output)
+	blocked(blocked)
+	__end__([Fim])
+	__start__ --> guard_input;
+	classify_intent --> retrieve;
+	generate --> guard_output;
+	guard_input -.-> blocked;
+	guard_input -.-> classify_intent;
+	retrieve --> generate;
+	blocked --> __end__;
+	guard_output --> __end__;

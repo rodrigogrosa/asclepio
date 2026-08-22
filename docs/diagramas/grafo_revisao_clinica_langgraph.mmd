@@ -1,0 +1,26 @@
+graph TD;
+	__start__([Início])
+	load_patient(load_patient)
+	check_pending_exams(check_pending_exams)
+	triage_risk(triage_risk)
+	emit_immediate_alerts(emit_immediate_alerts)
+	retrieve_protocols(retrieve_protocols)
+	suggest_conduct(suggest_conduct)
+	validate_guardrails(validate_guardrails)
+	emit_alerts(emit_alerts)
+	human_review(human_review)
+	finalize(finalize)
+	__end__([Fim])
+	__start__ --> load_patient;
+	check_pending_exams --> triage_risk;
+	emit_alerts --> human_review;
+	emit_immediate_alerts --> retrieve_protocols;
+	human_review --> finalize;
+	load_patient --> check_pending_exams;
+	retrieve_protocols --> suggest_conduct;
+	suggest_conduct --> validate_guardrails;
+	triage_risk -.-> emit_immediate_alerts;
+	triage_risk -.-> retrieve_protocols;
+	validate_guardrails -.-> emit_alerts;
+	validate_guardrails -.-> suggest_conduct;
+	finalize --> __end__;

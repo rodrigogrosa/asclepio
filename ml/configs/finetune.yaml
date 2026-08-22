@@ -1,0 +1,94 @@
+# ===========================================================================
+# Configuração do pipeline de fine-tuning do Asclépio
+# ---------------------------------------------------------------------------
+# Tudo que é "decisão de engenharia" fica aqui, versionado, para que o relatório
+# possa explicar e qualquer pessoa possa reproduzir. Os perfis (`quick` e `full`)
+# só alteram a parte de treino; dados, LoRA e avaliação são compartilhados.
+# Caminhos são relativos à RAIZ do monorepo.
+# ===========================================================================
+
+base_model: Qwen/Qwen2.5-0.5B-Instruct   # ungated, 0,5 B parâmetros, roda em MPS/CPU
+# Alternativas testadas/documentadas (ver ml/README.md):
+#   - meta-llama/Llama-3.2-1B-Instruct   (gated: exige HF_TOKEN e aceite de licença)
+#   - TinyLlama/TinyLlama-1.1B-Chat-v1.0  (ungated, arquitetura Llama)
+#   - Qwen/Qwen2.5-1.5B-Instruct          (melhor qualidade, ~3x mais lento)
+seed: 42
+
+paths:
+  knowledge_base: data/knowledge_base
+  seed_instructions: data/synthetic/instructions_seed.jsonl
+  processed: data/processed
+  runs: ml/runs
+  models: ml/models
+  reports: ml/reports
+  assets: docs/assets/eval
+  registry: ml/registry.json
+  cache: ml/.cache
+
+prepare:
+  augment_variants: 4          # nº máximo de paráfrases por pergunta (além da original)
+  target_examples: 2600        # alvo aproximado após augmentação (antes do cap)
+  cap_per_category: 1300       # balanceamento: máximo de exemplos por categoria
+  min_answer_chars: 40         # curadoria: respostas menores são descartadas
+  max_answer_chars: 3000       # curadoria: respostas maiores são truncadas em parágrafo
+  max_context_chars: 2500      # contexto de paciente truncado
+  section_summary_chars: 1400  # resumo de seção de protocolo (corte em frase/linha)
+  split: [0.85, 0.075, 0.075]  # train / val / test (estratificado por categoria, agrupado)
+  public_fraction: 0.10        # somente com --with-public (PubMedQA/MedQuAD)
+  public_max_items: 150
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+profiles:
+  full:                        # padrão — ajustado para ≤ ~45 min em Mac M-series
+    max_seq_len: 1024
+    epochs: 2
+    max_steps: -1              # -1 = usa epochs; >0 limita o nº de passos
+    batch_size: 2
+    grad_accum: 8              # batch efetivo = 16 (em fp32/MPS, bs ≥ 4 × 1024 tokens estourou a memória unificada → swap)
+    learning_rate: 2.0e-4
+    lr_scheduler: cosine
+    warmup_ratio: 0.05
+    weight_decay: 0.0
+    logging_steps: 10
+    eval_steps: 50
+    eval_subset: 64            # curva de eval em subconjunto do val (a final usa o val inteiro)
+    save_steps: 0              # 0 = só salva no final
+    gradient_checkpointing: false
+    dtype: auto                # auto → cuda: bf16 · mps: fp32 · cpu: fp32
+  quick:                       # smoke test (~2-4 min): valida o pipeline ponta a ponta
+    max_seq_len: 512
+    epochs: 1
+    max_steps: 50
+    batch_size: 2
+    grad_accum: 2
+    learning_rate: 2.0e-4
+    lr_scheduler: cosine
+    warmup_ratio: 0.1
+    weight_decay: 0.0
+    logging_steps: 5
+    eval_steps: 25
+    eval_subset: 32
+    save_steps: 0
+    gradient_checkpointing: false
+    dtype: auto
+
+export:
+  ollama_model: asclepio-med
+  temperature: 0.1
+  num_ctx: 4096
+  num_predict: 512
+
+evaluate:
+  max_samples: 120             # amostra do test.jsonl
+  per_sample_limit: 60         # itens detalhados no relatório (e amostra do LLM-juiz)
+  max_new_tokens: 256
+  batch_size: 8
+  judge_model: llama3.1:8b
+  reference_model: llama3.1:8b
+  embed_model: nomic-embed-text
+  ollama_base_url: http://localhost:11434

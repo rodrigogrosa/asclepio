@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.png binary
+*.gguf binary
+*.safetensors binary
+*.md linguist-documentation

@@ -1,0 +1,103 @@
+{
+  "started_at": "2026-08-21T20:56:03",
+  "sources": {
+    "seed_instructions": 233,
+    "faq": 167,
+    "protocolos": 16,
+    "modelos_documentos": 10
+  },
+  "generated_by_origin": {
+    "seed": 233,
+    "faq": 167,
+    "protocolo_secao": 144,
+    "protocolo_farmaco": 135,
+    "protocolo_faq": 80,
+    "modelo": 50,
+    "paciente": 72,
+    "builtin": 8
+  },
+  "after_augmentation": 3497,
+  "anonymization": {
+    "examples_with_pii_removed": 0,
+    "entities_removed": 0,
+    "by_type": {},
+    "examples_total": 3497,
+    "patient_notes_entities": 49
+  },
+  "curation": {
+    "removed_near_duplicates": 8,
+    "disclaimer_added": 123,
+    "removed_exact_duplicates": 93,
+    "refusal_reinforced": 114,
+    "capped_protocolo": 1350,
+    "kept": 2046
+  },
+  "final_by_category": {
+    "protocolo": 1300,
+    "documento": 248,
+    "paciente_contexto": 111,
+    "recusa_prescricao": 129,
+    "fora_escopo": 108,
+    "identidade_limites": 66,
+    "anonimizacao_seguranca": 84
+  },
+  "final_by_origin": {
+    "faq": 379,
+    "protocolo_secao": 272,
+    "protocolo_farmaco": 233,
+    "protocolo_faq": 202,
+    "seed": 734,
+    "modelo": 120,
+    "paciente": 70,
+    "builtin": 36
+  },
+  "splits": {
+    "train": {
+      "n": 1719,
+      "by_category": {
+        "protocolo": 1104,
+        "recusa_prescricao": 102,
+        "documento": 205,
+        "fora_escopo": 87,
+        "identidade_limites": 56,
+        "paciente_contexto": 93,
+        "anonimizacao_seguranca": 72
+      }
+    },
+    "val": {
+      "n": 165,
+      "by_category": {
+        "protocolo": 98,
+        "identidade_limites": 5,
+        "documento": 23,
+        "recusa_prescricao": 14,
+        "fora_escopo": 9,
+        "paciente_contexto": 10,
+        "anonimizacao_seguranca": 6
+      }
+    },
+    "test": {
+      "n": 162,
+      "by_category": {
+        "fora_escopo": 12,
+        "protocolo": 98,
+        "anonimizacao_seguranca": 6,
+        "paciente_contexto": 8,
+        "recusa_prescricao": 13,
+        "identidade_limites": 5,
+        "documento": 20
+      }
+    }
+  },
+  "lengths": {
+    "user_chars_mean": 126,
+    "user_chars_max": 1260,
+    "assistant_chars_mean": 583,
+    "assistant_chars_max": 1657,
+    "approx_tokens_mean": 497
+  },
+  "total": 2046,
+  "seed": 42,
+  "system_prompt_chars": 1030,
+  "notes": []
+}

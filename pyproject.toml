@@ -1,0 +1,52 @@
+[project]
+name = "asclepio"
+version = "1.0.0"
+description = "Asclépio — Assistente Clínico Inteligente (Tech Challenge FIAP · Fase 3 · IA para Devs)"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/asclepio_core", "backend", "ml"]
+
+[tool.uv.sources]
+asclepio-core = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6",
+    "httpx>=0.27",
+    "mypy>=1.13",
+    "pre-commit>=4",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["data", "frontend", "docs", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W", "N", "S", "C4", "SIM", "RUF"]
+ignore = ["S101", "S311", "S105", "S110", "B008", "RUF012", "RUF001", "RUF002", "RUF003", "E501", "E702", "SIM105", "B904", "N818"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S", "B", "N"]
+"ml/**" = ["S603", "S607"]
+"scripts/**" = ["S603", "S607"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--import-mode=importlib -p no:cacheprovider"
+testpaths = ["backend/tests", "packages/asclepio_core/tests", "ml/tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = true

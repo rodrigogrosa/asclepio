@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 256" width="900" height="256" role="img" aria-label="Asclépio — Assistente Clínico Inteligente">
+  <defs>
+    <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF3D7F"/>
+      <stop offset="100%" stop-color="#C40A4A"/>
+    </linearGradient>
+    <linearGradient id="serp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF5C95"/>
+      <stop offset="100%" stop-color="#ED145B"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="900" height="256" fill="#0B0B10"/>
+  <g transform="translate(0,0)">
+    <rect x="0" y="0" width="256" height="256" rx="56" fill="#0B0B10"/>
+    <g stroke="#ED145B" stroke-opacity=".28" stroke-width="1.5" fill="none">
+      <line x1="62" y1="70" x2="128" y2="48"/><line x1="194" y1="70" x2="128" y2="48"/>
+      <line x1="62" y1="70" x2="44" y2="132"/><line x1="194" y1="70" x2="212" y2="132"/>
+      <line x1="44" y1="132" x2="62" y2="194"/><line x1="212" y1="132" x2="194" y2="194"/>
+      <line x1="62" y1="194" x2="128" y2="222"/><line x1="194" y1="194" x2="128" y2="222"/>
+    </g>
+    <g fill="#ED145B" fill-opacity=".55">
+      <circle cx="62" cy="70" r="4"/><circle cx="194" cy="70" r="4"/><circle cx="44" cy="132" r="4"/>
+      <circle cx="212" cy="132" r="4"/><circle cx="62" cy="194" r="4"/><circle cx="194" cy="194" r="4"/><circle cx="128" cy="222" r="4"/>
+    </g>
+    <line x1="128" y1="56" x2="128" y2="214" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round"/>
+    <circle cx="128" cy="48" r="11" fill="url(#pink)" filter="url(#glow)"/>
+    <path d="M 96 84 C 96 108, 160 110, 160 134 C 160 158, 96 160, 96 184 C 96 202, 114 210, 128 206" fill="none" stroke="url(#serp)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 96 84 C 84 82, 78 72, 84 64 C 90 58, 104 62, 106 72 C 108 80, 102 86, 96 84 Z" fill="#FF5C95"/>
+    <circle cx="92" cy="68" r="2.6" fill="#0B0B10"/>
+    <path d="M 82 66 L 70 62 M 82 66 L 71 70" stroke="#FF5C95" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="128" cy="206" r="4" fill="#ED145B"/>
+  </g>
+  <!-- wordmark -->
+  <text x="292" y="132" font-family="Montserrat, Inter, Helvetica, Arial, sans-serif" font-weight="800" font-size="92" letter-spacing="4" fill="#FFFFFF">ASCL<tspan fill="url(#pink)">É</tspan>PIO</text>
+  <text x="296" y="178" font-family="Inter, Helvetica, Arial, sans-serif" font-weight="500" font-size="24" letter-spacing="6" fill="#ED145B">ASSISTENTE CLÍNICO INTELIGENTE</text>
+  <rect x="296" y="198" width="120" height="30" rx="6" fill="#ED145B"/>
+  <text x="356" y="219" text-anchor="middle" font-family="Montserrat, Inter, Helvetica, Arial, sans-serif" font-weight="800" font-size="16" letter-spacing="3" fill="#0B0B10">FIAP · IADT</text>
+</svg>

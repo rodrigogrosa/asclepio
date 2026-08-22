@@ -1,0 +1,21 @@
+flowchart LR
+  subgraph Web["Frontend · Next.js"]
+    UI[Dashboard · Assistente · Pacientes · Fluxos · Alertas · Conhecimento · Modelo · Auditoria]
+  end
+  subgraph API["Backend · FastAPI"]
+    AUTH[JWT · RBAC · rate limit]
+    CHAT[Grafo do chat · LangGraph]
+    WF[Grafo de revisão clínica · LangGraph + interrupt]
+    GR[Guardrails · Anonimizador]
+    AUD[(Auditoria · hash chain)]
+    DB[(Postgres · prontuários)]
+    VS[(Chroma · protocolos)]
+  end
+  OL[Ollama · asclepio-med · llama3.1 · nomic-embed]
+  LL[LiteLLM]
+  LF[Langfuse]
+  UI -->|REST + SSE| AUTH --> CHAT & WF
+  CHAT & WF --> GR & VS & DB & AUD
+  CHAT & WF -->|LangChain| OL
+  CHAT & WF -.-> LL --> OL
+  CHAT & WF -.-> LF

@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0b0b10;
+  --color-surface: #14141b;
+  --color-surface-2: #1c1c26;
+  --color-border: #2a2a38;
+  --color-text: #f5f5f7;
+  --color-muted: #9a9aab;
+  --color-primary: #ed145b;
+  --color-primary-hover: #ff3d7f;
+  --color-primary-dark: #c40a4a;
+  --color-accent: #7b2ff7;
+  --color-success: #2ecc71;
+  --color-warning: #f5a623;
+  --color-danger: #ff4d4f;
+  --color-info: #3aa0ff;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-montserrat), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+
+  --shadow-focus: 0 0 0 3px rgba(237, 20, 91, 0.35);
+  --shadow-glow: 0 0 24px rgba(237, 20, 91, 0.25);
+
+  --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+  --animate-blink: blink 1s steps(2, start) infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes blink {
+    to {
+      visibility: hidden;
+    }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+::selection {
+  background: rgba(237, 20, 91, 0.45);
+  color: #fff;
+}
+
+*:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: 8px;
+}
+
+/* Scrollbars sutis */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a38 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2a2a38;
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Utilitários de marca */
+@utility brand-gradient {
+  background-image: linear-gradient(135deg, #ed145b 0%, #7b2ff7 100%);
+}
+@utility brand-gradient-text {
+  background-image: linear-gradient(135deg, #ed145b 0%, #7b2ff7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility section-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Markdown (prose customizado sem plugin typography) */
+.md {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text);
+}
+.md > * + * {
+  margin-top: 0.75em;
+}
+.md h1,
+.md h2,
+.md h3,
+.md h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.2em;
+}
+.md h1 {
+  font-size: 1.35em;
+}
+.md h2 {
+  font-size: 1.2em;
+}
+.md h3 {
+  font-size: 1.05em;
+}
+.md p {
+  margin: 0;
+}
+.md ul,
+.md ol {
+  padding-left: 1.4em;
+}
+.md ul {
+  list-style: disc;
+}
+.md ol {
+  list-style: decimal;
+}
+.md li + li {
+  margin-top: 0.25em;
+}
+.md strong {
+  color: #fff;
+  font-weight: 600;
+}
+.md a {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.md code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875em;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  padding: 0.1em 0.35em;
+  border-radius: 6px;
+}
+.md pre {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+.md pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.md blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 12px;
+  color: var(--color-muted);
+}
+.md table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.md th,
+.md td {
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  text-align: left;
+}
+.md th {
+  background: var(--color-surface-2);
+  font-weight: 600;
+}
+.md hr {
+  border-color: var(--color-border);
+}
+.md .cite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin: 0 1px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  background: rgba(237, 20, 91, 0.15);
+  color: var(--color-primary-hover);
+  border: 1px solid rgba(237, 20, 91, 0.4);
+  cursor: pointer;
+  vertical-align: 2px;
+  line-height: 1;
+}
+.md .cite:hover {
+  background: rgba(237, 20, 91, 0.3);
+}
+
+/* Mermaid theme overrides */
+.mermaid-wrap svg {
+  max-width: 100%;
+  height: auto;
+  max-height: 440px;
+}
