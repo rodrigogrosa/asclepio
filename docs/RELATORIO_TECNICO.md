@@ -22,6 +22,28 @@
 
 ---
 
+## Checklist de conformidade com o edital da Fase 3
+
+| Exigência do PDF | Onde está neste relatório | Evidência no sistema/repositório |
+|---|---|---|
+| Fine-tuning de LLM com protocolos, FAQs e modelos de laudos/receitas/procedimentos | §3, §5 | `ml/` (pipeline), `ml/registry.json`, modelo `asclepio-med` no Ollama, tela IA & Modelos |
+| Preparo dos dados com pré-processamento, **anonimização** e curadoria | §4 | `data/processed/DATASET_CARD.md`, `asclepio_core/anonymizer.py`, testes |
+| Assistente com LangChain: pipeline com a LLM customizada | §6 | `services/assistant.py` (grafo), `/assistente` |
+| Consultas em base estruturada (prontuários/registros) | §6 | `services/patients.py`, `/pacientes`, Postgres |
+| Respostas contextualizadas com dados atualizados do paciente | §6 | "ver contexto anonimizado" no chat |
+| Fluxos automatizados e seguros (exames pendentes, sugestões, alertas) coordenados com LangChain/LangGraph | §7 | `services/workflow.py`, `/fluxos`, `/alertas` |
+| Limites de atuação (nunca prescrever sem validação humana) | §8 | `asclepio_core/guardrails.py`, nó `human_review`, testes |
+| Logging detalhado para rastreamento e auditoria | §8, §10 | trilha `audit_log` (hash chain), structlog, Prometheus, Langfuse, `/auditoria` |
+| Explainability (fonte da informação na resposta) | §6, §8, §9 | citações `[n]`, painel de fontes, métrica `citation_rate` |
+| Código modularizado em Python + README completo | §10 | `packages/`, `backend/`, `ml/`, `README.md`, CI |
+| Dataset anonimizado ou sintético | §3, §4 | `data/synthetic/`, `data/processed/`, `data/knowledge_base/` |
+| Explicação do processo de fine-tuning | §4, §5, §9 + `docs/FINE_TUNING.md` | — |
+| Descrição do assistente médico | §2, §6 | — |
+| Diagrama do fluxo LangChain/LangGraph | §2, §6, §7 (Mermaid) + `docs/diagramas/` | gerado pelo próprio LangGraph (`GET /workflows/graph`) |
+| Avaliação do modelo e análise dos resultados | §9 | `ml/reports/eval_latest.json`, `docs/assets/eval/` |
+| Vídeo (≤ 15 min) demonstrando treino, fluxo, perguntas contextualizadas, logs e validação | roteiro em `docs/ROTEIRO_VIDEO.md` | a gravar |
+| Datasets sugeridos (PubMedQA, MedQuAD) | §3, §4 (amostras ≤ 10 % via `--with-public`) | `data/processed/DATASET_CARD.md` |
+
 ## 1. Contexto e objetivos
 
 Após automatizar análises de exames e textos clínicos (fases anteriores), o hospital quer um **assistente virtual médico treinado com seus próprios dados** (protocolos, FAQs de médicos, modelos de laudos/receitas/procedimentos), capaz de **auxiliar condutas, responder dúvidas e sugerir procedimentos com base nos protocolos internos**, além de **fluxos de decisão automatizados e seguros** (verificar exames pendentes, sugerir tratamentos, emitir alertas) coordenados com LangChain.
@@ -136,7 +158,7 @@ Cada nó grava um **passo** (status, duração, resumo, dados) → timeline na U
 - **Limites de atuação** (`asclepio_core/guardrails.py`): entrada — PII redigida, *prompt injection* bloqueado, pedido de prescrição direta → intenção `prescricao` (recusa + protocolo), fora de escopo → redireciona; saída — linguagem prescritiva imperativa reescrita como sugestão, PII residual redigida, aviso de validação humana obrigatório, sinalização de ausência de fontes. Nos fluxos, a sugestão reprovada é regenerada uma vez.
 - **Logging detalhado**: structlog com `request_id` ponta a ponta; **trilha de auditoria append-only com cadeia de hashes** (`GET /audit/verify`), registrando usuário, ação, recurso, fontes usadas, guardrail, modelo, latência, PII redigida; métricas Prometheus; traces no Langfuse.
 - **Explainability**: toda resposta traz as fontes (documento › seção › score › trecho); o usuário vê o contexto exato enviado à LLM; a avaliação mede `citation_rate`; a confiança é derivada do score de recuperação e das flags.
-- **Autenticação/autorização**: JWT, política de senha, bloqueio por tentativas, RBAC declarativo (ver `docs/POLITICAS.md`).
+- **Autenticação/autorização (v1.2)**: senhas bcrypt com política, bloqueio por tentativas, **MFA com app autenticador (TOTP)** obrigatório para administradores, sessões com refresh token rotativo e revogação, troca de senha obrigatória no 1º acesso, **RBAC por perfil** (médico vê só o que é responsabilidade dele; IA & Modelos, base de conhecimento, usuários, catálogos e auditoria só para admin/auditor), cadastro de profissionais com CRM/especialidade validados — tudo auditado (ver `docs/POLITICAS.md`).
 
 ## 9. Avaliação do modelo e análise dos resultados
 
