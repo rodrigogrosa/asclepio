@@ -15,7 +15,7 @@ from ..core.logging import request_id_ctx
 from ..db import models as m
 from ..schemas import ChatIn, ChatResponse, ConversationDetailOut, ConversationOut, FeedbackIn
 from ..services import assistant as svc
-from ..services.llm import get_llm_factory
+from ..services.llm import LLMUnavailableError, get_llm_factory
 
 router = APIRouter(prefix="/assistant", tags=["assistente"])
 
@@ -26,15 +26,18 @@ router = APIRouter(prefix="/assistant", tags=["assistente"])
 async def chat(
     body: ChatIn, request: Request, session: DbSession, user: CurrentUser
 ) -> dict[str, Any]:
-    return await svc.run_chat(
-        session,
-        user=user,
-        message=body.message,
-        patient_id=body.patient_id,
-        conversation_id=body.conversation_id,
-        trace_id=request_id_ctx.get(),
-        ip=client_ip(request),
-    )
+    try:
+        return await svc.run_chat(
+            session,
+            user=user,
+            message=body.message,
+            patient_id=body.patient_id,
+            conversation_id=body.conversation_id,
+            trace_id=request_id_ctx.get(),
+            ip=client_ip(request),
+        )
+    except LLMUnavailableError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @router.post("/chat/stream", dependencies=[require_permission("assistant:chat")])
