@@ -43,7 +43,7 @@ from ..prompts import (
 )
 from .alerts import create_alert
 from .knowledge import get_knowledge_service
-from .llm import get_llm_factory
+from .llm import get_llm_factory, raise_if_llm_unavailable
 from .patients import alert_dict, build_context, get_patient, professional_names
 
 log = get_logger("workflow")
@@ -428,7 +428,11 @@ async def suggest_conduct(state: ReviewState) -> ReviewState:
             )
         ),
     ]
-    resp = await llm.ainvoke(msgs)
+    try:
+        resp = await llm.ainvoke(msgs)
+    except Exception as exc:
+        raise_if_llm_unavailable(exc)
+        raise
     text = resp.content if isinstance(resp.content, str) else " ".join(str(c) for c in resp.content)
     sugg = parse_suggestions(text, state.get("citations", []))
     return {

@@ -31,6 +31,55 @@ from ..core.logging import get_logger
 log = get_logger("llm")
 
 
+class LLMUnavailableError(RuntimeError):
+    """O provedor de LLM (ex.: Ollama) está fora do ar / inalcançável."""
+
+
+_CONN_HINTS = (
+    "name or service not known",
+    "connection refused",
+    "connect call failed",
+    "failed to connect",
+    "nodename nor servname",
+    "temporary failure in name resolution",
+    "connecterror",
+    "connection error",
+    "timed out",
+    "timeout",
+    "no route to host",
+)
+
+
+def map_llm_error(exc: Exception) -> str | None:
+    """Se o erro for de conectividade com o provedor, devolve uma mensagem amigável em pt-BR."""
+    text = f"{type(exc).__name__}: {exc}".lower()
+    if isinstance(exc, ConnectionError | OSError) or any(h in text for h in _CONN_HINTS):
+        s = get_settings()
+        alvo = (
+            s.ollama_base_url
+            if s.llm_provider == "ollama"
+            else (
+                s.litellm_base_url
+                if s.llm_provider == "litellm"
+                else s.openai_base_url or "provedor"
+            )
+        )
+        return (
+            f"O serviço de modelos de IA está indisponível no momento (não foi possível conectar a {alvo}). "
+            "Verifique se o Ollama está em execução — `make logs` mostra os detalhes e `make up` (ou `./scripts/bootstrap.sh`) "
+            "sobe/repara os serviços — e tente novamente em instantes."
+        )
+    return None
+
+
+def raise_if_llm_unavailable(exc: Exception) -> None:
+    """Converte erros de conexão em LLMUnavailableError (mensagem amigável); re-levanta os demais."""
+    msg = map_llm_error(exc)
+    if msg:
+        raise LLMUnavailableError(msg) from exc
+    raise exc
+
+
 @dataclass
 class ModelInfo:
     provider: str

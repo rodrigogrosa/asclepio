@@ -90,6 +90,7 @@ Sem Ollama/rede? `LLM_PROVIDER=fake EMBEDDINGS_PROVIDER=fake make api` sobe a AP
 | `Bind for 0.0.0.0:3000 failed: port is already allocated` | Outra aplicação (ou outro compose) usa a porta. Defina `WEB_PORT=3100` (ou `API_PORT`, `LITELLM_PORT`, `LANGFUSE_PORT`) no `.env` e rode `make up` de novo — o bootstrap ajusta o CORS automaticamente. |
 | API usa `llama3.1:8b` e não `asclepio-med` | O modelo fine-tunado ainda não foi criado no Ollama: `make finetune` (ou só `make export` se já treinou). A UI mostra o badge "fine-tuned" quando ativo. |
 | Ollama lento dentro do Docker (Mac) | Instale o Ollama nativo; o bootstrap detecta e usa `host.docker.internal` (variável `OLLAMA_BASE_URL_DOCKER`). `OLLAMA_BASE_URL` continua `localhost` para o `make dev`. |
+| "serviço de modelos de IA está indisponível" / `Name or service not known` | o serviço `ollama` não subiu: `make up` corrige (grava `COMPOSE_PROFILES=ollama` no `.env` quando não há Ollama nativo); `docker compose ps` deve listar `ollama` |
 | `/health` em `degraded` | Veja `make logs`: Ollama inacessível, base de conhecimento vazia ou banco indisponível. `make reindex` reindexa a base. |
 | Quero tudo offline/sem Ollama | `LLM_PROVIDER=fake EMBEDDINGS_PROVIDER=fake` (modo determinístico usado pelos testes). |
 

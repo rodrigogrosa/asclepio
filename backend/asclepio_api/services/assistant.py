@@ -42,7 +42,7 @@ from ..prompts import (
     system_prompt,
 )
 from .knowledge import get_knowledge_service
-from .llm import get_llm_factory
+from .llm import get_llm_factory, raise_if_llm_unavailable
 from .patients import build_context, get_patient, professional_names
 
 log = get_logger("assistant")
@@ -209,7 +209,11 @@ async def generate(state: ChatState) -> ChatState:
     llm, _info = get_llm_factory().chat_model()
     msgs = _build_messages(state)
     t0 = time.perf_counter()
-    resp = await llm.ainvoke(msgs)
+    try:
+        resp = await llm.ainvoke(msgs)
+    except Exception as exc:
+        raise_if_llm_unavailable(exc)
+        raise
     content = (
         resp.content if isinstance(resp.content, str) else " ".join(str(c) for c in resp.content)
     )

@@ -94,6 +94,16 @@ if curl -fsS http://localhost:11434/api/tags >/dev/null 2>&1; then
 else
   warn "Ollama não encontrado no host → subindo Ollama em container (perfil 'ollama'). Em Macs, instalar o Ollama nativo (https://ollama.com) é bem mais rápido."
   PROFILES+=(--profile ollama)
+  # Persistente: qualquer `docker compose up`/`make up` futuro já inclui o Ollama (evita "Name or service not known")
+  if grep -q '^COMPOSE_PROFILES=' .env; then
+    grep -E '^COMPOSE_PROFILES=' .env | grep -q ollama || sed -i.bak 's|^COMPOSE_PROFILES=\(.*\)|COMPOSE_PROFILES=ollama,\1|' .env && rm -f .env.bak
+  else
+    echo "COMPOSE_PROFILES=ollama" >> .env
+  fi
+fi
+# Caso contrário (host Ollama presente), remove o perfil persistido se existir só "ollama"
+if curl -fsS http://localhost:11434/api/tags >/dev/null 2>&1 && grep -q '^COMPOSE_PROFILES=ollama$' .env; then
+  sed -i.bak '/^COMPOSE_PROFILES=ollama$/d' .env && rm -f .env.bak
 fi
 # grava a URL vista pelos CONTAINERS no .env (OLLAMA_BASE_URL continua sendo a do host, para `make dev`)
 if grep -q '^OLLAMA_BASE_URL_DOCKER=' .env; then sed -i.bak "s|^OLLAMA_BASE_URL_DOCKER=.*|OLLAMA_BASE_URL_DOCKER=${OLLAMA_URL_FOR_CONTAINERS}|" .env && rm -f .env.bak; else echo "OLLAMA_BASE_URL_DOCKER=${OLLAMA_URL_FOR_CONTAINERS}" >> .env; fi

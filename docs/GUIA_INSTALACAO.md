@@ -88,6 +88,7 @@ make clean    # remove containers, volumes e artefatos locais
 |---|---|
 | "Docker não está em execução" | abra o Docker Desktop e rode o comando de novo |
 | "port is already allocated" | ajuste `WEB_PORT`/`API_PORT` (ou `LITELLM_PORT`, `LANGFUSE_PORT`) no `.env` e `make up` |
+| Chat responde "serviço de modelos de IA está indisponível" ou logs mostram `Name or service not known` | o container do Ollama não está de pé: rode `make up` (o bootstrap corrige o `.env`); confira com `docker compose ps` se o serviço `ollama` aparece; se usa Ollama nativo, abra-o (`ollama serve`) |
 | Modelo ativo aparece como `llama3.1:8b` | o `asclepio-med` não foi criado: verifique internet (download da Release) ou rode `make ollama-create` / `make finetune` |
 | Respostas lentas | no Mac, use o Ollama nativo (não em container); em máquinas sem GPU o `llama3.1:8b` é lento — o `asclepio-med` (0,5B) responde em ~1 s |
 | `/health` em `degraded` | `make logs` mostra o motivo (Ollama inacessível, base não indexada); `make reindex` reindexa |
