@@ -3,227 +3,127 @@
 </p>
 
 <p align="center">
-  <b>Assistente clínico com LLM fine-tunada + LangChain/LangGraph, guardrails, RAG com fontes, anonimização e auditoria.</b><br>
-  Tech Challenge · FIAP Pós-Tech IA para Devs (8IADT) · Fase 3 · Hospital Universitário FIAP (fictício)
-</p>
-
-<p align="center">
-  <a href="#-instalação-em-1-comando">Instalação</a> ·
-  <a href="#-o-que-o-asclépio-faz">Funcionalidades</a> ·
-  <a href="#-arquitetura">Arquitetura</a> ·
-  <a href="#-fine-tuning">Fine-tuning</a> ·
-  <a href="#-segurança-e-políticas">Segurança</a> ·
-  <a href="#-documentação">Docs</a> ·
-  <a href="docs/ROTEIRO_VIDEO.md">Roteiro do vídeo</a>
+  <b>Assistente clínico com inteligência artificial treinada com os protocolos do hospital.</b><br>
+  Responde dúvidas da equipe médica citando as fontes, executa revisões clínicas automatizadas com validação humana e registra tudo em auditoria.<br>
+  <i>Projeto do Tech Challenge · FIAP Pós-Tech IA para Devs (8IADT) · Fase 3</i>
 </p>
 
 ---
 
-## 🎯 O desafio
+# 🚀 Como rodar na sua máquina (passo a passo)
 
-> *"Criar um assistente virtual médico treinado com os dados próprios do hospital, capaz de auxiliar nas condutas clínicas, responder dúvidas de médicos e sugerir procedimentos com base nos protocolos internos — e organizar fluxos de decisão automatizados e seguros, coordenados com LangChain."*
+> **Não precisa saber programar.** São 3 instalações com o mouse + 1 comando para colar no terminal. Tempo total: 15–30 min (a maior parte é download). Tudo gratuito, nada é enviado para a internet.
 
-| Requisito do desafio | Como o Asclépio atende |
-|---|---|
-| **Fine-tuning de LLM** com protocolos, FAQs e modelos de laudos/receitas | Pipeline `ml/` (LoRA/PEFT) → modelo **`asclepio-med`** servido no Ollama. Dados preparados com **pré-processamento, anonimização e curadoria** (`asclepio_core.anonymizer`). Relatório em [`docs/FINE_TUNING.md`](docs/FINE_TUNING.md). |
-| **Assistente com LangChain** integrando a LLM customizada, consultando base estruturada e contextualizando com dados do paciente | Grafo de chat em LangGraph (`backend/asclepio_api/services/assistant.py`): RAG sobre protocolos (Chroma) + contexto do prontuário (SQL via SQLAlchemy) **anonimizado** antes de chegar à LLM. |
-| **Fluxos de decisão automatizados e seguros** (verificar exames pendentes, sugerir tratamentos, emitir alertas) | Grafo **LangGraph** de revisão clínica com 10 nós, regras determinísticas (qSOFA/NEWS2/valores críticos), alertas à equipe e **validação humana obrigatória** (`interrupt`) antes de concluir. |
-| **Segurança e validação**: limites (nunca prescrever sem validação humana), logging detalhado, explainability | Guardrails de entrada/saída em código testável; auditoria **append-only com cadeia de hashes**; citações `[n]` com documento/seção/score e visualização do **contexto exato enviado à LLM**; JWT + RBAC + rate limit + Langfuse. |
-| **Código modularizado em Python + README completo** | Monorepo `uv` (core / backend / ml), FastAPI, testes, CI, Docker, docs e ADRs. Frontend Next.js para demonstração. |
-| **Dataset anonimizado / sintético** | 24 prontuários sintéticos (Faker, PII fictícia de propósito), 16 protocolos, 10 modelos de documento, 167 FAQs, 233 instruções seed + amostras dos datasets sugeridos (**PubMedQA** e **MedQuAD**, ≤ 10 %) → dataset SFT em `data/processed/`. |
-| **Diagrama do fluxo LangChain** | Gerados pelo próprio LangGraph em [`docs/diagramas/`](docs/diagramas/) e exibidos na UI (`/fluxos`). |
+### Passo 1 — Instale o Docker Desktop *(obrigatório)*
+É o programa que roda o sistema. Baixe, instale e **deixe aberto** (ícone de baleia na barra):
+- **Mac**: https://docs.docker.com/desktop/setup/install/mac-install/ → baixe o arquivo `.dmg` (escolha *Apple Silicon* para Macs com chip M1/M2/M3/M4), arraste para Aplicativos, abra e aceite os termos.
+- **Windows**: https://docs.docker.com/desktop/setup/install/windows-install/ → baixe o `.exe`, instale (aceite ativar o WSL 2 se ele pedir), reinicie o computador e abra o Docker Desktop.
+- **Linux (Ubuntu)**: o comando do Passo 3 instala sozinho — pule este passo.
 
-## 🚀 Instalação em 1 comando
+### Passo 2 — Instale o Ollama *(recomendado — deixa a IA rápida)*
+É o programa que roda os modelos de IA localmente: https://ollama.com/download → baixe, instale e abra uma vez. *(Se pular este passo, funciona mesmo assim, só que mais lento.)*
 
-> Passo a passo completo para avaliadores (pré-requisitos com links, acesso, credenciais, roteiro de demo, problemas comuns): **[docs/GUIA_INSTALACAO.md](docs/GUIA_INSTALACAO.md)**. O modelo fine-tunado `asclepio-med` é baixado automaticamente da [Release v1.2.0](https://github.com/rodrigogrosa/asclepio/releases/tag/v1.2.0) (não precisa treinar).
+### Passo 3 — Abra o terminal e cole 1 comando
+**Como abrir o terminal:**
+- **Mac**: aperte `Cmd + barra de espaço`, digite `Terminal` e aperte Enter.
+- **Windows**: aperte a tecla Windows, digite `PowerShell`, clique com o botão direito → **Executar como administrador** e rode primeiro `wsl --install` (só na primeira vez; reinicie se pedir). Depois aperte a tecla Windows, digite `Ubuntu` e abra — é nesse terminal preto que você vai colar o comando.
+- **Linux**: `Ctrl + Alt + T`.
 
-**Opção A — instalador de 1 linha** (macOS ou Linux; no Windows use WSL2/Ubuntu). Instala o que faltar (git, Docker, Ollama), clona o repositório em `~/asclepio` e sobe tudo:
+**Cole este comando e aperte Enter** (ele baixa o projeto e instala tudo sozinho — modelos de IA, banco de dados, sistema):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh | bash
 ```
 
-> Variáveis opcionais: `ASCLEPIO_DIR=/outro/caminho`, `ASCLEPIO_FULL=1` (sobe também LiteLLM + Langfuse), `ASCLEPIO_NO_OLLAMA=1` (usa Ollama em container em vez de instalar). Exemplo: `ASCLEPIO_FULL=1 bash <(curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh)`.
+Espere terminar (aparece **"Tudo pronto!"** com os endereços e as senhas). ☕
 
-**Opção B — já tem Docker** (e, de preferência, [Ollama](https://ollama.com) nativo — em Mac Apple Silicon usa a GPU Metal; o bootstrap detecta e usa automaticamente, senão sobe um Ollama em container):
+### Passo 4 — Use o sistema
+Abra o navegador em **http://localhost:3000** e entre:
 
-```bash
-git clone https://github.com/rodrigogrosa/asclepio.git && cd asclepio
-make setup
-```
-
-O `make setup` (script [`scripts/bootstrap.sh`](scripts/bootstrap.sh)) verifica pré-requisitos, cria o `.env` com `SECRET_KEY` aleatório, decide Ollama host/container, baixa os modelos (`nomic-embed-text`, `llama3.1:8b`), cria o `asclepio-med` se os artefatos de fine-tuning existirem, constrói as imagens, sobe **Postgres + API + Web**, indexa a base de conhecimento e valida o `/health`.
-
-| Serviço | URL | Credenciais demo |
+| Quero ver… | Entre com | Senha |
 |---|---|---|
-| 🌐 Web (Next.js) | http://localhost:3000 | admins reais (senha gerada) ou demo `dra.ana@asclepio.fiap` / `Asclepio@2026` |
-| 🔌 API (FastAPI / Swagger) | http://localhost:8000/docs | Bearer JWT |
-| 📈 Métricas Prometheus | http://localhost:8000/metrics | — |
+| A visão do **médico** (pacientes, assistente de IA, revisões clínicas, alertas) | `dra.ana@asclepio.fiap` | `Asclepio@2026` |
+| A visão da **enfermagem** | `enf.carla@asclepio.fiap` | `Asclepio@2026` |
+| A **auditoria** e a **Documentação** do projeto | `auditor@asclepio.fiap` | `Asclepio@2026` |
+| **Tudo** (administração, IA & Modelos, usuários, documentação) | `admin@asclepio.fiap` | apareceu no final da instalação* |
 
-Personalize o hospital no `.env`: `APP_HOSPITAL_NAME="Hospital Santa Casa"`, `APP_HOSPITAL_SHORT_NAME=HSC` (aparece na interface e nos prompts). Em produção defina `SEED_DEMO_USERS=false`.
+\* Perdeu a senha do admin? No mesmo terminal, dentro da pasta do projeto (`cd ~/asclepio`), rode `grep ASCLEPIO_ .env` — ela aparece. No 1º acesso o admin troca a senha e cadastra um **aplicativo autenticador** (Google Authenticator etc.) escaneando um QR code — o próprio sistema ensina.
 
-Outros perfis:
+### O que testar primeiro (5 minutos)
+1. **Assistente** → pergunte: *"Qual o alvo de lactato na reavaliação segundo o protocolo de sepse?"* → veja a resposta com as **fontes**.
+2. Ainda no Assistente → selecione um paciente → **"ver contexto anonimizado"** (o que a IA recebe, sem dados pessoais).
+3. **Pacientes** → abra o primeiro paciente (crítico) → **"Executar revisão clínica"** → acompanhe as etapas → **Aprovar**.
+4. Peça algo proibido: *"Prescreva 2 g de ceftriaxona para o leito 5"* → a IA **recusa** (nunca prescreve).
+5. Como auditor/admin → **Documentação**: todos os relatórios e evidências do projeto, para ler e baixar.
 
-```bash
-make up-full      # + LiteLLM (http://localhost:4000/ui) + Langfuse (http://localhost:3001, admin@asclepio.fiap / Asclepio@2026)
-make down         # para tudo
-make logs         # acompanha api/web
-```
-
-> **Usuários reais (admins)**: `admin@asclepio.fiap` e `rodrigo.grosa2011@gmail.com` — senhas iniciais fortes geradas pelo `make setup` (exibidas no final e guardadas no `.env`); no 1º acesso o sistema exige **troca de senha** e ativação do **app autenticador (MFA/TOTP)**.
-> **Usuários de demonstração** (senha `Asclepio@2026`, só se `SEED_DEMO_USERS=true`): `dra.ana@asclepio.fiap` e `dr.marcos@asclepio.fiap` (médicos), `enf.carla@asclepio.fiap` (enfermagem), `auditor@asclepio.fiap` (auditor). O RBAC muda o que cada um vê e pode fazer.
-
-### Desenvolvimento local (hot-reload, sem Docker)
-
-```bash
-make install   # uv sync --all-packages + npm install + pre-commit
-make dev       # API em :8000 (uvicorn --reload) + Web em :3000
-make check     # ruff + pytest + eslint + tsc  (o que a CI roda)
-```
-
-Sem Ollama/rede? `LLM_PROVIDER=fake EMBEDDINGS_PROVIDER=fake make api` sobe a API com um modelo determinístico (é assim que os testes e a CI rodam).
-
-### Troubleshooting rápido
-
-| Sintoma | Causa / solução |
+### Deu errado? Os 3 problemas mais comuns
+| O que apareceu | O que fazer |
 |---|---|
-| `Bind for 0.0.0.0:3000 failed: port is already allocated` | Outra aplicação (ou outro compose) usa a porta. Defina `WEB_PORT=3100` (ou `API_PORT`, `LITELLM_PORT`, `LANGFUSE_PORT`) no `.env` e rode `make up` de novo — o bootstrap ajusta o CORS automaticamente. |
-| API usa `llama3.1:8b` e não `asclepio-med` | O modelo fine-tunado ainda não foi criado no Ollama: `make finetune` (ou só `make export` se já treinou). A UI mostra o badge "fine-tuned" quando ativo. |
-| Ollama lento dentro do Docker (Mac) | Instale o Ollama nativo; o bootstrap detecta e usa `host.docker.internal` (variável `OLLAMA_BASE_URL_DOCKER`). `OLLAMA_BASE_URL` continua `localhost` para o `make dev`. |
-| "serviço de modelos de IA está indisponível" / `Name or service not known` | o serviço `ollama` não subiu: `make up` corrige (grava `COMPOSE_PROFILES=ollama` no `.env` quando não há Ollama nativo); `docker compose ps` deve listar `ollama` |
-| `/health` em `degraded` | Veja `make logs`: Ollama inacessível, base de conhecimento vazia ou banco indisponível. `make reindex` reindexa a base. |
-| Quero tudo offline/sem Ollama | `LLM_PROVIDER=fake EMBEDDINGS_PROVIDER=fake` (modo determinístico usado pelos testes). |
+| "Docker não está em execução" | Abra o Docker Desktop, espere a baleia parar de se mexer e rode o comando de novo |
+| "port is already allocated" (porta ocupada) | Algum programa seu já usa a porta. Abra o arquivo `~/asclepio/.env`, troque `WEB_PORT=3000` por `WEB_PORT=3005` (e/ou `API_PORT=8000`→`8005`) e rode `cd ~/asclepio && make up` |
+| Chat diz "serviço de modelos de IA indisponível" | Rode `cd ~/asclepio && make up` (ele conserta sozinho) |
 
-## ✨ O que o Asclépio faz
+Guia completo com mais detalhes e problemas: **[docs/GUIA_INSTALACAO.md](docs/GUIA_INSTALACAO.md)** (também em [PDF](docs/GUIA_INSTALACAO.pdf)). Para **parar** o sistema: `cd ~/asclepio && make down`.
 
-<table>
-<tr><td width="50%">
+---
 
-**🗣️ Assistente (chat)** — pergunte sobre protocolos, exames, documentos ou sobre um paciente selecionado. Respostas em streaming com **citações `[n]`** (documento › seção › score), badge do guardrail, intenção detectada, modelo usado, latência, confiança e contagem de PII redigida. Botão "ver contexto anonimizado" mostra **exatamente** o que a LLM recebeu.
+# 🩺 O que é o Asclépio
 
-**🧬 Fluxos clínicos (LangGraph)** — "Executar revisão clínica" em um paciente: carrega/anonimiza o prontuário → verifica exames pendentes/atrasados → triagem de risco (qSOFA, NEWS2, valores críticos) → alerta imediato se crítico → RAG nos protocolos → LLM sugere condutas citando fontes → guardrails → alertas à equipe → **pausa para validação humana** → finaliza e audita. Timeline de cada nó com duração e dados.
+- **Assistente de IA treinado com os dados do hospital** (fictício): fizemos *fine-tuning* de um modelo de linguagem com 16 protocolos clínicos, 10 modelos de documentos e 167 perguntas frequentes — ele responde no formato institucional, **cita as fontes** e **nunca prescreve** sem validação humana.
+- **Fluxos clínicos automatizados e seguros**: ao revisar um paciente, o sistema verifica exames pendentes, calcula risco (qSOFA/NEWS2), consulta os protocolos, sugere condutas com fontes, emite alertas — e **pausa para um médico aprovar**.
+- **Seguro e auditável**: dados de pacientes são anonimizados antes de chegar à IA; login com autenticação em duas etapas; cada perfil vê só o que deve; toda ação fica numa trilha de auditoria imutável.
+- **100 % local e gratuito**: os modelos rodam na sua máquina (Ollama); nenhum dado sai do computador.
 
-**🚨 Alertas** — criados por regras e fluxos (exames atrasados, valores críticos, gatilhos de protocolo), com reconhecimento pela equipe.
+Resultado do treinamento (medido, não prometido): o modelo ajustado ficou ~3× melhor em aderência ao formato institucional (ROUGE-L 0,13 → 0,36), obedece aos limites de segurança em 95 % dos casos (antes 77 %) e responde em ~1 s. Detalhes em [docs/FINE_TUNING.md](docs/FINE_TUNING.md).
 
-</td><td width="50%">
+# 📚 Para avaliadores e curiosos (documentação completa)
 
-**📚 Base de conhecimento** — 16 protocolos, 10 modelos de documentos e 167 FAQs com busca semântica e visualização; reindexação pelo admin.
+**Dentro do próprio sistema**: menu **Documentação** (perfil admin ou auditor) — todos os artefatos para ler e baixar.
 
-**🧠 Modelo** — model card do `asclepio-med`: base, LoRA, hiperparâmetros, loss, métricas **base vs fine-tuned** (ROUGE-L, BLEU, cobertura de termos, juiz LLM, conformidade com guardrails, latência) e métricas do RAG (hit@5, MRR); troca de modelo pelo admin.
-
-**🧾 Auditoria** — toda ação (login, consulta a paciente, pergunta, bloqueio, fluxo, decisão, alerta, reindexação) fica em uma trilha **append-only com cadeia de hashes**; botão "verificar integridade" prova que nada foi alterado.
-
-**🔭 Observabilidade** — logs estruturados (structlog) com `X-Request-ID`, métricas Prometheus, traces de LLM no **Langfuse**, gateway **LiteLLM** opcional.
-
-</td></tr>
-</table>
-
-## 🏗️ Arquitetura
-
-```mermaid
-flowchart LR
-  subgraph Web["Frontend · Next.js 16 + Tailwind"]
-    UI[Dashboard · Assistente · Pacientes · Fluxos · Alertas · Conhecimento · Modelo · Auditoria]
-  end
-  subgraph API["Backend · FastAPI"]
-    AUTH[JWT · RBAC · rate limit · headers]
-    CHAT[Grafo do chat<br/>LangGraph]
-    WF[Grafo de revisão clínica<br/>LangGraph + interrupt]
-    GR[Guardrails · Anonimizador<br/>asclepio_core]
-    AUD[(Auditoria<br/>hash chain)]
-    DB[(Postgres / SQLite<br/>prontuários)]
-    VS[(Chroma<br/>protocolos)]
-  end
-  subgraph LLM["Modelos"]
-    OL[Ollama<br/>asclepio-med · llama3.1 · nomic-embed]
-    LL[LiteLLM gateway]
-  end
-  LF[Langfuse]
-  UI -->|REST + SSE| AUTH --> CHAT & WF
-  CHAT & WF --> GR
-  CHAT & WF --> VS & DB & AUD
-  CHAT & WF -->|LangChain| OL
-  CHAT & WF -.->|opcional| LL --> OL
-  CHAT & WF -.->|traces| LF
-```
-
-Mais detalhes, decisões e diagramas de sequência em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) e nos ADRs em [`docs/adr/`](docs/adr/).
-
-### Estrutura do repositório
-
-```
-asclepio/
-├── packages/asclepio_core/   # anonimização (LGPD), regras clínicas, guardrails, base de conhecimento, dados sintéticos
-├── backend/                  # FastAPI + LangChain/LangGraph (auth, pacientes, assistente, fluxos, alertas, RAG, auditoria)
-├── frontend/                 # Next.js (identidade visual FIAP), modo mock para demo offline
-├── ml/                       # prepare → train (LoRA) → export (Ollama) → evaluate; registry.json e relatórios
-├── data/                     # knowledge_base/ (protocolos, modelos, FAQ) · synthetic/ · processed/ (dataset SFT)
-├── docs/                     # relatório técnico, arquitetura, políticas, ADRs, diagramas, roteiro do vídeo, identidade
-├── infra/                    # LiteLLM, Ollama init, Postgres init
-├── docker-compose.yml · Makefile · scripts/bootstrap.sh · .github/workflows/ci.yml · .devcontainer/
-```
-
-## 🧠 Fine-tuning
-
-```bash
-make prepare   # dataset SFT (anonimizado, curado, estratificado; inclui amostras PubMedQA/MedQuAD) → data/processed/
-make train     # LoRA (PEFT) sobre Qwen2.5-0.5B-Instruct por padrão (MPS/CUDA/CPU) → ml/runs/ + ml/registry.json
-make export    # merge do adapter → ml/models/asclepio-med → `ollama create asclepio-med`
-make eval      # base vs fine-tuned + RAG → ml/reports/eval_latest.json + gráficos em docs/assets/eval/
-make finetune  # tudo acima
-```
-
-
-<!-- ML_RESULTS_START -->
-Resultado real da última execução (Mac Apple Silicon, 21.74 min de treino, 1801 exemplos, com amostras PubMedQA/MedQuAD) — avaliação em 120 perguntas *held-out* + 15 prompts de segurança:
-
-| Modelo | ROUGE-L | BLEU | Conformidade guardrails | Recusa correta | Latência |
-|---|---|---|---|---|---|
-| Base Qwen2.5-0.5B | 0.12 | 3.0 | 77% | 47% | 1.3 s |
-| **asclepio-med (fine-tuned)** | **0.36** | **27.6** | **95%** | **80%** | 0.9 s |
-| llama3.1:8b (referência) | 0.12 | 3.8 | 84% | 53% | 2.7 s |
-
-RAG: hit@5 = 97%, MRR = 0.91. Gráficos em `docs/assets/eval/`.
-<!-- ML_RESULTS_END -->
-
-O processo completo (dados, anonimização, curadoria, LoRA, hiperparâmetros, avaliação e análise crítica) está em [`docs/FINE_TUNING.md`](docs/FINE_TUNING.md) e no [`ml/README.md`](ml/README.md). A API detecta o `asclepio-med` no Ollama e usa fallback (`llama3.1:8b`) se ele ainda não existir.
-
-## 🔐 Segurança e políticas
-
-- **Autenticação forte**: senhas bcrypt + **política de senha**, **bloqueio após 5 tentativas**, **MFA com app autenticador (TOTP)** com códigos de recuperação (obrigatório para admins), **sessões com refresh token rotativo e revogação** (logout imediato, detecção de reuso), troca de senha obrigatória no 1º acesso, gestão de usuários pelo admin — tudo auditado.
-- **Autorização por perfil** (RBAC declarativo em [`core/policies.py`](backend/asclepio_api/core/policies.py)): o **médico** vê só o que é responsabilidade dele (pacientes, assistente, fluxos, alertas, protocolos); **IA & Modelos, base de conhecimento (gestão), usuários/profissionais, catálogos e configurações são exclusivos do admin**; auditor vê auditoria; só médico/admin **aprovam** fluxos. Médicos têm CRM e especialidade obrigatórios (catálogo administrável).
-- **LGPD / anonimização**: CPF, CNS, RG, telefone, e-mail, endereço, datas de nascimento e nomes são redigidos antes de qualquer prompt; o usuário vê quantos dados foram removidos.
-- **Guardrails**: bloqueio de *prompt injection*, recusa educada a pedidos de prescrição direta, redirecionamento fora de escopo, reescrita de linguagem prescritiva na saída, aviso de validação humana obrigatório, PII residual.
-- **Auditoria**: trilha append-only com `prev_hash`/`hash` (SHA-256), verificação de integridade, `trace_id` ponta a ponta.
-- **Infra**: headers de segurança, CORS restrito, limite de corpo, usuário não-root nos containers, `gitleaks` e `pip-audit` na CI, segredos só por `.env`.
-
-Tudo documentado em [`docs/POLITICAS.md`](docs/POLITICAS.md).
-
-## 🧪 Qualidade
-
-`make check` roda **ruff**, **pytest** (core + API em modo fake + ml), **eslint** e **tsc**. A CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) repete isso, constrói as imagens Docker e roda gitleaks/pip-audit. Pre-commit configurado (`make install`).
-
-## 📚 Documentação
-
-| Documento | Conteúdo |
+| Documento | O que tem |
 |---|---|
-| [`docs/GUIA_INSTALACAO.md`](docs/GUIA_INSTALACAO.md) · [PDF](docs/GUIA_INSTALACAO.pdf) | Passo a passo de instalação para avaliação (links, acesso, credenciais, demo, troubleshooting) |
-| [`docs/EVIDENCIAS.md`](docs/EVIDENCIAS.md) | **Onde cada exigência do Tech Challenge aparece no sistema** (tela + arquivo + comando) — guia para avaliação |
-| [`docs/RELATORIO_TECNICO.md`](docs/RELATORIO_TECNICO.md) · [PDF](docs/RELATORIO_TECNICO.pdf) | Relatório técnico da Fase 3 (fine-tuning, assistente, diagramas, avaliação e resultados) — PDF com anexos via `make docs-pdf` |
-| [`docs/FINE_TUNING.md`](docs/FINE_TUNING.md) | Processo de fine-tuning em detalhe, métricas e análise |
-| [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | Componentes, fluxos de dados, diagramas de sequência, decisões |
-| [`docs/CONTRATO_API.md`](docs/CONTRATO_API.md) | Contrato REST/SSE (tipos e endpoints) |
-| [`docs/POLITICAS.md`](docs/POLITICAS.md) | Políticas de autenticação, autorização, dados, guardrails e auditoria |
-| [`docs/adr/`](docs/adr/) | Decisões de arquitetura (ADRs) |
-| [`docs/ROTEIRO_VIDEO.md`](docs/ROTEIRO_VIDEO.md) | Roteiro do vídeo de demonstração (≤ 15 min) |
-| [`docs/IDENTIDADE_VISUAL.md`](docs/IDENTIDADE_VISUAL.md) | Nome, logo, tokens e padrões de UI |
-| [`data/knowledge_base/README.md`](data/knowledge_base/README.md) | Formato e conteúdo da base de conhecimento fictícia |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`SECURITY.md`](SECURITY.md) | Como contribuir · política de segurança |
+| [Guia de instalação](docs/GUIA_INSTALACAO.md) · [PDF](docs/GUIA_INSTALACAO.pdf) | Passo a passo detalhado por sistema operacional + problemas comuns |
+| [Relatório técnico](docs/RELATORIO_TECNICO.md) · [PDF](docs/RELATORIO_TECNICO.pdf) | Documento central da entrega (34 págs.): dados, fine-tuning, assistente, fluxos, segurança, avaliação |
+| [Processo de desenvolvimento](docs/PROCESSO_DESENVOLVIMENTO.md) | Como foi feito, etapa por etapa (visão acadêmica) |
+| [Mapa de evidências](docs/EVIDENCIAS.md) | Onde cada exigência do edital aparece no sistema |
+| [Arquitetura](docs/ARQUITETURA.md) · [ADRs](docs/adr/) · [Contrato da API](docs/CONTRATO_API.md) | Desenho da solução e decisões |
+| [Fine-tuning](docs/FINE_TUNING.md) · [Dataset card](data/processed/DATASET_CARD.md) | Treinamento e avaliação do modelo, com números reais |
+| [Políticas de segurança](docs/POLITICAS.md) | MFA, perfis de acesso, LGPD, guardrails, auditoria |
+| [Roteiro do vídeo](docs/ROTEIRO_VIDEO.md) | Cena a cena da demonstração (≤ 15 min) |
+
+<details>
+<summary><b>🔧 Para desenvolvedores</b> — comandos, estrutura do código, testes e stack (clique para abrir)</summary>
+
+### Comandos principais (`make help` lista todos)
+```bash
+make setup      # instala e sobe tudo em Docker (o que o install.sh chama)
+make up-full    # + LiteLLM (gateway) e Langfuse (observabilidade de LLM)
+make dev        # desenvolvimento local com hot-reload (requer: uv, node)
+make check      # lint + 88 testes + typecheck (o que a CI roda)
+make finetune   # reproduz o fine-tuning: prepare → train (LoRA) → export → eval
+make docs-pdf   # regenera os PDFs do relatório e do guia
+make down       # para tudo · make clean remove tudo
+```
+
+### Estrutura
+```
+packages/asclepio_core/  # anonimização (LGPD), regras clínicas, guardrails, base de conhecimento, dados sintéticos
+backend/                 # FastAPI + LangChain/LangGraph (auth MFA, pacientes, assistente, fluxos, auditoria, docs-hub)
+frontend/                # Next.js 16 (identidade FIAP), navegação por permissão, modo mock
+ml/                      # pipeline de fine-tuning: prepare → train → export → evaluate
+data/                    # knowledge_base (protocolos/FAQ/modelos) · synthetic · processed (dataset SFT)
+docs/                    # relatórios, ADRs, diagramas, políticas, guias
+infra/ · scripts/        # LiteLLM, Ollama init, Postgres, bootstrap, geradores de PDF/métricas
+```
+
+### Stack e garantias
+Python 3.12 (uv) · LangChain/LangGraph 1.x · Transformers/PEFT/TRL · Ollama · ChromaDB · FastAPI · SQLAlchemy 2 · PostgreSQL · Next.js 16/React 19/Tailwind 4 · Docker Compose · GitHub Actions (lint, 88 testes, build, gitleaks/pip-audit) · pre-commit · Dev Container. O modelo fine-tunado (`asclepio-med`) é baixado automaticamente da [Release v1.2.0](https://github.com/rodrigogrosa/asclepio/releases/tag/v1.2.0). Provedores de LLM plugáveis (`ollama` | `litellm` | `openai` | `fake` para CI). Segredos só via `.env`; senhas de admin geradas por instalação.
+
+Contribuições: [CONTRIBUTING.md](CONTRIBUTING.md) · Segurança: [SECURITY.md](SECURITY.md) · Histórico: [CHANGELOG.md](CHANGELOG.md)
+</details>
 
 ## ⚠️ Aviso
-
-Projeto **acadêmico**. Todo o conteúdo clínico (protocolos, doses, pacientes) é **fictício/sintético** e não deve ser usado para decisões reais. O Asclépio **não prescreve**: toda sugestão exige validação de um profissional habilitado.
+Projeto **acadêmico**: protocolos, pacientes e dados são **fictícios/sintéticos**. O Asclépio não prescreve e não deve apoiar decisões clínicas reais.
 
 ## 📄 Licença
-
-MIT — veja [`LICENSE`](LICENSE).
+MIT — [LICENSE](LICENSE).
