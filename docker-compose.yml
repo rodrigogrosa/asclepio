@@ -110,6 +110,8 @@ services:
     volumes:
       - ./data:/app/data
       - ./ml:/app/ml:ro          # registry.json + reports/ (gerados por `make finetune`)
+      - ./docs:/app/docs:ro      # central de documentação (menu Documentação)
+      - ./CHANGELOG.md:/app/CHANGELOG.md:ro
     ports:
       - "${API_PORT:-8000}:8000"
     extra_hosts:

@@ -222,6 +222,41 @@ export const httpApi: ApiClient = {
     resetPassword: (id) => post(`/users/${id}/reset-password`),
     mfaReset: (id) => post(`/users/${id}/mfa/reset`),
   },
+  docsHub: {
+    list: () => get("/docs-hub"),
+    read: (id) => get(`/docs-hub/${encodeURIComponent(id)}`),
+    downloadUrl: (id) => `${API_URL}/docs-hub/${encodeURIComponent(id)}/download`,
+    // Download autenticado: fetch com Bearer → blob (o navegador não envia o header em <a href> direto)
+    download: async (id) => {
+      const doFetch = async (retried = false): Promise<Response> => {
+        const headers: Record<string, string> = {};
+        const token = getToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+        let res: Response;
+        try {
+          res = await fetch(`${API_URL}/docs-hub/${encodeURIComponent(id)}/download`, { headers, cache: "no-store" });
+        } catch {
+          throw new ApiError(0, "Não foi possível conectar à API.");
+        }
+        if (res.status === 401 && !retried) {
+          const tok = await refreshSession();
+          if (tok) return doFetch(true);
+          notifyUnauthorized();
+          throw new ApiError(401, "Sessão expirada. Faça login novamente.");
+        }
+        if (!res.ok) {
+          const { detail, code } = await parseError(res);
+          throw new ApiError(res.status, detail, code);
+        }
+        return res;
+      };
+      const res = await doFetch();
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+      const filename = m ? decodeURIComponent(m[1]) : `${id}`;
+      return { blob: await res.blob(), filename };
+    },
+  },
   catalog: {
     specialties: (includeInactive) => get(`/catalog/specialties${qs({ include_inactive: includeInactive ? true : undefined })}`),
     createSpecialty: (input) => post("/catalog/specialties", input),

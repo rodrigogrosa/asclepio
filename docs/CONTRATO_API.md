@@ -222,3 +222,21 @@ type Sector = { id: number; name: string; kind: "pronto_socorro" | "internacao" 
 
 ### Dashboard por perfil
 `GET /dashboard/stats` devolve **sempre** os indicadores clínicos; os campos `model`, `guardrail_blocks_today`, `system` só aparecem para quem tem `model:read`/`audit:read` (para os demais vêm `null`). Novo bloco `my_work` (para medico/enfermagem): `{pending_approvals: WorkflowRun[] (aguardando_aprovacao), my_open_alerts: number, my_conversations_today: number}`.
+
+---
+
+## Central de documentação (v1.3) — evidências acadêmicas dentro da plataforma
+
+Permissão nova: `docs:read` (admin e auditor). Menu "Documentação" no frontend.
+
+```ts
+type DocFormat = "md" | "pdf" | "mmd";
+type HubDocument = { id: string; title: string; description: string; format: DocFormat; filename: string;
+  size_bytes: number; updated_at: string | null; readable: boolean; downloadable: boolean };
+type HubCategory = { id: string; title: string; description: string; documents: HubDocument[] };
+```
+
+- `GET /docs-hub` → `{categories: HubCategory[], total: number}` — biblioteca curada (relatórios, processo de desenvolvimento, arquitetura/ADRs, dados & ML, segurança, operação, diagramas).
+- `GET /docs-hub/{doc_id}` → `HubDocument & {content: string}` — conteúdo para leitura (só `md`/`mmd`); imagens relativas já vêm **embutidas em base64** (renderizam direto no MarkdownView); diagramas `.mmd` vêm com `content` puro Mermaid (renderizar com o MermaidGraph).
+- `GET /docs-hub/{doc_id}/download` → arquivo original (`Content-Disposition: attachment`), inclusive PDFs.
+- 404 para id desconhecido; sem acesso a caminhos fora da lista curada (não há endpoint por caminho livre).

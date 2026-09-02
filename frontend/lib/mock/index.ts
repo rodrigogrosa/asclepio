@@ -5,12 +5,13 @@ import type {
   KnowledgeSearchResponse, LoginResponse, ModelInfoResponse, Patient, PatientContext, PatientDetail, ReindexResponse,
   StreamEvent, User, WorkflowGraph, WorkflowRun, Guardrail, Citation, Intent, TokenOut, Session, MfaSetup, MfaEnableResponse,
   UserCreateInput, UserUpdateInput, UserCreateResponse, UsersListParams, PublicConfig, Specialty, Sector, SpecialtyInput, SectorInput,
+  DocsHubList, HubDocumentContent, HubDocument,
 } from "@/lib/types";
 import type { ApiClient, ApiError as ApiErrorT } from "@/lib/api-types";
 import {
   ALERTS, AUDIT, AUDIT_ACTIONS, CHAT_GRAPH_MERMAID, CITATIONS, CONVERSATIONS, CONV_MESSAGES, KNOWLEDGE_DOCS, MODEL_ACTIVE, MODEL_INFO,
   PATIENTS, PATIENT_DETAILS, RUNS, SUGGESTIONS_GENERIC, SUGGESTIONS_PATIENT, USERS, WORKFLOW_GRAPH, citationsFor, knowledgeDetail,
-  MOCK_TOTP_CODE, PERMISSIONS_BY_ROLE, PUBLIC_CONFIG, SPECIALTIES, SECTORS, type MockUser,
+  MOCK_TOTP_CODE, PERMISSIONS_BY_ROLE, PUBLIC_CONFIG, SPECIALTIES, SECTORS, HUB_CATEGORIES, HUB_CONTENTS, type MockUser,
 } from "./data";
 import { initials, sleep, uid } from "@/lib/utils";
 import { getStoredUser, notifyPrecondition } from "@/lib/session";
@@ -621,6 +622,39 @@ const rawMockApi: ApiClient = {
       return { ok: true as const };
     },
   },
+  docsHub: {
+    async list(): Promise<DocsHubList> {
+      await latency(120, 300);
+      requirePerm("docs:read");
+      const categories = HUB_CATEGORIES.map((c) => ({ ...c, documents: c.documents.map((d) => ({ ...d })) }));
+      return { categories, total: categories.reduce((s, c) => s + c.documents.length, 0) };
+    },
+    async read(id: string): Promise<HubDocumentContent> {
+      await latency(150, 400);
+      requirePerm("docs:read");
+      const doc = HUB_CATEGORIES.flatMap((c) => c.documents).find((d) => d.id === id);
+      if (!doc) throw new MockApiError(404, "Documento não encontrado");
+      if (!doc.readable) throw new MockApiError(400, "Este documento não está disponível para leitura — use o download");
+      return { ...doc, content: HUB_CONTENTS[id] ?? `# ${doc.title}\n\n_Conteúdo de exemplo._` };
+    },
+    downloadUrl(id: string): string {
+      return `/docs-hub/${encodeURIComponent(id)}/download`;
+    },
+    async download(id: string): Promise<{ blob: Blob; filename: string }> {
+      await latency(200, 500);
+      requirePerm("docs:read");
+      const doc: HubDocument | undefined = HUB_CATEGORIES.flatMap((c) => c.documents).find((d) => d.id === id);
+      if (!doc) throw new MockApiError(404, "Documento não encontrado");
+      if (!doc.downloadable) throw new MockApiError(400, "Download indisponível para este documento");
+      if (doc.format === "pdf") {
+        // PDF mínimo válido (uma página em branco com título) para a demo
+        const pdf = `%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n4 0 obj<</Length 68>>stream\nBT /F1 18 Tf 72 780 Td (Asclepio - ${doc.title.replace(/[()\\]/g, "")}) Tj ET\nendstream endobj\n5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF`;
+        return { blob: new Blob([pdf], { type: "application/pdf" }), filename: doc.filename };
+      }
+      const content = HUB_CONTENTS[id] ?? `# ${doc.title}`;
+      return { blob: new Blob([content], { type: "text/plain;charset=utf-8" }), filename: doc.filename };
+    },
+  },
   catalog: {
     async specialties(includeInactive?: boolean): Promise<Specialty[]> {
       await latency(80, 200);
@@ -1046,6 +1080,7 @@ export const mockApi: ApiClient = {
   publicConfig: rawMockApi.publicConfig,
   auth: rawMockApi.auth,
   users: guardNamespace(rawMockApi.users),
+  docsHub: { ...guardNamespace(rawMockApi.docsHub), downloadUrl: rawMockApi.docsHub.downloadUrl },
   catalog: guardNamespace(rawMockApi.catalog),
   dashboard: guardNamespace(rawMockApi.dashboard),
   patients: guardNamespace(rawMockApi.patients),

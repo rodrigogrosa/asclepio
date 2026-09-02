@@ -4,6 +4,7 @@ import type {
   LoginResponse, ModelInfo, ModelInfoResponse, Patient, PatientContext, PatientDetail, ReindexResponse, RiskLevel, RunStatus,
   StreamEvent, User, WorkflowGraph, WorkflowRun, AlertSeverity, TokenOut, Session, MfaSetup, MfaEnableResponse,
   UserCreateInput, UserUpdateInput, UserCreateResponse, UsersListParams, PublicConfig, Specialty, Sector, SpecialtyInput, SectorInput,
+  DocsHubList, HubDocumentContent,
 } from "./types";
 
 export interface ApiError extends Error {
@@ -42,6 +43,15 @@ export interface ApiClient {
     update(id: number, patch: UserUpdateInput): Promise<User>;
     resetPassword(id: number): Promise<{ temporary_password: string }>;
     mfaReset(id: number): Promise<{ ok: true }>;
+  };
+  docsHub: {
+    list(): Promise<DocsHubList>;
+    /** Conteúdo para leitura (só md/mmd; 404/400 para os demais). */
+    read(id: string): Promise<HubDocumentContent>;
+    /** URL do arquivo original (exige Authorization: Bearer — use `download`). */
+    downloadUrl(id: string): string;
+    /** Baixa o arquivo original autenticado (blob + nome do arquivo). */
+    download(id: string): Promise<{ blob: Blob; filename: string }>;
   };
   catalog: {
     specialties(includeInactive?: boolean): Promise<Specialty[]>;

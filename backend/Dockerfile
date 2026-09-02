@@ -23,6 +23,8 @@ WORKDIR /app
 COPY --from=builder --chown=asclepio:asclepio /app/.venv /app/.venv
 COPY --from=builder --chown=asclepio:asclepio /app/packages /app/packages
 COPY --from=builder --chown=asclepio:asclepio /app/backend /app/backend
+COPY --chown=asclepio:asclepio docs /app/docs
+COPY --chown=asclepio:asclepio CHANGELOG.md /app/CHANGELOG.md
 # dados (base de conhecimento) são montados como volume em /app/data
 RUN mkdir -p /app/data /app/ml && chown -R asclepio:asclepio /app
 ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 APP_ENV=production LOG_FORMAT=json \

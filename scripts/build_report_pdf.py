@@ -22,7 +22,11 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 # Documentos disponíveis: `python scripts/build_report_pdf.py [relatorio|guia] [out_dir]`
 DOC_KIND = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("/") else "relatorio"
-OUT_DIR = Path(sys.argv[2]) if len(sys.argv) > 2 else (Path(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].startswith("/") else DOCS)
+OUT_DIR = (
+    Path(sys.argv[2])
+    if len(sys.argv) > 2
+    else (Path(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].startswith("/") else DOCS)
+)
 
 DOCUMENTS = {
     "relatorio": {
@@ -31,17 +35,24 @@ DOCUMENTS = {
         "subtitle": "LLM fine-tunada · LangChain/LangGraph · Guardrails · RAG com fontes · Auditoria",
         "sections": [
             ("", DOCS / "RELATORIO_TECNICO.md"),
-            ("Anexo A — Fine-tuning em detalhe", DOCS / "FINE_TUNING.md"),
-            ("Anexo B — Arquitetura", DOCS / "ARQUITETURA.md"),
-            ("Anexo C — Políticas de segurança e acesso", DOCS / "POLITICAS.md"),
-            ("Anexo D — Evidências: onde cada exigência aparece", DOCS / "EVIDENCIAS.md"),
+            (
+                "Anexo A — Processo de desenvolvimento (memória descritiva)",
+                DOCS / "PROCESSO_DESENVOLVIMENTO.md",
+            ),
+            ("Anexo B — Fine-tuning em detalhe", DOCS / "FINE_TUNING.md"),
+            ("Anexo C — Arquitetura", DOCS / "ARQUITETURA.md"),
+            ("Anexo D — Políticas de segurança e acesso", DOCS / "POLITICAS.md"),
+            ("Anexo E — Evidências: onde cada exigência aparece", DOCS / "EVIDENCIAS.md"),
         ],
     },
     "guia": {
         "out": "GUIA_INSTALACAO.pdf",
         "title": "Guia de Instalação",
         "subtitle": "Passo a passo para instalar e avaliar o Asclépio em qualquer máquina (macOS · Linux · Windows/WSL2)",
-        "sections": [("", DOCS / "GUIA_INSTALACAO.md"), ("Anexo — Evidências: onde cada exigência aparece", DOCS / "EVIDENCIAS.md")],
+        "sections": [
+            ("", DOCS / "GUIA_INSTALACAO.md"),
+            ("Anexo — Evidências: onde cada exigência aparece", DOCS / "EVIDENCIAS.md"),
+        ],
     },
 }
 DOC = DOCUMENTS[DOC_KIND]
@@ -85,7 +96,12 @@ hr { border: none; border-top: 1px solid #ddd; margin: 18px 0; }
 def img_data_uri(path: Path) -> str:
     b = base64.b64encode(path.read_bytes()).decode()
     ext = path.suffix.lstrip(".").lower()
-    mime = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "svg": "image/svg+xml"}.get(ext, "application/octet-stream")
+    mime = {
+        "png": "image/png",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "svg": "image/svg+xml",
+    }.get(ext, "application/octet-stream")
     return f"data:{mime};base64,{b}"
 
 
@@ -101,6 +117,7 @@ def convert(md_text: str, base: Path) -> str:
     # comentários HTML de marcação → remove
     md_text = re.sub(r"<!--.*?-->", "", md_text, flags=re.S)
     html = markdown.markdown(md_text, extensions=["tables", "fenced_code", "toc", "sane_lists"])
+
     # imagens relativas → data URI
     def img(m: re.Match) -> str:
         src = m.group(1)
@@ -111,7 +128,9 @@ def convert(md_text: str, base: Path) -> str:
 
     html = re.sub(r'src="([^"]+)"', img, html)
     for i, code in enumerate(blocks):
-        html = html.replace(f"<p>@@MERMAID{i}@@</p>", f'<div class="mermaid">{code}</div>').replace(f"@@MERMAID{i}@@", f'<div class="mermaid">{code}</div>')
+        html = html.replace(f"<p>@@MERMAID{i}@@</p>", f'<div class="mermaid">{code}</div>').replace(
+            f"@@MERMAID{i}@@", f'<div class="mermaid">{code}</div>'
+        )
     return html
 
 
@@ -142,7 +161,17 @@ document.body.dataset.ready = "1";
 </script></head><body>{body}</body></html>"""
     html_path = OUT_DIR / (DOC["out"].replace(".pdf", ".html"))
     html_path.write_text(html, encoding="utf-8")
-    cmd = [CHROME, "--headless=new", "--disable-gpu", "--no-sandbox", "--run-all-compositor-stages-before-draw", "--virtual-time-budget=20000", "--no-pdf-header-footer", f"--print-to-pdf={OUT_PDF}", str(html_path)]
+    cmd = [
+        CHROME,
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--run-all-compositor-stages-before-draw",
+        "--virtual-time-budget=20000",
+        "--no-pdf-header-footer",
+        f"--print-to-pdf={OUT_PDF}",
+        str(html_path),
+    ]
     subprocess.run(cmd, check=True, capture_output=True, timeout=180)
     print(json.dumps({"pdf": str(OUT_PDF), "bytes": OUT_PDF.stat().st_size}))
     html_path.unlink(missing_ok=True)

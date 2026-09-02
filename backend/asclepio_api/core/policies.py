@@ -67,6 +67,7 @@ PERMISSIONS: dict[Role, frozenset[str]] = {
             "workflows:read",
             "alerts:read",
             "catalog:read",
+            "docs:read",
         }
     ),
 }

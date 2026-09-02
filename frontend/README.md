@@ -56,6 +56,7 @@ app/
     conta/               minha conta (perfil, MFA, sessões) · conta/senha · conta/mfa
     usuarios/            usuários & profissionais (admin)
     catalogos/           especialidades e setores (admin)
+    documentacao/        central de documentação (docs:read — admin e auditor)
     configuracoes/       identidade, versão e status dos serviços (admin)
 components/
   ui/                    Button, Card, Badge, Input, Tabs, Modal/Drawer, Table, Skeleton, Toast, EmptyState, KpiCard, badges de status, MarkdownView, JsonView
@@ -84,10 +85,12 @@ O menu e as rotas são montados a partir de **`user.permissions`** (contrato v1.
 |---|---|
 | **medico** | Dashboard clínico (+ "Meu trabalho"), Pacientes, Assistente, Fluxos clínicos (executa e aprova), Alertas, Protocolos e documentos (leitura/busca), Minha conta |
 | **enfermagem** | Igual ao médico, sem aprovar/rejeitar fluxos (`workflows:decide`) |
-| **auditor** | Dashboard (resumo), Auditoria, Protocolos (leitura), Alertas (leitura), Minha conta |
-| **admin** | Tudo + seção **Administração**: Usuários & profissionais, Catálogos (Especialidades/Setores), IA & Modelos, Base de conhecimento (gestão + reindexar), Auditoria, Configurações |
+| **auditor** | Dashboard (resumo), Auditoria, Documentação, Protocolos (leitura), Alertas (leitura), Minha conta |
+| **admin** | Tudo + seção **Administração**: Usuários & profissionais, Catálogos (Especialidades/Setores), IA & Modelos, Base de conhecimento (gestão + reindexar), Auditoria, **Documentação**, Configurações |
 
-Permissões usadas: `patients:read`, `assistant:chat`, `workflows:run`, `workflows:decide`, `alerts:read`, `alerts:ack`, `knowledge:read`, `knowledge:manage`, `model:read`, `system:internals`, `users:manage`, `catalog:read`, `catalog:manage`, `audit:read`, `settings:read` (`"*"` = todas).
+Permissões usadas: `patients:read`, `assistant:chat`, `workflows:run`, `workflows:decide`, `alerts:read`, `alerts:ack`, `knowledge:read`, `knowledge:manage`, `model:read`, `system:internals`, `users:manage`, `catalog:read`, `catalog:manage`, `audit:read`, `settings:read`, `docs:read` (`"*"` = todas).
+
+- **Documentação** (`/documentacao`, permissão `docs:read` — admin e auditor): central de evidências acadêmicas servida pelo backend (`GET /docs-hub`); leitura de `md`/`mmd` no drawer (MarkdownView/MermaidGraph) e download autenticado (fetch com Bearer → blob).
 
 - **Detalhes técnicos** (grafo Mermaid, nomes de nós, JSON dos passos, trace/modelo no chat) só aparecem com `system:internals`; para os demais, linha do tempo clínica e indicador simples ("consultando os protocolos…").
 - **Identidade**: `GET /public/config` (sem auth, `ConfigProvider`) fornece `hospital_name`/`hospital_short_name`/`version`/`demo_mode`; usados no login, sidebar, header e rodapé ("{hospital_name} · Asclépio v{version}"). A lista "Acesso de demonstração" no login só aparece com `demo_mode=true`.

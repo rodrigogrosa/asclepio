@@ -307,6 +307,23 @@ export type Sector = { id: number; name: string; kind: SectorKind; active: boole
 export type SpecialtyInput = { name?: string; code?: string | null; active?: boolean };
 export type SectorInput = { name?: string; kind?: SectorKind; active?: boolean };
 
+// ---- Central de documentação (v1.3) ----
+export type DocFormat = "md" | "pdf" | "mmd";
+export type HubDocument = {
+  id: string;
+  title: string;
+  description: string;
+  format: DocFormat;
+  filename: string;
+  size_bytes: number;
+  updated_at: string | null;
+  readable: boolean;
+  downloadable: boolean;
+};
+export type HubCategory = { id: string; title: string; description: string; documents: HubDocument[] };
+export type DocsHubList = { categories: HubCategory[]; total: number };
+export type HubDocumentContent = HubDocument & { content: string };
+
 export type DashboardStats = {
   patients: number;
   patients_critical: number;

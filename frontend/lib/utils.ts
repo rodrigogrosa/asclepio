@@ -43,6 +43,19 @@ export function fmtPct(n: number | null | undefined, digits = 0) {
   if (n == null) return "—";
   return `${(n * 100).toFixed(digits)}%`;
 }
+export function fmtBytes(n: number | null | undefined) {
+  if (n == null || !Number.isFinite(n)) return "—";
+  if (n < 1024) return `${n} B`;
+  const units = ["KB", "MB", "GB"];
+  let v = n / 1024;
+  let u = 0;
+  while (v >= 1024 && u < units.length - 1) {
+    v /= 1024;
+    u++;
+  }
+  return `${v >= 100 ? Math.round(v) : v.toFixed(1).replace(".", ",")} ${units[u]}`;
+}
+
 export function shortHash(hash: string | null | undefined, n = 10) {
   if (!hash) return "—";
   return hash.length > n ? `${hash.slice(0, n)}…` : hash;

@@ -2,6 +2,7 @@
 import type {
   Alert,
   AuditEntry,
+  HubCategory,
   PublicConfig,
   Sector,
   Specialty,
@@ -39,7 +40,7 @@ const PERMS: Record<User["role"], string[]> = {
   admin: ["*"],
   medico: ["patients:read", "assistant:chat", "workflows:run", "workflows:decide", "alerts:read", "alerts:ack", "knowledge:read", "catalog:read"],
   enfermagem: ["patients:read", "assistant:chat", "workflows:run", "alerts:read", "alerts:ack", "knowledge:read", "catalog:read"],
-  auditor: ["audit:read", "alerts:read", "knowledge:read", "catalog:read"],
+  auditor: ["audit:read", "alerts:read", "knowledge:read", "catalog:read", "docs:read"],
 };
 
 export const PUBLIC_CONFIG: PublicConfig = {
@@ -112,6 +113,92 @@ export const PERMISSIONS_BY_ROLE = PERMS;
 
 export const MODEL_ACTIVE: ModelInfo = { provider: "ollama", name: "asclepio-med", fine_tuned: true, base_model: "llama3.1:8b" };
 export const MODEL_BASE: ModelInfo = { provider: "ollama", name: "llama3.1:8b", fine_tuned: false, base_model: null };
+
+
+// ---------- Central de documentação (v1.3) ----------
+const hubDoc = (id: string, title: string, description: string, format: "md" | "pdf" | "mmd", filename: string, size_bytes: number, opts: { readable?: boolean; downloadable?: boolean; updated_days_ago?: number } = {}) => ({
+  id, title, description, format, filename, size_bytes,
+  updated_at: daysAgo(opts.updated_days_ago ?? 3),
+  readable: opts.readable ?? format !== "pdf",
+  downloadable: opts.downloadable ?? true,
+});
+
+export const HUB_CATEGORIES: HubCategory[] = [
+  {
+    id: "relatorios",
+    title: "Relatórios",
+    description: "Relatório técnico do projeto e sumário executivo.",
+    documents: [
+      hubDoc("relatorio-tecnico", "Relatório técnico", "Documento principal: arquitetura, dados, fine-tuning, RAG, LangGraph, segurança e resultados.", "md", "RELATORIO_TECNICO.md", 48_320, { updated_days_ago: 1 }),
+      hubDoc("relatorio-tecnico-pdf", "Relatório técnico (PDF)", "Versão em PDF para entrega/impressão.", "pdf", "RELATORIO_TECNICO.pdf", 1_824_512, { readable: false, updated_days_ago: 1 }),
+    ],
+  },
+  {
+    id: "processo",
+    title: "Processo de desenvolvimento",
+    description: "Como o projeto foi construído: decisões, cronologia e changelog.",
+    documents: [
+      hubDoc("changelog", "Changelog", "Histórico de versões e mudanças relevantes por fase.", "md", "CHANGELOG.md", 9_210, { updated_days_ago: 0 }),
+      hubDoc("processo-desenvolvimento", "Diário de desenvolvimento", "Registro do processo: etapas, ferramentas e lições aprendidas.", "md", "PROCESSO.md", 15_480, { updated_days_ago: 2 }),
+    ],
+  },
+  {
+    id: "arquitetura",
+    title: "Arquitetura & ADRs",
+    description: "Visão de arquitetura, contrato de API e registros de decisão (ADRs).",
+    documents: [
+      hubDoc("contrato-api", "Contrato da API", "Contrato v1 + auth v1.1 + plataforma v1.2 — fonte de verdade entre frontend e backend.", "md", "CONTRATO_API.md", 31_744, { updated_days_ago: 1 }),
+      hubDoc("adr-001-monorepo", "ADR-001 — Monorepo", "Decisão de manter frontend, backend, dados e docs em um único repositório.", "md", "ADR-001-monorepo.md", 4_120, { updated_days_ago: 20 }),
+    ],
+  },
+  {
+    id: "dados-ml",
+    title: "Dados & ML",
+    description: "Dataset sintético, fine-tuning (LoRA) e avaliação dos modelos.",
+    documents: [
+      hubDoc("dataset-card", "Dataset card", "Origem, composição, splits e limitações do dataset sintético.", "md", "DATASET_CARD.md", 12_040, { updated_days_ago: 5 }),
+      hubDoc("fine-tuning", "Fine-tuning", "Configuração LoRA, hiperparâmetros, curvas de loss e avaliação comparativa.", "md", "FINE_TUNING.md", 18_910, { updated_days_ago: 4 }),
+    ],
+  },
+  {
+    id: "seguranca",
+    title: "Segurança",
+    description: "Políticas, guardrails, autenticação e trilha de auditoria.",
+    documents: [
+      hubDoc("politicas", "Políticas de segurança e privacidade", "Guardrails de entrada/saída, PII, RBAC, MFA e auditoria encadeada.", "md", "POLITICAS.md", 22_360, { updated_days_ago: 2 }),
+    ],
+  },
+  {
+    id: "operacao",
+    title: "Operação",
+    description: "Como executar o projeto: Docker, variáveis de ambiente e make.",
+    documents: [
+      hubDoc("operacao-runbook", "Runbook de operação", "Subir o ambiente (docker compose), seeds, portas e solução de problemas.", "md", "OPERACAO.md", 8_752, { updated_days_ago: 3 }),
+    ],
+  },
+  {
+    id: "diagramas",
+    title: "Diagramas",
+    description: "Diagramas Mermaid da arquitetura e dos fluxos.",
+    documents: [
+      hubDoc("diagrama-arquitetura", "Arquitetura geral", "Componentes da plataforma e como se conectam (Mermaid).", "mmd", "arquitetura.mmd", 2_140, { updated_days_ago: 6 }),
+    ],
+  },
+];
+
+const HUB_MD = (title: string, body: string) => `# ${title}\n\n${body}`;
+export const HUB_CONTENTS: Record<string, string> = {
+  "relatorio-tecnico": HUB_MD("Relatório técnico", `> Versão 1.2 · documento de exemplo (mock)\n\n## Visão geral\nO **Asclépio** é um assistente clínico com respostas baseadas em protocolos institucionais, revisão clínica orquestrada e validação humana obrigatória.\n\n## Resultados (resumo)\n| Métrica | Base | Ajustado |\n|---|---:|---:|\n| ROUGE-L | 0,31 | 0,47 |\n| Cobertura de termos | 58% | 81% |\n| Latência média | 2,1 s | 2,4 s |\n\n## Conclusão\nO modelo ajustado supera o base em aderência aos protocolos mantendo latência aceitável.`),
+  "changelog": HUB_MD("Changelog", `## v1.2.0\n- Perfis por permissão, catálogos e configuração pública.\n\n## v1.1.0\n- Autenticação real: MFA TOTP, sessões/refresh, gestão de usuários.\n\n## v1.0.0\n- Chat com RAG, fluxos de revisão clínica e auditoria.`),
+  "processo-desenvolvimento": HUB_MD("Diário de desenvolvimento", `## Etapas\n1. Contrato de API e identidade visual.\n2. Frontend em modo mock.\n3. Backend FastAPI + LangGraph.\n4. Fine-tuning e avaliação.\n\n## Lições aprendidas\n- Desenvolver contra contrato permitiu paralelismo real entre times.`),
+  "contrato-api": HUB_MD("Contrato da API", `Fonte de verdade entre frontend e backend.\n\n## Convenções\n- Base: \`/api/v1\` · autenticação Bearer JWT.\n- Erros: \`{detail, code?}\`.\n\n## Seções\n1. Núcleo clínico (v1)\n2. Autenticação real (v1.1)\n3. Plataforma (v1.2)\n4. Central de documentação (v1.3)`),
+  "adr-001-monorepo": HUB_MD("ADR-001 — Monorepo", `**Status**: aceita\n\n## Contexto\nProjeto com frontend, backend, dados e documentação fortemente acoplados ao mesmo contrato.\n\n## Decisão\nManter tudo em um único repositório.\n\n## Consequências\n- Versionamento único do contrato.\n- CI mais simples para a entrega.`),
+  "dataset-card": HUB_MD("Dataset card", `## Composição\n- 1.240 pares instrução→resposta (pt-BR), gerados a partir de protocolos sintéticos.\n\n## Splits\n| Split | Exemplos |\n|---|---:|\n| treino | 992 |\n| validação | 124 |\n| teste | 124 |\n\n## Limitações\nDados sintéticos: não usar para decisão clínica real.`),
+  "fine-tuning": HUB_MD("Fine-tuning", `## Configuração\n- Método: **LoRA** (r=16, alpha=32) sobre llama3.1:8b.\n- 3 épocas · lr 2e-4 · loss final treino 0,84 / val 1,02.\n\n## Avaliação\nModelo ajustado com maior aderência aos protocolos e melhor cobertura de termos técnicos.`),
+  "politicas": HUB_MD("Políticas de segurança e privacidade", `## Guardrails\n- Entrada: prompt injection, PII, escopo clínico.\n- Saída: linguagem não prescritiva, citações válidas.\n\n## Autenticação\n- MFA obrigatório para administradores; sessões com refresh rotativo.\n\n## Auditoria\nTrilha encadeada por hash, verificável em \`/audit/verify\`.`),
+  "operacao-runbook": HUB_MD("Runbook de operação", `## Subir o ambiente\n\`\`\`bash\nmake setup\ndocker compose up -d\n\`\`\`\n\n## Portas\n| Serviço | Porta |\n|---|---:|\n| frontend | 3000 |\n| api | 8000 |\n| ollama | 11434 |`),
+  "diagrama-arquitetura": `flowchart LR\n  subgraph Cliente\n    FE[Frontend Next.js]\n  end\n  subgraph Servidor\n    API[FastAPI /api/v1]\n    LG[LangGraph]\n    RAG[(Base vetorial)]\n    LLM[[LLM ajustada]]\n    DB[(PostgreSQL)]\n  end\n  FE -->|Bearer JWT| API\n  API --> LG\n  LG --> RAG\n  LG --> LLM\n  API --> DB\n  LG --> DB`,
+};
 
 // ---------- Pacientes ----------
 export const PATIENTS: Patient[] = [

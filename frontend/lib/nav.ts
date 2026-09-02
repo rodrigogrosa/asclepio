@@ -1,6 +1,6 @@
 // Navegação montada a partir de `user.permissions` (contrato v1.2).
 import type { LucideIcon } from "lucide-react";
-import { Bell, BookOpen, Bot, ClipboardList, Cpu, LayoutDashboard, ScrollText, Settings, UserCog, UserRound, Users, Workflow } from "lucide-react";
+import { Bell, BookOpen, BookOpenText, Bot, ClipboardList, Cpu, LayoutDashboard, ScrollText, Settings, UserCog, UserRound, Users, Workflow } from "lucide-react";
 import type { User } from "./types";
 import { hasPermission, type Permission } from "./permissions";
 
@@ -23,6 +23,7 @@ const CLINICAL: NavItem[] = [
   { href: "/alertas", label: "Alertas", icon: Bell, all: ["alerts:read"] },
   { href: "/conhecimento", label: "Protocolos e documentos", icon: BookOpen, all: ["knowledge:read"], hideIf: ["knowledge:manage"] },
   { href: "/auditoria", label: "Auditoria", icon: ScrollText, all: ["audit:read"], hideIf: ["settings:read"] },
+  { href: "/documentacao", label: "Documentação", icon: BookOpenText, all: ["docs:read"], hideIf: ["settings:read"] },
 ];
 
 const ADMIN: NavItem[] = [
@@ -31,6 +32,7 @@ const ADMIN: NavItem[] = [
   { href: "/modelo", label: "IA & Modelos", icon: Cpu, all: ["model:read"] },
   { href: "/conhecimento", label: "Base de conhecimento", icon: BookOpen, all: ["knowledge:manage"] },
   { href: "/auditoria", label: "Auditoria", icon: ScrollText, all: ["audit:read", "settings:read"] },
+  { href: "/documentacao", label: "Documentação", icon: BookOpenText, all: ["docs:read", "settings:read"] },
   { href: "/configuracoes", label: "Configurações", icon: Settings, all: ["settings:read"] },
 ];
 

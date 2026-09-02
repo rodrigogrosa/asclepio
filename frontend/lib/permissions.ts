@@ -16,7 +16,8 @@ export type Permission =
   | "catalog:read"
   | "catalog:manage"
   | "audit:read"
-  | "settings:read";
+  | "settings:read"
+  | "docs:read";
 
 /** `"*"` (curinga) concede tudo; `"users:*"` concede o namespace. */
 export function hasPermission(user: Pick<User, "permissions"> | null | undefined, perm: Permission): boolean {
@@ -46,4 +47,5 @@ export const PERMISSION_LABEL: Record<Permission, string> = {
   "catalog:manage": "Gerir catálogos",
   "audit:read": "Auditoria",
   "settings:read": "Configurações do sistema",
+  "docs:read": "Central de documentação",
 };
