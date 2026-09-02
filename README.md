@@ -23,19 +23,30 @@
 ### Passo 2 — Instale o Ollama *(recomendado — deixa a IA rápida)*
 É o programa que roda os modelos de IA localmente: https://ollama.com/download → baixe, instale e abra uma vez. *(Se pular este passo, funciona mesmo assim, só que mais lento.)*
 
-### Passo 3 — Abra o terminal e cole 1 comando
-**Como abrir o terminal:**
-- **Mac**: aperte `Cmd + barra de espaço`, digite `Terminal` e aperte Enter.
-- **Windows**: aperte a tecla Windows, digite `PowerShell`, clique com o botão direito → **Executar como administrador** e rode primeiro `wsl --install` (só na primeira vez; reinicie se pedir). Depois aperte a tecla Windows, digite `Ubuntu` e abra — é nesse terminal preto que você vai colar o comando.
-- **Linux**: `Ctrl + Alt + T`.
+### Passo 3 — Abra o terminal e cole o comando do seu sistema
 
-**Cole este comando e aperte Enter** (ele baixa o projeto e instala tudo sozinho — modelos de IA, banco de dados, sistema):
+**🍎 macOS** — aperte `Cmd + barra de espaço`, digite `Terminal`, Enter. Cole e aperte Enter:
+```bash
+curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh | bash
+```
 
+**🪟 Windows** — são 2 momentos:
+1. Menu Iniciar → digite `PowerShell` → botão direito → **Executar como administrador** → cole (só na 1ª vez; reinicie se pedir):
+```powershell
+wsl --install
+```
+2. Menu Iniciar → digite `Ubuntu` → abra (na 1ª vez ele cria um usuário) → cole no terminal do Ubuntu:
+```bash
+curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh | bash
+```
+
+**🐧 Linux (Ubuntu/Debian)** — aperte `Ctrl + Alt + T` e cole (vai pedir sua senha para instalar o Docker):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh | bash
 ```
 
 Espere terminar (aparece **"Tudo pronto!"** com os endereços e as senhas). ☕
+> 💡 No Windows, **todos os comandos deste projeto** (`make up`, `make down`, `grep ASCLEPIO_ .env`…) são digitados no terminal do **Ubuntu**, não no PowerShell.
 
 ### Passo 4 — Use o sistema
 Abra o navegador em **http://localhost:3000** e entre:

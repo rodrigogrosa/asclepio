@@ -42,11 +42,18 @@
   4. É **nessa janela do Ubuntu** que você cola o comando abaixo.
 - **Linux**: `Ctrl + Alt + T`.
 
-**Agora cole isto no terminal e aperte Enter** (colar: `Cmd+V` no Mac; no Ubuntu/Windows, botão direito do mouse):
+**Agora cole o comando no terminal do seu sistema e aperte Enter** (colar: `Cmd+V` no Mac; botão direito do mouse no Ubuntu/Windows):
 
+🍎 **macOS** e 🐧 **Linux** (no Terminal):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh | bash
 ```
+
+🪟 **Windows** (no terminal do **Ubuntu** — não no PowerShell):
+```bash
+curl -fsSL https://raw.githubusercontent.com/rodrigogrosa/asclepio/main/install.sh | bash
+```
+> No Windows, todos os comandos deste guia (`make up`, `make down`, `grep …`) são sempre digitados no terminal do **Ubuntu**.
 
 O que ele faz sozinho: verifica/instala o que faltar → baixa o projeto para a pasta `asclepio` na sua área do usuário → baixa os modelos de IA (inclusive o **modelo treinado do projeto**, pronto — você não treina nada) → cria as senhas → liga tudo → testa.
 
