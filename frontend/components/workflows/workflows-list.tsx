@@ -59,7 +59,7 @@ export function WorkflowsList() {
             <p className="text-xs text-muted">Não foi possível carregar o grafo: {graphError}</p>
           ) : graph ? (
             <>
-              <MermaidGraph code={graph.mermaid} className="min-h-[220px]" />
+              <MermaidGraph code={graph.mermaid} className="min-h-[220px]" title="grafo-revisao-clinica" />
               {showNodes && (
                 <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {graph.nodes.map((n, i) => (
