@@ -1,6 +1,6 @@
 // Cliente HTTP tipado contra docs/CONTRATO_API.md (v1 + auth v1.1). Em NEXT_PUBLIC_USE_MOCK=true usa lib/mock.
-import type { StreamEvent, TokenOut } from "./types";
-import type { ApiClient, ApiError as ApiErrorT, StreamHandler } from "./api-types";
+import type { Analysis, AnalysisSummary, CreateAnalysisInput, LiveStartInput, MonitoringStatus, PatientMonitoring, StreamEvent, TokenOut } from "./types";
+import type { ApiClient, ApiError as ApiErrorT } from "./api-types";
 import { mockApi } from "./mock";
 import {
   clearSession, getRefreshToken, getToken, notifyPrecondition, notifyUnauthorized, saveSession, TOKEN_KEY, USER_KEY, UNAUTHORIZED_EVENT,
@@ -132,14 +132,15 @@ const post = <T>(path: string, body?: unknown) => request<T>(path, { method: "PO
 const patch = <T>(path: string, body?: unknown) => request<T>(path, { method: "PATCH", body: body === undefined ? undefined : JSON.stringify(body) });
 const del = <T>(path: string) => request<T>(path, { method: "DELETE" });
 
-/** Parser manual de SSE sobre fetch (EventSource não suporta POST). */
-async function streamSse(path: string, body: unknown, onEvent: StreamHandler, signal?: AbortSignal, retried = false): Promise<void> {
-  const headers: Record<string, string> = { "Content-Type": "application/json", Accept: "text/event-stream" };
+/** Parser manual de SSE sobre fetch (EventSource não suporta POST nem Bearer). GET quando `body` é undefined. */
+async function streamSse<E extends { event: string }>(path: string, body: unknown, onEvent: (ev: E) => void, signal?: AbortSignal, retried = false): Promise<void> {
+  const headers: Record<string, string> = { Accept: "text/event-stream" };
+  if (body !== undefined) headers["Content-Type"] = "application/json";
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, { method: "POST", headers, body: JSON.stringify(body), signal, cache: "no-store" });
+    res = await fetch(`${API_URL}${path}`, { method: body === undefined ? "GET" : "POST", headers, body: body === undefined ? undefined : JSON.stringify(body), signal, cache: "no-store" });
   } catch (e) {
     if ((e as Error)?.name === "AbortError") throw e;
     throw new ApiError(0, "Não foi possível conectar à API.");
@@ -180,7 +181,7 @@ async function streamSse(path: string, body: unknown, onEvent: StreamHandler, si
     } catch {
       /* manter string */
     }
-    onEvent({ event, data } as StreamEvent);
+    onEvent({ event, data } as unknown as E);
   };
   while (true) {
     const { value, done } = await reader.read();
@@ -194,6 +195,63 @@ async function streamSse(path: string, body: unknown, onEvent: StreamHandler, si
     }
   }
   if (buffer.trim()) dispatch(buffer);
+}
+
+/** GET autenticado que devolve a Response (blob, texto…): Bearer, renovação do token em 401 e erro com causa. */
+async function authedFetch(path: string, retried = false): Promise<Response> {
+  const headers: Record<string, string> = {};
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { headers, cache: "no-store" });
+  } catch {
+    throw new ApiError(0, "Não foi possível conectar à API.");
+  }
+  if (res.status === 401 && !retried) {
+    const tok = await refreshSession();
+    if (tok) return authedFetch(path, true);
+    notifyUnauthorized();
+    throw new ApiError(401, "Sessão expirada. Faça login novamente.");
+  }
+  if (!res.ok) {
+    const { detail, code } = await parseError(res);
+    throw new ApiError(res.status, detail, code);
+  }
+  return res;
+}
+
+/** POST multipart com progresso de envio (fetch não expõe upload; XMLHttpRequest sim). */
+function uploadForm<T>(path: string, form: FormData, onProgress?: (fraction: number) => void, signal?: AbortSignal, retried = false): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}${path}`);
+    xhr.setRequestHeader("Accept", "application/json");
+    const token = getToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress?.(e.loaded / e.total);
+    xhr.onerror = () => reject(new ApiError(0, "Não foi possível enviar o arquivo: a conexão com a API falhou. Verifique a rede e tente novamente."));
+    xhr.onabort = () => reject(new DOMException("Envio cancelado", "AbortError"));
+    xhr.onload = async () => {
+      if (xhr.status === 401) {
+        const tok = retried ? null : await refreshSession();
+        if (tok) return uploadForm<T>(path, form, onProgress, signal, true).then(resolve, reject);
+        notifyUnauthorized();
+        return reject(new ApiError(401, "Sessão expirada. Faça login novamente."));
+      }
+      if (xhr.status < 200 || xhr.status >= 300) {
+        const { detail, code } = await parseError(new Response(xhr.responseText, { status: xhr.status >= 400 ? xhr.status : 500 }));
+        return reject(xhr.status === 428 ? handlePrecondition(detail, code) : new ApiError(xhr.status, detail, code));
+      }
+      try {
+        resolve(JSON.parse(xhr.responseText) as T);
+      } catch {
+        reject(new ApiError(xhr.status, "Resposta inesperada da API ao enviar o arquivo."));
+      }
+    };
+    signal?.addEventListener("abort", () => xhr.abort(), { once: true });
+    xhr.send(form);
+  });
 }
 
 export const httpApi: ApiClient = {
@@ -228,29 +286,7 @@ export const httpApi: ApiClient = {
     downloadUrl: (id) => `${API_URL}/docs-hub/${encodeURIComponent(id)}/download`,
     // Download autenticado: fetch com Bearer → blob (o navegador não envia o header em <a href> direto)
     download: async (id) => {
-      const doFetch = async (retried = false): Promise<Response> => {
-        const headers: Record<string, string> = {};
-        const token = getToken();
-        if (token) headers.Authorization = `Bearer ${token}`;
-        let res: Response;
-        try {
-          res = await fetch(`${API_URL}/docs-hub/${encodeURIComponent(id)}/download`, { headers, cache: "no-store" });
-        } catch {
-          throw new ApiError(0, "Não foi possível conectar à API.");
-        }
-        if (res.status === 401 && !retried) {
-          const tok = await refreshSession();
-          if (tok) return doFetch(true);
-          notifyUnauthorized();
-          throw new ApiError(401, "Sessão expirada. Faça login novamente.");
-        }
-        if (!res.ok) {
-          const { detail, code } = await parseError(res);
-          throw new ApiError(res.status, detail, code);
-        }
-        return res;
-      };
-      const res = await doFetch();
+      const res = await authedFetch(`/docs-hub/${encodeURIComponent(id)}/download`);
       const cd = res.headers.get("Content-Disposition") ?? "";
       const m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
       const filename = m ? decodeURIComponent(m[1]) : `${id}`;
@@ -276,7 +312,7 @@ export const httpApi: ApiClient = {
   },
   assistant: {
     chat: (req) => post("/assistant/chat", req),
-    stream: (req, onEvent, signal) => streamSse("/assistant/chat/stream", req, onEvent, signal),
+    stream: (req, onEvent, signal) => streamSse<StreamEvent>("/assistant/chat/stream", req, onEvent, signal),
     conversations: () => get("/assistant/conversations"),
     conversation: (id) => get(`/assistant/conversations/${encodeURIComponent(id)}`),
     deleteConversation: (id) => del(`/assistant/conversations/${encodeURIComponent(id)}`),
@@ -294,6 +330,31 @@ export const httpApi: ApiClient = {
   alerts: {
     list: (params) => get(`/alerts${qs(params)}`),
     ack: (id) => post(`/alerts/${id}/ack`),
+    stream: (onEvent, signal) => streamSse("/alerts/stream", undefined, onEvent, signal),
+  },
+  monitoring: {
+    status: () => get<MonitoringStatus>("/monitoring/status"),
+    analyses: (params) => get<AnalysisSummary[]>(`/monitoring/analyses${qs(params)}`),
+    analysis: (id) => get<Analysis>(`/monitoring/analyses/${encodeURIComponent(id)}`),
+    createAnalysis: (input: CreateAnalysisInput, opts) => {
+      const form = new FormData();
+      form.set("kind", input.kind);
+      form.set("patient_id", String(input.patient_id));
+      if (input.file) form.set("file", input.file, input.file.name);
+      else if (input.sample) form.set("sample", input.sample);
+      if (input.profile) form.set("profile", input.profile);
+      if (input.exercise) form.set("exercise", input.exercise);
+      return uploadForm<AnalysisSummary>("/monitoring/analyses", form, opts?.onProgress, opts?.signal);
+    },
+    artifact: async (analysisId, name) => {
+      const res = await authedFetch(`/monitoring/analyses/${encodeURIComponent(analysisId)}/artifacts/${encodeURIComponent(name)}`);
+      return res.blob();
+    },
+    patient: (id) => get<PatientMonitoring>(`/monitoring/patients/${id}`),
+    scan: (id) => post<PatientMonitoring>(`/monitoring/patients/${id}/scan`),
+    liveStart: (input: LiveStartInput) => post("/monitoring/live/start", input),
+    liveStop: (sessionId) => post(`/monitoring/live/${encodeURIComponent(sessionId)}/stop`),
+    liveStream: (patientId, onEvent, signal) => streamSse(`/monitoring/live/stream${qs({ patient_id: patientId })}`, undefined, onEvent, signal),
   },
   knowledge: {
     documents: (doc_type) => get(`/knowledge/documents${qs({ doc_type })}`),

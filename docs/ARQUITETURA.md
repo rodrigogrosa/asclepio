@@ -142,3 +142,89 @@ Pontos de projeto:
 ## 9. Deploy
 
 `docker-compose.yml` com perfis: padrão (db, api, web), `ollama` (Ollama + init automático), `gateway` (LiteLLM), `observability` (LiteLLM + Langfuse v3 com ClickHouse/MinIO/Redis, inicialização *headless* com chaves conhecidas), `ml` (pipeline em container). Imagens multi-stage, usuário não-root, healthchecks. `scripts/bootstrap.sh` automatiza tudo.
+
+## 10. Fase 4 — monitoramento multimodal
+
+Novo pacote **`multimodal/asclepio_multimodal`** (workspace uv) com os analisadores; o backend só
+orquestra (fila, persistência, alertas, SSE). Todo analisador devolve o mesmo contrato
+(`schemas.AnalysisResult`: risco, achados com evidência, séries, modelos usados, artefatos), o que
+permite persistir, alertar e fundir sem conhecer o modelo por trás.
+
+```mermaid
+flowchart LR
+  subgraph IN[Entradas]
+    V[Vídeo clínico<br/>fisioterapia · quarto · cirurgia]
+    A[Áudio da consulta]
+    M[Monitor de beira-leito<br/>replay PhysioNet / cenário]
+    P[Prontuário<br/>prescrições · sensor de leito]
+  end
+  subgraph VID[video/]
+    Y[YOLOv8n<br/>pessoas · objetos · zonas críticas]
+    O[OpenPose COCO 18<br/>pose por pessoa · OpenCV DNN]
+    K[Cinemática<br/>ângulos · ROM · simetria · queda]
+    RV[Regras do protocolo<br/>+ detector não supervisionado]
+  end
+  subgraph AUD[audio/]
+    W[ffmpeg → WAV 16 kHz]
+    STT[Azure Speech to Text<br/>reserva: Whisper local]
+    AN[Anonimizador LGPD]
+    TA[Azure Text Analytics<br/>Health · sentimento · frases-chave]
+    PR[Praat<br/>F0 · jitter · shimmer · HNR · pausas]
+    AST[AST treinado no AudioSet<br/>tosse · respiração · chiado]
+  end
+  subgraph ANO[anomaly/]
+    OD[Detector online de sinais vitais<br/>limites · z-score robusto · CUSUM · Isolation Forest]
+    RX[Prescrições<br/>salto de dose · alergia · suspensão]
+    MB[Mobilidade<br/>imobilidade · agitação noturna · queda]
+  end
+  F[fusion.py<br/>fusão tardia + concordância]
+  AL[Alertas<br/>SSE em tempo real · webhook]
+  EQ[Equipe médica<br/>toast · /alertas · reconhecer]
+  REL[Relatórios automáticos<br/>quadros anotados · vídeo H.264 · Markdown]
+  V --> Y --> O --> K --> RV
+  A --> W --> STT --> AN --> TA
+  W --> PR
+  W --> AST
+  M --> OD
+  P --> RX & MB
+  RV & TA & PR & AST & OD & RX & MB --> F --> AL --> EQ
+  RV & TA & PR --> REL
+```
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as Enfermagem/Médico (Web)
+  participant API as FastAPI /monitoring
+  participant Q as Fila (1 por vez)
+  participant MM as asclepio_multimodal
+  participant AZ as Azure AI (Speech/Language)
+  participant DB as Banco + Auditoria
+  participant BUS as Barramento SSE
+  U->>API: POST /monitoring/analyses (vídeo/áudio ou exemplo)
+  API->>API: extensão + tamanho em blocos + decodifica (OpenCV/ffmpeg)
+  API->>DB: monitoring_analyses (na_fila) + auditoria (sha256)
+  API-->>U: 202 {id}
+  API->>Q: agenda
+  Q->>MM: analyze_video / analyze_audio (thread)
+  MM->>AZ: transcrição (áudio) e Text Analytics (texto anonimizado)
+  MM-->>Q: AnalysisResult (achados, séries, artefatos)
+  Q->>DB: resultado + alertas (atenção/crítico, máx. 6)
+  Q->>BUS: alerta publicado
+  BUS-->>U: GET /alerts/stream → toast em tempo real
+  Q->>MM: fusion.fuse(últimas análises do paciente)
+  Q->>DB: análise "fusao" + alerta de concordância
+  U->>API: GET /monitoring/analyses/{id} (poll de progresso → relatório)
+```
+
+Pontos de projeto:
+- **Fila de 1 análise pesada por vez** (OpenPose/AST disputam CPU); as demais ficam `na_fila` e a
+  tela mostra a etapa e o progresso. Análise interrompida por reinício vira `erro` com instrução.
+- **Monitor ao vivo**: `POST /monitoring/live/start` reproduz uma série (PhysioNet ou cenário
+  sintético) como se fosse o monitor de beira-leito; cada leitura grava um `Vital`, passa pelo
+  detector online e é publicada em `live:<paciente>`; ao fim, a sessão vira uma análise de sinais.
+- **Tabelas novas**: `monitoring_analyses`, `prescription_events`, `mobility_readings`; `alerts`
+  ganha `analysis_id` (migração leve automática em `db/base.py`).
+- **Imagem da API**: inclui OpenCV, Ultralytics, PyTorch **só-CPU** (índice CPU no Linux) e os SDKs
+  Azure; pesos dos modelos e vídeos de exemplo são baixados sob demanda para o volume `data/`
+  e conferidos por SHA-256. Decisões: ADR-0006, ADR-0007 e ADR-0008.

@@ -10,12 +10,15 @@ import { SkeletonRows } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/misc";
 import { AlertList } from "./alert-list";
+import { useAlertEvents } from "./alert-stream";
 import { cn } from "@/lib/utils";
 
 export function AlertsView() {
   const [severity, setSeverity] = useState<AlertSeverity | "">("");
   const [openOnly, setOpenOnly] = useState(true);
   const { data, loading, error, reload, setData } = useAsync(() => api.alerts.list({ severity, open_only: openOnly }), [severity, openOnly], { pollMs: 30_000 });
+
+  useAlertEvents(() => void reload(true));
 
   const onChanged = (a: Alert) => {
     if (!data) return;
@@ -26,7 +29,7 @@ export function AlertsView() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Alertas" description="Alertas emitidos por fluxos clínicos, regras determinísticas ou manualmente." />
+      <PageHeader title="Alertas" description="Alertas de fluxos clínicos, regras, monitoramento multimodal (vídeo, áudio, sinais, prescrição e mobilidade) ou lançados manualmente. Os novos chegam em tempo real." />
       <div className="flex flex-wrap items-center gap-3">
         <div className="inline-flex rounded-control border border-border bg-surface p-1">
           {[

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/misc";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useConfig } from "@/components/providers/config-provider";
+import { useAlertEvents } from "@/components/alerts/alert-stream";
 
 const RISK_COLOR: Record<RiskLevel, string> = { critico: "#FF4D4F", alto: "#ED145B", moderado: "#F5A623", baixo: "#2ECC71" };
 
@@ -25,6 +26,7 @@ export function DashboardView() {
   const { user } = useAuth();
   const { config } = useConfig();
   const { data, loading, error, reload } = useAsync(() => api.dashboard.stats(), [], { pollMs: 30_000 });
+  useAlertEvents(() => void reload(true));
 
   const can = (p: Parameters<typeof hasPermission>[1]) => hasPermission(user, p);
   const canPatients = can("patients:read");

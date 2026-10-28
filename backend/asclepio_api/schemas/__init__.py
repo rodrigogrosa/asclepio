@@ -177,6 +177,7 @@ class AlertOut(ORMModel):
     message: str
     source: str
     run_id: str | None = None
+    analysis_id: str | None = None
     created_at: datetime
     acknowledged_at: datetime | None = None
     acknowledged_by: str | None = None
@@ -383,3 +384,43 @@ class AuditEntryOut(ORMModel):
 class AuditPageOut(BaseModel):
     items: list[AuditEntryOut]
     total: int
+
+
+# --- monitoramento multimodal (Fase 4) ----------------------------------------------
+class AnalysisSummaryOut(BaseModel):
+    id: str
+    patient_id: int
+    patient_name: str = ""
+    kind: str
+    status: Literal["na_fila", "processando", "concluida", "erro"]
+    progress: float = 0
+    stage: str | None = None
+    profile: str | None = None
+    filename: str | None = None
+    created_at: datetime
+    created_by: str
+    finished_at: datetime | None = None
+    risk_level: RiskLevel | None = None
+    risk_score: float | None = None
+    severity: str | None = None
+    findings_count: int = 0
+    summary: str | None = None
+    error: str | None = None
+
+
+class AnalysisArtifactOut(BaseModel):
+    name: str
+    content_type: str
+    url: str
+
+
+class AnalysisOut(AnalysisSummaryOut):
+    result: dict[str, Any] | None = None
+    report_markdown: str | None = None
+    artifacts: list[AnalysisArtifactOut] = []
+
+
+class LiveStartIn(BaseModel):
+    patient_id: int
+    source: str = Field(min_length=3, max_length=80)
+    speed: float = Field(default=2.0, ge=0.2, le=50)

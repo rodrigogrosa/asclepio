@@ -4,7 +4,8 @@ import type {
   LoginResponse, ModelInfo, ModelInfoResponse, Patient, PatientContext, PatientDetail, ReindexResponse, RiskLevel, RunStatus,
   StreamEvent, User, WorkflowGraph, WorkflowRun, AlertSeverity, TokenOut, Session, MfaSetup, MfaEnableResponse,
   UserCreateInput, UserUpdateInput, UserCreateResponse, UsersListParams, PublicConfig, Specialty, Sector, SpecialtyInput, SectorInput,
-  DocsHubList, HubDocumentContent,
+  DocsHubList, HubDocumentContent, Analysis, AnalysisKind, AnalysisSummary, AlertStreamEvent, CreateAnalysisInput, LiveEvent,
+  LiveStartInput, MonitoringStatus, PatientMonitoring,
 } from "./types";
 
 export interface ApiError extends Error {
@@ -15,6 +16,8 @@ export interface ApiError extends Error {
 }
 
 export type StreamHandler = (ev: StreamEvent) => void;
+export type LiveHandler = (ev: LiveEvent) => void;
+export type AlertStreamHandler = (ev: AlertStreamEvent) => void;
 
 export interface ApiClient {
   health(): Promise<HealthResponse>;
@@ -90,6 +93,24 @@ export interface ApiClient {
   alerts: {
     list(params?: { patient_id?: number; severity?: AlertSeverity | ""; open_only?: boolean }): Promise<Alert[]>;
     ack(id: number): Promise<Alert>;
+    /** SSE `GET /alerts/stream` (alertas novos de qualquer origem + `ping`). Resolve quando o stream termina; rejeita se cair. */
+    stream(onEvent: AlertStreamHandler, signal?: AbortSignal): Promise<void>;
+  };
+  /** Monitoramento multimodal (v2.0 — Fase 4) */
+  monitoring: {
+    status(): Promise<MonitoringStatus>;
+    analyses(params?: { patient_id?: number; kind?: AnalysisKind | ""; limit?: number }): Promise<AnalysisSummary[]>;
+    analysis(id: string): Promise<Analysis>;
+    /** `multipart/form-data` (arquivo ou amostra). 202 com a análise na fila; `onProgress` recebe 0..1 do envio. */
+    createAnalysis(input: CreateAnalysisInput, opts?: { onProgress?: (fraction: number) => void; signal?: AbortSignal }): Promise<AnalysisSummary>;
+    /** Artefato (JPEG/PNG/MP4/áudio/Markdown) como blob, baixado com o Bearer. */
+    artifact(analysisId: string, name: string): Promise<Blob>;
+    patient(id: number): Promise<PatientMonitoring>;
+    scan(id: number): Promise<PatientMonitoring>;
+    liveStart(input: LiveStartInput): Promise<{ session_id: string }>;
+    liveStop(sessionId: string): Promise<{ ok?: boolean }>;
+    /** SSE `GET /monitoring/live/stream?patient_id=`: `vital`, `finding`, `alert`, `end`. */
+    liveStream(patientId: number, onEvent: LiveHandler, signal?: AbortSignal): Promise<void>;
   };
   knowledge: {
     documents(doc_type?: DocType | ""): Promise<KnowledgeDocument[]>;

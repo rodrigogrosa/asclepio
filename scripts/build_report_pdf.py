@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-# Documentos disponíveis: `python scripts/build_report_pdf.py [relatorio|guia] [out_dir]`
+# Documentos disponíveis: `python scripts/build_report_pdf.py [relatorio|guia|fase4] [out_dir]`
 DOC_KIND = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("/") else "relatorio"
 OUT_DIR = (
     Path(sys.argv[2])
@@ -54,6 +54,29 @@ DOCUMENTS = {
             ("Anexo — Evidências: onde cada exigência aparece", DOCS / "EVIDENCIAS.md"),
         ],
     },
+}
+DOCUMENTS["fase4"] = {
+    "out": "fase4/RELATORIO_TECNICO_FASE4.pdf",
+    "title": "Relatório Técnico · Fase 4",
+    "subtitle": "Monitoramento multimodal: vídeo (OpenPose + YOLOv8) · áudio (Azure Speech/Text Analytics) · anomalias em tempo real · fusão",
+    "badge": "TECH CHALLENGE · FASE 4 · FIAP PÓS-TECH IA PARA DEVS (8IADT)",
+    "sections": [
+        ("", DOCS / "fase4" / "RELATORIO_TECNICO_FASE4.md"),
+        ("Anexo A — Checklist e evidências da Fase 4", DOCS / "fase4" / "EVIDENCIAS_FASE4.md"),
+        ("Anexo B — Configuração do Azure", DOCS / "fase4" / "GUIA_AZURE.md"),
+        (
+            "Anexo C — Decisões (ADR-0006 · vídeo)",
+            DOCS / "adr" / "0006-video-openpose-top-down-com-yolov8.md",
+        ),
+        (
+            "Anexo D — Decisões (ADR-0007 · Azure e LGPD)",
+            DOCS / "adr" / "0007-azure-com-fallback-local-e-lgpd.md",
+        ),
+        (
+            "Anexo E — Decisões (ADR-0008 · anomalias e fusão)",
+            DOCS / "adr" / "0008-anomalias-em-tempo-real-e-fusao.md",
+        ),
+    ],
 }
 DOC = DOCUMENTS[DOC_KIND]
 OUT_PDF = OUT_DIR / DOC["out"]
@@ -141,7 +164,7 @@ def main() -> None:
         f'<div class="cover"><img class="logo" src="{logo}"><h1>{DOC["title"]}</h1>'
         f'<div class="sub">Asclépio — Assistente Clínico Inteligente</div>'
         f'<div class="sub">{DOC["subtitle"]}</div>'
-        f'<div class="badge">TECH CHALLENGE · FASE 3 · FIAP PÓS-TECH IA PARA DEVS (8IADT)</div>'
+        f'<div class="badge">{DOC.get("badge", "TECH CHALLENGE · FASE 3 · FIAP PÓS-TECH IA PARA DEVS (8IADT)")}</div>'
         f'<div class="meta">Repositório: https://github.com/rodrigogrosa/asclepio<br>Gerado em {date.today().strftime("%d/%m/%Y")}</div></div>'
     ]
     for title, path in SECTIONS:
@@ -159,6 +182,7 @@ mermaid.initialize({{ startOnLoad: false, theme: "neutral", securityLevel: "loos
 await mermaid.run({{ querySelector: ".mermaid" }});
 document.body.dataset.ready = "1";
 </script></head><body>{body}</body></html>"""
+    OUT_PDF.parent.mkdir(parents=True, exist_ok=True)
     html_path = OUT_DIR / (DOC["out"].replace(".pdf", ".html"))
     html_path.write_text(html, encoding="utf-8")
     cmd = [

@@ -45,11 +45,68 @@ class Category:
     docs: tuple[Doc, ...]
 
 
+FASE4 = DOCS / "fase4"
+
 CATALOG: tuple[Category, ...] = (
+    Category(
+        "fase4",
+        "Fase 4 · Monitoramento multimodal",
+        "Entrega da Fase 4: vídeo (OpenPose + YOLOv8), áudio (Azure Speech/Text Analytics), anomalias em tempo real e fusão.",
+        (
+            Doc(
+                "fase4-relatorio",
+                "Relatório Técnico da Fase 4",
+                "Fluxo multimodal, modelos aplicados em cada tipo de dado, resultados medidos e exemplos de anomalias detectadas — abre com o checklist do edital.",
+                FASE4 / "RELATORIO_TECNICO_FASE4.md",
+            ),
+            Doc(
+                "fase4-relatorio-pdf",
+                "Relatório Técnico da Fase 4 (PDF)",
+                "Versão em PDF para entrega e impressão.",
+                FASE4 / "RELATORIO_TECNICO_FASE4.pdf",
+            ),
+            Doc(
+                "fase4-evidencias",
+                "Checklist e evidências da Fase 4",
+                "Cada exigência do edital, o status, onde está no sistema (tela, arquivo, comando) e a prova.",
+                FASE4 / "EVIDENCIAS_FASE4.md",
+            ),
+            Doc(
+                "fase4-roteiro",
+                "Roteiro do vídeo da Fase 4 (≤ 15 min)",
+                "Cena a cena: análise de áudio e vídeo, anomalias, integração Azure e o alerta chegando à equipe.",
+                FASE4 / "ROTEIRO_VIDEO_FASE4.md",
+            ),
+            Doc(
+                "fase4-azure",
+                "Guia de configuração do Azure",
+                "Como criar os recursos Speech e Language (tier gratuito) e ligar a integração.",
+                FASE4 / "GUIA_AZURE.md",
+            ),
+            Doc(
+                "adr-0006",
+                "ADR-0006 · OpenPose + YOLOv8 (top-down)",
+                "Pesos oficiais do OpenPose via OpenCV DNN sobre as pessoas encontradas pelo YOLOv8.",
+                DOCS / "adr" / "0006-video-openpose-top-down-com-yolov8.md",
+            ),
+            Doc(
+                "adr-0007",
+                "ADR-0007 · Azure com modo local e LGPD",
+                "Speech to Text e Text Analytics com reserva local e texto anonimizado.",
+                DOCS / "adr" / "0007-azure-com-fallback-local-e-lgpd.md",
+            ),
+            Doc(
+                "adr-0008",
+                "ADR-0008 · Anomalias em tempo real e fusão",
+                "Detector online em camadas, antiflood, SSE e fusão tardia com concordância entre modalidades.",
+                DOCS / "adr" / "0008-anomalias-em-tempo-real-e-fusao.md",
+            ),
+        ),
+    ),
     Category(
         "relatorios",
         "Relatórios da entrega",
-        "Documentos principais exigidos pelo edital da Fase 3.",
+        "Documentos principais exigidos pelo edital da Fase 3 (assistente, fine-tuning e fluxos).",
         (
             Doc(
                 "relatorio-tecnico",

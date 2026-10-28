@@ -1,0 +1,1311 @@
+{
+  "gerado_em": "2026-10-28T19:01:54+00:00",
+  "ambiente": {
+    "python": "3.12.13",
+    "sistema": "macOS-26.7.1-arm64-arm-64bit"
+  },
+  "parametros_do_detector": {
+    "janela_zscore_min": 30,
+    "z_alerta": 3.5,
+    "referencia_cusum_min": 90,
+    "cusum_k": 0.5,
+    "cusum_h": 4.0,
+    "iforest_amostras_linha_de_base": 45,
+    "iforest_limite_escore": 0.6,
+    "cooldown_min": 15,
+    "recuperacao_min": 10,
+    "duracao_minima_amostras": {
+      "atencao": 3,
+      "critico": 2
+    },
+    "observacao": "Limiares escolhidos a priori (NEWS2/literatura) e conferidos só em séries sintéticas. Depois de ver a tempestade de alertas em 4 registros reais (101, 106, 201 e 217) foram acrescentados ao antiflood: recuperação de 10 min, backoff do cooldown e supressão de NEWS2/índice de choque redundantes. Nenhum parâmetro foi ajustado olhando sensibilidade, especificidade ou F1 nos registros rotulados nem na injeção."
+  },
+  "versoes": {
+    "scikit-learn": "1.9.0",
+    "numpy": "2.5.2",
+    "scipy": "1.18.1",
+    "wfdb": "4.3.1",
+    "pandas": "3.0.5",
+    "matplotlib": "3.11.1"
+  },
+  "limitacoes": [
+    "50 registros de UTI adulta (MIMIC-II): os intervalos de confiança de sensibilidade/especificidade são largos.",
+    "O escore do ensemble mistura todos os sinais; não é um preditor dedicado de AHE (ver auc_antes_do_inicio).",
+    "Na injeção, FP inclui eventos fisiológicos reais da linha de base: a precisão é um piso.",
+    "Prescrições e mobilidade: o gabarito foi injetado pelos mesmos geradores que as regras foram escritas para detectar; valida o pipeline, não a sensibilidade clínica.",
+    "O IsolationForest usa as primeiras 45 amostras como linha de base e não recalibra: séries longas com mudança de estado legítima podem gerar alertas.",
+    "Doses máximas são referências didáticas de adulto; o protocolo institucional prevalece."
+  ],
+  "physionet_real": {
+    "conjunto": "PhysioNet/CinC Challenge 2009 — Predicting Acute Hypotensive Episodes (testes A e B)",
+    "n_registros": 50,
+    "n_h": 19,
+    "n_c": 31,
+    "janela_avaliacao_min_em_relacao_a_T0": [
+      -120,
+      60
+    ],
+    "definicao": "H detectado = alerta hemodinâmico até o início do AHE (≥ 30 min com ≥ 90 % das PAM por minuto ≤ 60 mmHg, calculado sobre a PAM do registro); C com alerta na janela = falso positivo.",
+    "codigos_hemodinamicos": [
+      "deriva_map",
+      "deriva_sbp",
+      "indice_choque",
+      "mudanca_brusca_map",
+      "mudanca_brusca_sbp",
+      "multivariada",
+      "pam_baixa",
+      "pas_baixa"
+    ],
+    "h_sem_inicio_calculavel": [
+      "223"
+    ],
+    "metodos": {
+      "limiar": {
+        "n_h": 19,
+        "n_c": 31,
+        "sensibilidade": 0.737,
+        "sensibilidade_ate_5min_apos": 0.789,
+        "sensibilidade_ic95": [
+          0.512,
+          0.882
+        ],
+        "especificidade": 0.548,
+        "especificidade_ic95": [
+          0.378,
+          0.708
+        ],
+        "precisao": 0.5,
+        "verdadeiros_positivos": 14,
+        "falsos_positivos": 14,
+        "falsos_negativos": 5,
+        "verdadeiros_negativos": 17,
+        "antecedencia_media_min": 75.1,
+        "antecedencia_mediana_min": 73.0,
+        "antecedencia_max_min": 143.0,
+        "alertas_por_controle_na_janela": 1.39,
+        "n_com_antecedencia": 14
+      },
+      "zscore": {
+        "n_h": 19,
+        "n_c": 31,
+        "sensibilidade": 0.421,
+        "sensibilidade_ate_5min_apos": 0.421,
+        "sensibilidade_ic95": [
+          0.231,
+          0.637
+        ],
+        "especificidade": 0.387,
+        "especificidade_ic95": [
+          0.237,
+          0.562
+        ],
+        "precisao": 0.296,
+        "verdadeiros_positivos": 8,
+        "falsos_positivos": 19,
+        "falsos_negativos": 11,
+        "verdadeiros_negativos": 12,
+        "antecedencia_media_min": 127.6,
+        "antecedencia_mediana_min": 131.0,
+        "antecedencia_max_min": 148.0,
+        "alertas_por_controle_na_janela": 1.42,
+        "n_com_antecedencia": 8
+      },
+      "cusum_ewma": {
+        "n_h": 19,
+        "n_c": 31,
+        "sensibilidade": 0.526,
+        "sensibilidade_ate_5min_apos": 0.579,
+        "sensibilidade_ic95": [
+          0.317,
+          0.727
+        ],
+        "especificidade": 0.452,
+        "especificidade_ic95": [
+          0.292,
+          0.622
+        ],
+        "precisao": 0.37,
+        "verdadeiros_positivos": 10,
+        "falsos_positivos": 17,
+        "falsos_negativos": 9,
+        "verdadeiros_negativos": 14,
+        "antecedencia_media_min": 82.5,
+        "antecedencia_mediana_min": 73.0,
+        "antecedencia_max_min": 154.0,
+        "alertas_por_controle_na_janela": 1.19,
+        "n_com_antecedencia": 10
+      },
+      "iforest": {
+        "n_h": 19,
+        "n_c": 31,
+        "sensibilidade": 0.211,
+        "sensibilidade_ate_5min_apos": 0.263,
+        "sensibilidade_ic95": [
+          0.085,
+          0.433
+        ],
+        "especificidade": 0.645,
+        "especificidade_ic95": [
+          0.469,
+          0.789
+        ],
+        "precisao": 0.267,
+        "verdadeiros_positivos": 4,
+        "falsos_positivos": 11,
+        "falsos_negativos": 15,
+        "verdadeiros_negativos": 20,
+        "antecedencia_media_min": 60.5,
+        "antecedencia_mediana_min": 61.5,
+        "antecedencia_max_min": 67.0,
+        "alertas_por_controle_na_janela": 0.42,
+        "n_com_antecedencia": 4
+      },
+      "ensemble": {
+        "n_h": 19,
+        "n_c": 31,
+        "sensibilidade": 0.842,
+        "sensibilidade_ate_5min_apos": 0.842,
+        "sensibilidade_ic95": [
+          0.624,
+          0.945
+        ],
+        "especificidade": 0.194,
+        "especificidade_ic95": [
+          0.092,
+          0.363
+        ],
+        "precisao": 0.39,
+        "verdadeiros_positivos": 16,
+        "falsos_positivos": 25,
+        "falsos_negativos": 3,
+        "verdadeiros_negativos": 6,
+        "antecedencia_media_min": 112.9,
+        "antecedencia_mediana_min": 127.5,
+        "antecedencia_max_min": 154.0,
+        "alertas_por_controle_na_janela": 4.42,
+        "n_com_antecedencia": 16
+      }
+    },
+    "metodos_por_conjunto": {
+      "A": {
+        "limiar": {
+          "n_h": 5,
+          "n_c": 5,
+          "sensibilidade": 0.6,
+          "sensibilidade_ate_5min_apos": 0.6,
+          "sensibilidade_ic95": [
+            0.231,
+            0.882
+          ],
+          "especificidade": 0.6,
+          "especificidade_ic95": [
+            0.231,
+            0.882
+          ],
+          "precisao": 0.6,
+          "verdadeiros_positivos": 3,
+          "falsos_positivos": 2,
+          "falsos_negativos": 2,
+          "verdadeiros_negativos": 3,
+          "antecedencia_media_min": 126.7,
+          "antecedencia_mediana_min": 126.0,
+          "antecedencia_max_min": 143.0,
+          "alertas_por_controle_na_janela": 0.4,
+          "n_com_antecedencia": 3
+        },
+        "zscore": {
+          "n_h": 5,
+          "n_c": 5,
+          "sensibilidade": 0.0,
+          "sensibilidade_ate_5min_apos": 0.0,
+          "sensibilidade_ic95": [
+            0.0,
+            0.434
+          ],
+          "especificidade": 0.4,
+          "especificidade_ic95": [
+            0.118,
+            0.769
+          ],
+          "precisao": 0.0,
+          "verdadeiros_positivos": 0,
+          "falsos_positivos": 3,
+          "falsos_negativos": 5,
+          "verdadeiros_negativos": 2,
+          "antecedencia_media_min": null,
+          "antecedencia_mediana_min": null,
+          "antecedencia_max_min": null,
+          "alertas_por_controle_na_janela": 1.2,
+          "n_com_antecedencia": 0
+        },
+        "cusum_ewma": {
+          "n_h": 5,
+          "n_c": 5,
+          "sensibilidade": 0.2,
+          "sensibilidade_ate_5min_apos": 0.2,
+          "sensibilidade_ic95": [
+            0.036,
+            0.624
+          ],
+          "especificidade": 0.6,
+          "especificidade_ic95": [
+            0.231,
+            0.882
+          ],
+          "precisao": 0.333,
+          "verdadeiros_positivos": 1,
+          "falsos_positivos": 2,
+          "falsos_negativos": 4,
+          "verdadeiros_negativos": 3,
+          "antecedencia_media_min": 62.0,
+          "antecedencia_mediana_min": 62.0,
+          "antecedencia_max_min": 62.0,
+          "alertas_por_controle_na_janela": 0.8,
+          "n_com_antecedencia": 1
+        },
+        "iforest": {
+          "n_h": 5,
+          "n_c": 5,
+          "sensibilidade": 0.2,
+          "sensibilidade_ate_5min_apos": 0.2,
+          "sensibilidade_ic95": [
+            0.036,
+            0.624
+          ],
+          "especificidade": 0.8,
+          "especificidade_ic95": [
+            0.376,
+            0.964
+          ],
+          "precisao": 0.5,
+          "verdadeiros_positivos": 1,
+          "falsos_positivos": 1,
+          "falsos_negativos": 4,
+          "verdadeiros_negativos": 4,
+          "antecedencia_media_min": 65.0,
+          "antecedencia_mediana_min": 65.0,
+          "antecedencia_max_min": 65.0,
+          "alertas_por_controle_na_janela": 0.2,
+          "n_com_antecedencia": 1
+        },
+        "ensemble": {
+          "n_h": 5,
+          "n_c": 5,
+          "sensibilidade": 0.6,
+          "sensibilidade_ate_5min_apos": 0.6,
+          "sensibilidade_ic95": [
+            0.231,
+            0.882
+          ],
+          "especificidade": 0.4,
+          "especificidade_ic95": [
+            0.118,
+            0.769
+          ],
+          "precisao": 0.5,
+          "verdadeiros_positivos": 3,
+          "falsos_positivos": 3,
+          "falsos_negativos": 2,
+          "verdadeiros_negativos": 2,
+          "antecedencia_media_min": 126.7,
+          "antecedencia_mediana_min": 126.0,
+          "antecedencia_max_min": 143.0,
+          "alertas_por_controle_na_janela": 2.6,
+          "n_com_antecedencia": 3
+        }
+      },
+      "B": {
+        "limiar": {
+          "n_h": 14,
+          "n_c": 26,
+          "sensibilidade": 0.786,
+          "sensibilidade_ate_5min_apos": 0.857,
+          "sensibilidade_ic95": [
+            0.524,
+            0.924
+          ],
+          "especificidade": 0.538,
+          "especificidade_ic95": [
+            0.355,
+            0.712
+          ],
+          "precisao": 0.478,
+          "verdadeiros_positivos": 11,
+          "falsos_positivos": 12,
+          "falsos_negativos": 3,
+          "verdadeiros_negativos": 14,
+          "antecedencia_media_min": 61.0,
+          "antecedencia_mediana_min": 65.0,
+          "antecedencia_max_min": 124.0,
+          "alertas_por_controle_na_janela": 1.58,
+          "n_com_antecedencia": 11
+        },
+        "zscore": {
+          "n_h": 14,
+          "n_c": 26,
+          "sensibilidade": 0.571,
+          "sensibilidade_ate_5min_apos": 0.571,
+          "sensibilidade_ic95": [
+            0.326,
+            0.786
+          ],
+          "especificidade": 0.385,
+          "especificidade_ic95": [
+            0.224,
+            0.575
+          ],
+          "precisao": 0.333,
+          "verdadeiros_positivos": 8,
+          "falsos_positivos": 16,
+          "falsos_negativos": 6,
+          "verdadeiros_negativos": 10,
+          "antecedencia_media_min": 127.6,
+          "antecedencia_mediana_min": 131.0,
+          "antecedencia_max_min": 148.0,
+          "alertas_por_controle_na_janela": 1.46,
+          "n_com_antecedencia": 8
+        },
+        "cusum_ewma": {
+          "n_h": 14,
+          "n_c": 26,
+          "sensibilidade": 0.643,
+          "sensibilidade_ate_5min_apos": 0.714,
+          "sensibilidade_ic95": [
+            0.388,
+            0.837
+          ],
+          "especificidade": 0.423,
+          "especificidade_ic95": [
+            0.255,
+            0.611
+          ],
+          "precisao": 0.375,
+          "verdadeiros_positivos": 9,
+          "falsos_positivos": 15,
+          "falsos_negativos": 5,
+          "verdadeiros_negativos": 11,
+          "antecedencia_media_min": 84.8,
+          "antecedencia_mediana_min": 73.0,
+          "antecedencia_max_min": 154.0,
+          "alertas_por_controle_na_janela": 1.27,
+          "n_com_antecedencia": 9
+        },
+        "iforest": {
+          "n_h": 14,
+          "n_c": 26,
+          "sensibilidade": 0.214,
+          "sensibilidade_ate_5min_apos": 0.286,
+          "sensibilidade_ic95": [
+            0.076,
+            0.476
+          ],
+          "especificidade": 0.615,
+          "especificidade_ic95": [
+            0.425,
+            0.776
+          ],
+          "precisao": 0.231,
+          "verdadeiros_positivos": 3,
+          "falsos_positivos": 10,
+          "falsos_negativos": 11,
+          "verdadeiros_negativos": 16,
+          "antecedencia_media_min": 59.0,
+          "antecedencia_mediana_min": 58.0,
+          "antecedencia_max_min": 67.0,
+          "alertas_por_controle_na_janela": 0.46,
+          "n_com_antecedencia": 3
+        },
+        "ensemble": {
+          "n_h": 14,
+          "n_c": 26,
+          "sensibilidade": 0.929,
+          "sensibilidade_ate_5min_apos": 0.929,
+          "sensibilidade_ic95": [
+            0.685,
+            0.987
+          ],
+          "especificidade": 0.154,
+          "especificidade_ic95": [
+            0.061,
+            0.335
+          ],
+          "precisao": 0.371,
+          "verdadeiros_positivos": 13,
+          "falsos_positivos": 22,
+          "falsos_negativos": 1,
+          "verdadeiros_negativos": 4,
+          "antecedencia_media_min": 109.7,
+          "antecedencia_mediana_min": 129.0,
+          "antecedencia_max_min": 154.0,
+          "alertas_por_controle_na_janela": 4.77,
+          "n_com_antecedencia": 13
+        }
+      }
+    },
+    "politicas_de_alerta": {
+      "descricao": "Políticas sobre os alertas do ensemble: «critico» = só severidade crítica; «2 famílias» = só quando ≥ 2 métodos diferentes (limiar, z-score, CUSUM, IsolationForest) concordam em 10 min.",
+      "ensemble_critico": {
+        "n_h": 19,
+        "n_c": 31,
+        "sensibilidade": 0.526,
+        "sensibilidade_ate_5min_apos": 0.737,
+        "sensibilidade_ic95": [
+          0.317,
+          0.727
+        ],
+        "especificidade": 0.484,
+        "especificidade_ic95": [
+          0.32,
+          0.652
+        ],
+        "precisao": 0.385,
+        "verdadeiros_positivos": 10,
+        "falsos_positivos": 16,
+        "falsos_negativos": 9,
+        "verdadeiros_negativos": 15,
+        "antecedencia_media_min": 86.2,
+        "antecedencia_mediana_min": 77.5,
+        "antecedencia_max_min": 145.0,
+        "alertas_por_controle_na_janela": 1.1,
+        "n_com_antecedencia": 10
+      },
+      "ensemble_2_familias": {
+        "n_h": 19,
+        "n_c": 31,
+        "sensibilidade": 0.526,
+        "sensibilidade_ate_5min_apos": 0.579,
+        "sensibilidade_ic95": [
+          0.317,
+          0.727
+        ],
+        "especificidade": 0.613,
+        "especificidade_ic95": [
+          0.438,
+          0.763
+        ],
+        "precisao": 0.455,
+        "verdadeiros_positivos": 10,
+        "falsos_positivos": 12,
+        "falsos_negativos": 9,
+        "verdadeiros_negativos": 19,
+        "antecedencia_media_min": 77.7,
+        "antecedencia_mediana_min": 72.0,
+        "antecedencia_max_min": 154.0,
+        "alertas_por_controle_na_janela": 0.58,
+        "n_com_antecedencia": 10
+      }
+    },
+    "auc_antes_do_inicio": {
+      "janela_min": [
+        -120,
+        15
+      ],
+      "n_h": 18,
+      "n_c": 31,
+      "nota": "preditor = máximo do escore (ou NEWS2) na janela; «PAM mínima» = −min(PAM), o preditor trivial",
+      "escore_ensemble": {
+        "auc": 0.536,
+        "ic95_bootstrap": [
+          0.392,
+          0.67
+        ]
+      },
+      "news2_maximo": {
+        "auc": 0.556,
+        "ic95_bootstrap": [
+          0.379,
+          0.736
+        ]
+      },
+      "pam_minima": {
+        "auc": 0.894,
+        "ic95_bootstrap": [
+          0.803,
+          0.971
+        ]
+      }
+    },
+    "registros": [
+      {
+        "id": "101",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 33.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": 77.0
+      },
+      {
+        "id": "102",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 47.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -79.0
+      },
+      {
+        "id": "103",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 100.0
+      },
+      {
+        "id": "104",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 23.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -88.0
+      },
+      {
+        "id": "105",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -100.0
+      },
+      {
+        "id": "106",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -106.0
+      },
+      {
+        "id": "107",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 28.0
+      },
+      {
+        "id": "108",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": null
+      },
+      {
+        "id": "109",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 26.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -117.0
+      },
+      {
+        "id": "110",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 23.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": 30.0
+      },
+      {
+        "id": "201",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": null
+      },
+      {
+        "id": "202",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 17.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -116.0
+      },
+      {
+        "id": "203",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 33.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -32.0
+      },
+      {
+        "id": "204",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -104.0
+      },
+      {
+        "id": "205",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -79.0
+      },
+      {
+        "id": "206",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 90.0
+      },
+      {
+        "id": "207",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 26.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -118.0
+      },
+      {
+        "id": "208",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 44.0
+      },
+      {
+        "id": "209",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 28.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -120.0
+      },
+      {
+        "id": "210",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": null
+      },
+      {
+        "id": "211",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 40.0
+      },
+      {
+        "id": "212",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -117.0
+      },
+      {
+        "id": "213",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -78.0
+      },
+      {
+        "id": "214",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 45.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -92.0
+      },
+      {
+        "id": "215",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 14.0
+      },
+      {
+        "id": "216",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -106.0
+      },
+      {
+        "id": "217",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 35.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -119.0
+      },
+      {
+        "id": "218",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 46.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -91.0
+      },
+      {
+        "id": "219",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -119.0
+      },
+      {
+        "id": "220",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -113.0
+      },
+      {
+        "id": "221",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -83.0
+      },
+      {
+        "id": "222",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 29.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -93.0
+      },
+      {
+        "id": "223",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": null
+      },
+      {
+        "id": "224",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 44.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -23.0
+      },
+      {
+        "id": "225",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 25.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -27.0
+      },
+      {
+        "id": "226",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -105.0
+      },
+      {
+        "id": "227",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 62.0
+      },
+      {
+        "id": "228",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -21.0
+      },
+      {
+        "id": "229",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -60.0
+      },
+      {
+        "id": "230",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -102.0
+      },
+      {
+        "id": "231",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 24.0
+      },
+      {
+        "id": "232",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -111.0
+      },
+      {
+        "id": "233",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -31.0
+      },
+      {
+        "id": "234",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 22.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -94.0
+      },
+      {
+        "id": "235",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -96.0
+      },
+      {
+        "id": "236",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 43.0
+      },
+      {
+        "id": "237",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": 14.0
+      },
+      {
+        "id": "238",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 29.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": 7.0
+      },
+      {
+        "id": "239",
+        "rotulo": "H",
+        "inicio_ahe_min_apos_T0": 29.0,
+        "primeiro_alerta_hemodinamico_ensemble_min": -100.0
+      },
+      {
+        "id": "240",
+        "rotulo": "C",
+        "inicio_ahe_min_apos_T0": null,
+        "primeiro_alerta_hemodinamico_ensemble_min": -106.0
+      }
+    ]
+  },
+  "antiflood": {
+    "todos": {
+      "sem_antiflood": {
+        "alertas": 50089,
+        "horas": 398.4,
+        "alertas_por_hora": 125.73
+      },
+      "com_antiflood": {
+        "alertas": 1115,
+        "horas": 398.4,
+        "alertas_por_hora": 2.8
+      },
+      "reducao": 0.978
+    },
+    "controles": {
+      "sem_antiflood": {
+        "alertas": 25941,
+        "horas": 246.4,
+        "alertas_por_hora": 105.29
+      },
+      "com_antiflood": {
+        "alertas": 679,
+        "horas": 246.4,
+        "alertas_por_hora": 2.76
+      },
+      "reducao": 0.974
+    },
+    "episodio_h": {
+      "sem_antiflood": {
+        "alertas": 24148,
+        "horas": 152.0,
+        "alertas_por_hora": 158.87
+      },
+      "com_antiflood": {
+        "alertas": 436,
+        "horas": 152.0,
+        "alertas_por_hora": 2.87
+      },
+      "reducao": 0.982
+    },
+    "descricao": "sem_antiflood = toda amostra fora do critério vira alerta; com_antiflood = duração mínima (3 amostras atenção / 2 crítico), histerese com recuperação de 10 min, cooldown de 15 min com backoff exponencial e supressão de achados redundantes (NEWS2/índice de choque)."
+  },
+  "injecao_controlada": {
+    "linhas_de_base": [
+      "103",
+      "105",
+      "106",
+      "107",
+      "108",
+      "201",
+      "204",
+      "205",
+      "206",
+      "208",
+      "210",
+      "211",
+      "212",
+      "213",
+      "215",
+      "216",
+      "219",
+      "220",
+      "221",
+      "226",
+      "227",
+      "228",
+      "229",
+      "230",
+      "231",
+      "232",
+      "233",
+      "235",
+      "236",
+      "237",
+      "240"
+    ],
+    "n_linhas_de_base": 31,
+    "n_anomalias_injetadas": 117,
+    "tipos": {
+      "pico_fc": "pico de FC",
+      "deriva_pam": "deriva de PAM",
+      "dessaturacao": "dessaturação",
+      "combinacao": "FC↑ + PAM↓"
+    },
+    "parametros": {
+      "pico_fc": "FC +40 bpm por ~6 min",
+      "deriva_pam": "PAM −22, PAS −28, PAD −18 mmHg em 40 min, sustentado 10 min",
+      "dessaturacao": "SpO2 −10 pontos em 6 min, sustentado 10 min (FR +4)",
+      "combinacao": "FC +25 bpm, PAM −15 e PAS −20 mmHg em 20 min, sustentado 10 min"
+    },
+    "criterio": "TP = alerta de código compatível com o tipo entre o início e o fim da anomalia + 8 min; FP = qualquer alerta fora das janelas injetadas (inclui eventos fisiológicos reais da linha de base, portanto a precisão é um piso); atraso = primeiro alerta compatível − início.",
+    "metodos": {
+      "limiar": {
+        "verdadeiros_positivos": 98,
+        "falsos_negativos": 19,
+        "falsos_positivos": 129,
+        "precisao": 0.432,
+        "recall": 0.838,
+        "f1": 0.57,
+        "atraso_medio_min": 9.7,
+        "atraso_mediano_min": 5.0,
+        "por_tipo": {
+          "pico_fc": {
+            "injetadas": 31,
+            "recall": 0.806,
+            "atraso_medio_min": 1.4
+          },
+          "deriva_pam": {
+            "injetadas": 31,
+            "recall": 0.806,
+            "atraso_medio_min": 22.9
+          },
+          "dessaturacao": {
+            "injetadas": 24,
+            "recall": 0.958,
+            "atraso_medio_min": 4.2
+          },
+          "combinacao": {
+            "injetadas": 31,
+            "recall": 0.806,
+            "atraso_medio_min": 10.0
+          }
+        }
+      },
+      "zscore": {
+        "verdadeiros_positivos": 101,
+        "falsos_negativos": 16,
+        "falsos_positivos": 84,
+        "precisao": 0.546,
+        "recall": 0.863,
+        "f1": 0.669,
+        "atraso_medio_min": 15.3,
+        "atraso_mediano_min": 4.0,
+        "por_tipo": {
+          "pico_fc": {
+            "injetadas": 31,
+            "recall": 1.0,
+            "atraso_medio_min": 1.1
+          },
+          "deriva_pam": {
+            "injetadas": 31,
+            "recall": 0.774,
+            "atraso_medio_min": 45.0
+          },
+          "dessaturacao": {
+            "injetadas": 24,
+            "recall": 0.958,
+            "atraso_medio_min": 3.6
+          },
+          "combinacao": {
+            "injetadas": 31,
+            "recall": 0.742,
+            "atraso_medio_min": 14.9
+          }
+        }
+      },
+      "cusum_ewma": {
+        "verdadeiros_positivos": 109,
+        "falsos_negativos": 8,
+        "falsos_positivos": 57,
+        "precisao": 0.657,
+        "recall": 0.932,
+        "f1": 0.77,
+        "atraso_medio_min": 12.2,
+        "atraso_mediano_min": 7.0,
+        "por_tipo": {
+          "pico_fc": {
+            "injetadas": 31,
+            "recall": 0.839,
+            "atraso_medio_min": 3.2
+          },
+          "deriva_pam": {
+            "injetadas": 31,
+            "recall": 0.935,
+            "atraso_medio_min": 25.9
+          },
+          "dessaturacao": {
+            "injetadas": 24,
+            "recall": 1.0,
+            "atraso_medio_min": 5.4
+          },
+          "combinacao": {
+            "injetadas": 31,
+            "recall": 0.968,
+            "atraso_medio_min": 12.2
+          }
+        }
+      },
+      "iforest": {
+        "verdadeiros_positivos": 26,
+        "falsos_negativos": 91,
+        "falsos_positivos": 16,
+        "precisao": 0.619,
+        "recall": 0.222,
+        "f1": 0.327,
+        "atraso_medio_min": 12.4,
+        "atraso_mediano_min": 8.0,
+        "por_tipo": {
+          "pico_fc": {
+            "injetadas": 31,
+            "recall": 0.065,
+            "atraso_medio_min": 2.0
+          },
+          "deriva_pam": {
+            "injetadas": 31,
+            "recall": 0.097,
+            "atraso_medio_min": 40.7
+          },
+          "dessaturacao": {
+            "injetadas": 24,
+            "recall": 0.5,
+            "atraso_medio_min": 7.4
+          },
+          "combinacao": {
+            "injetadas": 31,
+            "recall": 0.29,
+            "atraso_medio_min": 11.9
+          }
+        }
+      },
+      "ensemble": {
+        "verdadeiros_positivos": 116,
+        "falsos_negativos": 1,
+        "falsos_positivos": 286,
+        "precisao": 0.289,
+        "recall": 0.991,
+        "f1": 0.447,
+        "atraso_medio_min": 8.1,
+        "atraso_mediano_min": 4.0,
+        "por_tipo": {
+          "pico_fc": {
+            "injetadas": 31,
+            "recall": 1.0,
+            "atraso_medio_min": 1.1
+          },
+          "deriva_pam": {
+            "injetadas": 31,
+            "recall": 1.0,
+            "atraso_medio_min": 18.7
+          },
+          "dessaturacao": {
+            "injetadas": 24,
+            "recall": 1.0,
+            "atraso_medio_min": 3.5
+          },
+          "combinacao": {
+            "injetadas": 31,
+            "recall": 0.968,
+            "atraso_medio_min": 8.3
+          }
+        }
+      }
+    },
+    "ruido_linha_de_base_alertas_por_hora": {
+      "limiar": 1.07,
+      "zscore": 0.81,
+      "cusum_ewma": 0.62,
+      "iforest": 0.17,
+      "ensemble": 2.67
+    }
+  },
+  "sinteticos": {
+    "nota": "Gabarito = anomalias injetadas pelos geradores sintéticos; os pacientes sem injeção são «normais». Valida o pipeline de regras, não a sensibilidade clínica em dados reais.",
+    "prescricoes": {
+      "24_pacientes": {
+        "pacientes_avaliados": 24,
+        "pacientes_com_gabarito_exato": 24,
+        "verdadeiros_positivos": 11,
+        "falsos_positivos": 0,
+        "falsos_negativos": 0,
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "por_codigo": {
+          "prescricao.alergia": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.dose_maxima": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.duplicidade": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.instabilidade": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.salto_dose": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.suspensao_abrupta": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "divergencias": []
+      },
+      "varredura_5_horarios": {
+        "pacientes_avaliados": 120,
+        "pacientes_com_gabarito_exato": 120,
+        "verdadeiros_positivos": 55,
+        "falsos_positivos": 0,
+        "falsos_negativos": 0,
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "por_codigo": {
+          "prescricao.alergia": {
+            "tp": 10,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.dose_maxima": {
+            "tp": 10,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.duplicidade": {
+            "tp": 10,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.instabilidade": {
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.salto_dose": {
+            "tp": 10,
+            "fp": 0,
+            "fn": 0
+          },
+          "prescricao.suspensao_abrupta": {
+            "tp": 10,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "divergencias": []
+      },
+      "gabarito_injetado": {
+        "sepse_pac": [
+          "prescricao.alergia"
+        ],
+        "sca": [
+          "prescricao.duplicidade"
+        ],
+        "hipercalemia_lra": [
+          "prescricao.dose_maxima"
+        ],
+        "icc": [
+          "prescricao.suspensao_abrupta"
+        ],
+        "controle_glicemico": [
+          "prescricao.salto_dose"
+        ],
+        "delirium": [
+          "prescricao.salto_dose"
+        ],
+        "tev_risco": [
+          "prescricao.alergia",
+          "prescricao.duplicidade"
+        ],
+        "dpoc": [
+          "prescricao.suspensao_abrupta"
+        ],
+        "pos_op_estavel": [
+          "prescricao.dose_maxima"
+        ],
+        "dor_pos_op": [
+          "prescricao.instabilidade"
+        ]
+      }
+    },
+    "mobilidade": {
+      "24_pacientes": {
+        "pacientes_avaliados": 24,
+        "pacientes_com_gabarito_exato": 24,
+        "verdadeiros_positivos": 6,
+        "falsos_positivos": 0,
+        "falsos_negativos": 0,
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "por_codigo": {
+          "mobilidade.agitacao_noturna": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mobilidade.imobilidade": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mobilidade.queda": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mobilidade.queda_atividade": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 0
+          },
+          "mobilidade.saida_leito_noturna": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "divergencias": []
+      },
+      "varredura_5_horarios": {
+        "pacientes_avaliados": 120,
+        "pacientes_com_gabarito_exato": 120,
+        "verdadeiros_positivos": 30,
+        "falsos_positivos": 0,
+        "falsos_negativos": 0,
+        "precisao": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "por_codigo": {
+          "mobilidade.agitacao_noturna": {
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "mobilidade.imobilidade": {
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "mobilidade.queda": {
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "mobilidade.queda_atividade": {
+            "tp": 5,
+            "fp": 0,
+            "fn": 0
+          },
+          "mobilidade.saida_leito_noturna": {
+            "tp": 10,
+            "fp": 0,
+            "fn": 0
+          }
+        },
+        "divergencias": []
+      },
+      "gabarito_injetado": {
+        "avc": [
+          "mobilidade.imobilidade"
+        ],
+        "delirium": [
+          "mobilidade.agitacao_noturna",
+          "mobilidade.saida_leito_noturna"
+        ],
+        "hipoglicemia": [
+          "mobilidade.queda",
+          "mobilidade.saida_leito_noturna"
+        ],
+        "hipercalemia_lra": [
+          "mobilidade.queda_atividade"
+        ]
+      }
+    }
+  },
+  "tempo_total_s": 85.7
+}

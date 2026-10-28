@@ -28,6 +28,12 @@ os.environ.update(
         "ASCLEPIO_ADMIN_PASSWORD": "Admin#Inicial2026",
         "ASCLEPIO_RODRIGO_PASSWORD": "Rodrigo#Inicial2026",
         "SEED_DEMO_USERS": "true",
+        # Fase 4: uploads e artefatos fora do repositório; Azure desligado (sem rede nos testes)
+        "UPLOADS_DIR": str(_TMP / "uploads"),
+        "ANALYSES_DIR": str(_TMP / "analyses"),
+        "STT_PROVIDER": "local",
+        "TEXT_PROVIDER": "local",
+        "AUDIO_EVENTS_ENABLED": "false",
     }
 )
 

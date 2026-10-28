@@ -40,6 +40,8 @@ PERMISSIONS: dict[Role, frozenset[str]] = {
             "knowledge:read",
             "knowledge:search",
             "catalog:read",
+            "monitoring:read",
+            "monitoring:run",
         }
     ),
     "enfermagem": frozenset(
@@ -57,6 +59,8 @@ PERMISSIONS: dict[Role, frozenset[str]] = {
             "knowledge:read",
             "knowledge:search",
             "catalog:read",
+            "monitoring:read",
+            "monitoring:run",
         }
     ),
     "auditor": frozenset(
@@ -68,6 +72,7 @@ PERMISSIONS: dict[Role, frozenset[str]] = {
             "alerts:read",
             "catalog:read",
             "docs:read",
+            "monitoring:read",
         }
     ),
 }
