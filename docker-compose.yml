@@ -83,6 +83,8 @@ services:
         condition: service_healthy
     environment:
       APP_ENV: ${APP_ENV:-development}
+      # horários do banco são "locais" (sem fuso): o container precisa do fuso do hospital, não UTC
+      TZ: ${TZ:-America/Sao_Paulo}
       APP_HOSPITAL_NAME: ${APP_HOSPITAL_NAME:-Hospital Universitário}
       APP_HOSPITAL_SHORT_NAME: ${APP_HOSPITAL_SHORT_NAME:-HU}
       APP_SUPPORT_EMAIL: ${APP_SUPPORT_EMAIL:-}

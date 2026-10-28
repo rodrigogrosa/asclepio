@@ -701,7 +701,11 @@ def detail_dict(r: m.MonitoringAnalysis, patient_name: str = "") -> dict[str, An
     if rel:
         p = artifact_path(r, rel_override=rel)
         if p is not None:
-            report = p.read_text(encoding="utf-8", errors="replace")
+            from ..routers.docs_hub import _inline_images
+
+            # imagens relativas do relatório viram data URI: o navegador não buscaria os artefatos
+            # sem o Bearer, e o .md baixado fica autocontido
+            report = _inline_images(p.read_text(encoding="utf-8", errors="replace"), p.parent)
     out.update(
         result=r.result,
         report_markdown=report,

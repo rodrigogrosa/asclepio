@@ -38,3 +38,8 @@ def test_achado_critico_leva_risco_a_critico():
     video = _r("video", 0.2, _f("video.queda", "Queda detectada", "mobilidade", "critico"))
     r = fuse({"video": video, "sinais": _r("sinais", 0.1)})
     assert r.risk_level == "critico" and r.severity == "critico"
+
+
+def test_finalize_achado_critico_eleva_risco_em_qualquer_modalidade():
+    r = _r("video", 0.4, _f("video.queda", "Queda detectada", "mobilidade", "critico"))
+    assert r.risk_score == 0.75 and r.risk_level == "critico"

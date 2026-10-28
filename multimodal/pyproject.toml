@@ -15,6 +15,9 @@ dependencies = [
     "opencv-python>=4.9,<5",  # OpenCV 5 removeu o importador Caffe (pesos oficiais do OpenPose)
     "ultralytics>=8.3",
     "torch>=2.4",
+    # direto (e não só via Ultralytics) para o índice só-CPU valer também para ele no Linux:
+    # torchvision transitivo vinha do PyPI e não casava com o torch+cpu (operator torchvision::nms)
+    "torchvision>=0.19",
     # áudio: acústica (Praat), decodificação (ffmpeg estático), nuvem (Azure) e fallback local
     "praat-parselmouth>=0.4.5",
     "soundfile>=0.12",

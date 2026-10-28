@@ -35,7 +35,8 @@ COPY --from=builder --chown=asclepio:asclepio /app/backend /app/backend
 COPY --chown=asclepio:asclepio docs /app/docs
 COPY --chown=asclepio:asclepio CHANGELOG.md /app/CHANGELOG.md
 # dados (base de conhecimento) são montados como volume em /app/data
-RUN mkdir -p /app/data /app/ml && chown -R asclepio:asclepio /app
+# COPY --chown já entrega os arquivos com o dono certo; chown -R aqui duplicaria o venv (~GBs) numa camada nova
+RUN mkdir -p /app/data /app/ml && chown asclepio:asclepio /app /app/data /app/ml
 ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 APP_ENV=production LOG_FORMAT=json \
     KNOWLEDGE_BASE_DIR=/app/data/knowledge_base VECTORSTORE_DIR=/app/data/vectorstore \
     CHECKPOINTS_DIR=/app/data/checkpoints SYNTHETIC_PATIENTS_FILE=/app/data/synthetic/patients.json \

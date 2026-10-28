@@ -78,9 +78,12 @@ class AnalysisResult(BaseModel):
     )
 
     def finalize(self) -> AnalysisResult:
-        """Deriva ``severity`` (pior achado) e ``risk_level`` (do ``risk_score``)."""
+        """Deriva ``severity`` (pior achado) e ``risk_level`` (do ``risk_score``). Regra de
+        segurança única para todas as modalidades: achado crítico ⇒ risco no mínimo crítico."""
         if self.findings:
             self.severity = max(self.findings, key=lambda f: SEVERITY_ORDER[f.severity]).severity
+        if self.severity == "critico":
+            self.risk_score = max(self.risk_score, 0.75)
         self.risk_level = risk_level_for(self.risk_score)
         return self
 
