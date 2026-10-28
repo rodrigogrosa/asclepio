@@ -14,15 +14,15 @@ const str = (v: unknown) => (typeof v === "string" && v.trim() ? v : null);
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const pick = (d: Rec, keys: string[]) => keys.map((k) => d[k]).find((v) => v !== undefined && v !== null);
 
-type Term = { term: string; start: number | null; end: number | null; category: string | null; t: number | null; negated: boolean };
+type Term = { term: string; start: number | null; end: number | null; category: string | null; t: number | null; negated: boolean; severity: string | null };
 function readTerms(v: unknown): Term[] {
   if (!Array.isArray(v)) return [];
   return v.flatMap((x): Term[] => {
-    if (typeof x === "string") return [{ term: x, start: null, end: null, category: null, t: null, negated: false }];
+    if (typeof x === "string") return [{ term: x, start: null, end: null, category: null, t: null, negated: false, severity: null }];
     if (!isRec(x)) return [];
     const term = str(x.term) ?? str(x.text) ?? str(x.word) ?? str(x.termo);
     if (!term) return [];
-    return [{ term, start: num(x.start) ?? num(x.offset) ?? num(x.start_char), end: num(x.end) ?? num(x.end_char), category: str(x.category) ?? str(x.categoria) ?? str(x.type), t: num(x.t_start) ?? num(x.time) ?? num(x.start_s), negated: x.negated === true || x.negado === true }];
+    return [{ term, start: num(x.start) ?? num(x.offset) ?? num(x.start_char), end: num(x.end) ?? num(x.end_char), category: str(x.category) ?? str(x.categoria) ?? str(x.type), t: num(x.t_start) ?? num(x.time) ?? num(x.start_s), negated: x.negated === true || x.negado === true, severity: str(x.severity) ?? str(x.severidade) }];
   });
 }
 
@@ -101,41 +101,50 @@ const fold: Fold = (s) => Array.from(s).map((c) => c.normalize("NFD")[0] ?? c).j
 /** Destaca os termos críticos no texto: usa as posições do backend quando conferem; senão procura o termo. */
 function highlight(text: string, terms: Term[], useOffsets: boolean): ReactNode {
   const f = fold(text);
-  // [início, fim, negado]: termo negado pelo paciente ("nega febre") aparece riscado, sem cor de alerta
-  const ranges: [number, number, boolean][] = [];
+  // [início, fim, estilo]: negado ("nega febre") aparece riscado; a cor segue a severidade do termo
+  type Style = "negado" | "critico" | "atencao" | "info";
+  const style = (t: Term): Style => (t.negated ? "negado" : t.severity === "atencao" ? "atencao" : t.severity === "info" ? "info" : "critico");
+  const rank: Record<Style, number> = { negado: 0, info: 1, atencao: 2, critico: 3 };
+  const ranges: [number, number, Style][] = [];
   for (const t of terms) {
     const needle = fold(t.term);
     if (!needle) continue;
     if (useOffsets && t.start != null && t.end != null && t.end > t.start && f.slice(t.start, t.end) === needle) {
-      ranges.push([t.start, t.end, t.negated]);
+      ranges.push([t.start, t.end, style(t)]);
       continue;
     }
-    for (let i = f.indexOf(needle); i !== -1; i = f.indexOf(needle, i + needle.length)) ranges.push([i, i + needle.length, t.negated]);
+    for (let i = f.indexOf(needle); i !== -1; i = f.indexOf(needle, i + needle.length)) ranges.push([i, i + needle.length, style(t)]);
   }
   if (!ranges.length) return text;
   ranges.sort((a, b) => a[0] - b[0]);
-  const merged: [number, number, boolean][] = [];
+  const merged: [number, number, Style][] = [];
   for (const r of ranges) {
     const last = merged[merged.length - 1];
     if (last && r[0] <= last[1]) {
       last[1] = Math.max(last[1], r[1]);
-      last[2] = last[2] && r[2];
+      if (rank[r[2]] > rank[last[2]]) last[2] = r[2];
     } else merged.push([...r]);
   }
+  const markClass: Record<Style, string> = {
+    negado: "rounded bg-surface-2 px-0.5 text-muted line-through",
+    info: "rounded bg-surface-2 px-0.5 text-text underline decoration-dotted",
+    atencao: "rounded bg-warning/20 px-0.5 font-semibold text-warning",
+    critico: "rounded bg-danger/25 px-0.5 font-semibold text-danger",
+  };
+  const markTitle: Record<Style, string> = {
+    negado: "Negado pelo paciente: não gera alerta",
+    info: "Termo de saúde identificado (informativo)",
+    atencao: "Termo de atenção",
+    critico: "Termo crítico",
+  };
   const out: ReactNode[] = [];
   let at = 0;
-  merged.forEach(([a, b, negated], i) => {
+  merged.forEach(([a, b, st], i) => {
     out.push(<Fragment key={`t${i}`}>{text.slice(at, a)}</Fragment>);
     out.push(
-      negated ? (
-        <mark key={`m${i}`} className="rounded bg-surface-2 px-0.5 text-muted line-through" title="Negado pelo paciente: não gera alerta">
-          {text.slice(a, b)}
-        </mark>
-      ) : (
-        <mark key={`m${i}`} className="rounded bg-danger/25 px-0.5 font-semibold text-danger" title="Termo crítico">
-          {text.slice(a, b)}
-        </mark>
-      ),
+      <mark key={`m${i}`} className={markClass[st]} title={markTitle[st]}>
+        {text.slice(a, b)}
+      </mark>,
     );
     at = b;
   });
@@ -165,7 +174,7 @@ export const AudioInsights = memo(function AudioInsights({ details, onSeek }: { 
     <div className="space-y-4">
       {(transcript || segments.length > 0) && (
         <Card>
-          <CardHeader title="Transcrição" subtitle={terms.length ? "Os termos críticos estão destacados em vermelho" : "Texto reconhecido na fala"} icon={<MessageSquareText className="h-4 w-4" />} />
+          <CardHeader title="Transcrição" subtitle={terms.length ? "Termos por severidade: vermelho = crítico, laranja = atenção, pontilhado = informativo, riscado = negado" : "Texto reconhecido na fala"} icon={<MessageSquareText className="h-4 w-4" />} />
           <CardBody className="space-y-3">
             {segments.length > 1 ? (
               <ul className="space-y-2">
@@ -187,7 +196,7 @@ export const AudioInsights = memo(function AudioInsights({ details, onSeek }: { 
               <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-3">
                 <span className="text-[11px] text-muted">Termos críticos:</span>
                 {terms.map((t, i) => (
-                  <Badge key={`${t.term}-${i}`} tone={t.negated ? "neutral" : "danger"} size="sm" title={t.negated ? "Negado pelo paciente: não gera alerta" : (t.category ?? undefined)}>
+                  <Badge key={`${t.term}-${i}`} tone={t.negated || t.severity === "info" ? "neutral" : t.severity === "atencao" ? "warning" : "danger"} size="sm" title={t.negated ? "Negado pelo paciente: não gera alerta" : (t.category ?? undefined)}>
                     {t.term}
                     {t.negated ? " (negado)" : ""}
                     {t.category ? ` · ${t.category}` : ""}

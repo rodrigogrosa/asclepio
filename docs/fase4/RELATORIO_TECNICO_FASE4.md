@@ -39,7 +39,7 @@ equipe em tempo real. Todos os números deste relatório foram **medidos** e est
 
 ## Checklist de conformidade com o edital da Fase 4
 
-✅ concluído e provado · 🟡 concluído; depende de ação do aluno/avaliador (chave do Azure, gravação do vídeo)
+✅ concluído e provado · 🟡 depende de ação do aluno (gravação do vídeo)
 
 | Exigência do edital | Status | Onde neste relatório | Evidência |
 |---|---|---|---|
@@ -49,14 +49,14 @@ equipe em tempo real. Todos os números deste relatório foram **medidos** e est
 | **Vídeo:** relatórios automáticos de desvios/falhas | ✅ | §4.4 | `report.md`, quadros e vídeo anotados por análise |
 | **Áudio:** processar áudios de consultas | ✅ | §5 | **Monitoramento → Áudio**; `audio/pipeline.py` |
 | **Áudio:** alterações vocais (cansaço, dificuldade respiratória) | ✅ | §5.3–5.5 | `audio/features.py`, `audio/vocal.py`, `audio/events.py`; VOICED |
-| **Áudio:** **Azure Speech to Text** | 🟡 | §5.1, §8 | `audio/azure_speech.py`; `make azure-check` |
-| **Áudio:** termos críticos e sentimentos com **Azure Text Analytics** | 🟡 | §5.2, §8 | `audio/azure_text.py` (Health + sentimento) |
+| **Áudio:** **Azure Speech to Text** | ✅ | §5.1, §8 | `audio/azure_speech.py`; chamada real provada (§8) |
+| **Áudio:** termos críticos e sentimentos com **Azure Text Analytics** | ✅ | §5.2, §8 | `audio/azure_text.py` (Health + sentimento); chamada real provada (§8) |
 | **Anomalias:** séries de sinais vitais (FC, PA, SpO2) | ✅ | §6.1 | `anomaly/vitals.py`; PhysioNet/CinC 2009 |
 | **Anomalias:** evolução de prescrições | ✅ | §6.2 | `anomaly/prescriptions.py` |
 | **Anomalias:** padrões de movimentação na internação | ✅ | §6.3, §4 | `anomaly/mobility.py`; perfil *quarto* (quedas, URFD) |
 | **Alertas automáticos** à equipe médica | ✅ | §7 | `/alerts/stream` (SSE), toast, `/alertas`, webhook opcional |
 | **Objetivo:** fusão de texto, áudio e vídeo | ✅ | §2, §7 | `fusion.py`; painel multimodal do paciente |
-| **Objetivo:** serviços em nuvem | 🟡 | §8 | Azure AI Speech + Language |
+| **Objetivo:** serviços em nuvem | ✅ | §8 | Azure AI Speech + Language (F0, brazilsouth), em uso pela plataforma |
 | **Objetivo:** anomalias em **tempo real** | ✅ | §6.1, §7 | detector online + monitor ao vivo |
 | **Datasets sugeridos** (PhysioNet, AudioSet) | ✅ | §3, §5, §6 | VOICED e CinC 2009 (PhysioNet); AST treinado no AudioSet |
 | **Entregável:** código-fonte completo | ✅ | §10 | repositório + CI |
@@ -430,16 +430,25 @@ sequenceDiagram
   `make azure-check` faz uma chamada real a cada serviço. Passo a passo pelo portal: [`GUIA_AZURE.md`](GUIA_AZURE.md).
 - A tela **Monitoramento** mostra o estado da integração ("Azure conectado" × "modo local") e cada análise
   lista o provedor efetivo em "Modelos aplicados".
-- **Status honesto**: o código Azure foi testado com o SDK simulado (parâmetros: idioma pt-BR, timestamps
-  por palavra, texto anonimizado no envio) e com o `SpeechConfig` real; a chamada de ponta a ponta
-  depende de uma chave, que o aluno cria na própria assinatura (Azure for Students). O formato exato de
-  algumas respostas do Text Analytics for Health só aparece com chave; o código trata ausência de campos
-  sem quebrar.
+- **Prova real (28/10/2026)**, assinatura do aluno, recursos `asclepio-speech-*` e `asclepio-language-*`
+  (F0, `brazilsouth`) criados por `make azure-setup`:
+  - `make azure-check`: Speech transcreveu o áudio de exemplo; Language devolveu sentimento **negativo
+    (0,87)** e o **Text Analytics for Health em português** reconheceu *falta de ar*, *dor no peito* e
+    *febre* como `SymptomOrSign` — no tier gratuito.
+  - **Análise pela plataforma** (consulta "falta de ar"): provedores `stt: azure` e `text: azure`, sem
+    avisos; 34 palavras com tempo; o Text Analytics for Health marcou **"febre" como negada** e a tela a
+    exibe riscada; sentimento negativo (0,9); 8 achados, risco crítico; ~1 min 53 s (o tempo é dominado
+    pelo AST/AudioSet local em CPU).
+  - O Azure transcreveu corretamente "Não tenho febre", trecho em que o Whisper local havia errado ("não ou
+    tenho") — ganho concreto de qualidade. Também erra: "subo a escada" virou "sudo a escada", e o
+    Health marcou "sudo a" como sintoma informativo (sem alerta, só destacado em pontilhado).
+  - Assinatura nova precisa do provedor `Microsoft.CognitiveServices` registrado; o `make azure-setup`
+    agora faz isso sozinho (antes falhava com `MissingSubscriptionRegistration`).
 
 ## 8.1 Telas do sistema (prova de uso real)
 Capturas da plataforma rodando em Docker (`make up`), com os exemplos da tela **Monitoramento** — o mesmo
-caminho descrito no roteiro do vídeo. Sem chave Azure nesta máquina, as telas mostram o **modo local**;
-com a chave, o cabeçalho passa a "Azure conectado" e os modelos listados mudam.
+caminho descrito no roteiro do vídeo. As telas 01–08 foram capturadas antes de ligar o Azure (**modo
+local**); as 10–12, depois do `make azure-setup`, com o **Azure conectado**.
 
 | | |
 |---|---|
@@ -451,6 +460,10 @@ com a chave, o cabeçalho passa a "Azure conectado" e os modelos listados mudam.
 | Monitor de beira-leito: leituras chegando e alertas em tempo real | Fim da deterioração: FC 117, PAM 65, SpO2 90 %, pontos anômalos marcados |
 | ![Painel multimodal do paciente](../assets/fase4/telas/07_paciente_fusao.jpg) | ![Alertas para a equipe](../assets/fase4/telas/08_alertas_equipe.jpg) |
 | Paciente: risco fundido e **concordância de 3 fontes** (áudio + sinais vitais + relato) | Alertas: origem, evidência, recomendação, "ver análise" e reconhecer |
+| ![Azure conectado](../assets/fase4/telas/10_azure_conectado.jpg) | ![Transcrição pelo Azure](../assets/fase4/telas/11_audio_azure_transcricao.jpg) |
+| **Azure conectado**: Speech to Text em `brazilsouth` | Transcrição do **Azure Speech** com termos do **Text Analytics for Health** por severidade; "febre" negada |
+| ![Modelos aplicados — Azure](../assets/fase4/telas/12_audio_azure_modelos.jpg) | |
+| "Modelos aplicados": Azure Speech to Text e Azure Text Analytics rodando **no Azure** | |
 
 Tempos medidos no container (CPU, Mac M5 Pro via Docker Desktop): vídeo de 5 s analisado em ~35 s
 (OpenPose em CPU); consulta de 31 s em ~2 min com Whisper local — com o Azure, a transcrição sai da máquina.
