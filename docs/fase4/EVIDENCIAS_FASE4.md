@@ -5,7 +5,7 @@
 > `dra.ana@asclepio.fiap` / `Asclepio@2026` (médica) para as telas clínicas; `admin` vê tudo.
 > URLs consideram `make up` (Web `:3000`, API `:8000`).
 
-Legenda: ✅ concluído e provado · 🟡 concluído, depende de ação do avaliador/aluno (ex.: chave Azure, gravação do vídeo)
+Legenda: ✅ concluído e provado · 🟡 depende de ação do aluno (gravação do vídeo)
 
 **Prova de uso real:** prints das telas rodando em Docker em [`docs/assets/fase4/telas/`](../assets/fase4/telas/)
 (relatório §8.1): integração Azure e modelos, queda detectada com alerta em tempo real, análise de áudio
@@ -27,8 +27,8 @@ de alertas da equipe.
 |---|---|---|---|---|
 | Processar áudios de consultas | ✅ | **Monitoramento → Áudio**: enviar arquivo (WAV/MP3/M4A/OGG/WEBM) ou exemplo (fluente, fadiga, falta de ar) | `multimodal/asclepio_multimodal/audio/` | testes `multimodal/tests/test_audio*.py` |
 | Detectar alterações vocais (cansaço, dificuldade respiratória) | ✅ | Detalhe da análise → **Indicadores vocais** (fadiga, dificuldade respiratória, alteração articulatória) com a evidência acústica; eventos sonoros (tosse, respiração) | `audio/features.py` (Praat), `audio/vocal.py`, `audio/events.py` (AST · AudioSet) | Avaliação com o **VOICED (PhysioNet)** — Relatório §5 |
-| Transcrever e analisar com **Azure Speech to Text** | 🟡 | Transcrição com tempo por palavra; "Modelos aplicados: Azure Speech to Text (azure)"; selo **Integração Azure: conectado** no topo da tela | `audio/azure_speech.py` | `make azure-check` (chamada real); testes com SDK simulado. Requer chave (F0 gratuito): `docs/fase4/GUIA_AZURE.md` |
-| Termos críticos e sentimentos com **Azure Text Analytics** | 🟡 | Transcrição com termos críticos destacados (com negação: "nega febre"), entidades de saúde, sentimento por frase, frases-chave | `audio/azure_text.py` (Text Analytics for Health + sentimento) — texto **anonimizado** antes do envio | idem; sem chave, cai para o léxico clínico local e a tela avisa |
+| Transcrever e analisar com **Azure Speech to Text** | ✅ | Transcrição com tempo por palavra; "Modelos aplicados: Azure Speech to Text (azure)"; selo **Integração Azure: conectado** no topo da tela | `audio/azure_speech.py` | `make azure-check` e análise pela plataforma com `stt: azure` (28/10, relatório §8); telas `10`–`12` em `docs/assets/fase4/telas/` |
+| Termos críticos e sentimentos com **Azure Text Analytics** | ✅ | Transcrição com termos críticos destacados (com negação: "nega febre"), entidades de saúde, sentimento por frase, frases-chave | `audio/azure_text.py` (Text Analytics for Health + sentimento) — texto **anonimizado** antes do envio | Prova real: Health em português reconheceu falta de ar, dor no peito e **febre negada**; sentimento negativo 0,9 (relatório §8) |
 
 ## 3. Detecção de anomalias
 
@@ -44,7 +44,7 @@ de alertas da equipe.
 | Objetivo | Status | Evidência |
 |---|---|---|
 | Análise e **fusão** de texto, áudio e vídeo | ✅ | `multimodal/asclepio_multimodal/fusion.py` (fusão tardia + concordância entre modalidades); painel do paciente mostra o risco fundido e a contribuição de cada modalidade |
-| Serviços em nuvem para ampliar processamento e inteligência | 🟡 | Azure Speech to Text + Azure Text Analytics (ADR-0007, `GUIA_AZURE.md`) |
+| Serviços em nuvem para ampliar processamento e inteligência | ✅ | Azure Speech to Text + Azure Text Analytics em uso pela plataforma (F0, brazilsouth; ADR-0007, `GUIA_AZURE.md`) |
 | Detecção de anomalias **em tempo real** | ✅ | Detector online + SSE (`/monitoring/live/stream`, `/alerts/stream`); Relatório §6–§7 |
 
 ## 5. Entregáveis

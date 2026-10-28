@@ -16,6 +16,11 @@ command -v az >/dev/null || { echo "Azure CLI não encontrada. Instale: https://
 az account show >/dev/null 2>&1 || az login >/dev/null
 echo "▶ Assinatura: $(az account show --query name -o tsv)"
 az group create -n "$RG" -l "$LOC" -o none
+# Assinatura nova não tem o provedor de IA registrado (MissingSubscriptionRegistration): registra e espera
+if [[ "$(az provider show -n Microsoft.CognitiveServices --query registrationState -o tsv 2>/dev/null)" != "Registered" ]]; then
+  echo "▶ Registrando o provedor Microsoft.CognitiveServices na assinatura (1–3 min, só na primeira vez)"
+  az provider register --namespace Microsoft.CognitiveServices --wait -o none
+fi
 echo "▶ Criando Speech (F0) $SPEECH em $LOC"
 az cognitiveservices account create -n "$SPEECH" -g "$RG" -l "$LOC" --kind SpeechServices --sku F0 --yes -o none
 echo "▶ Criando Language (F0) $LANG_RES em $LOC — inclui Text Analytics for Health e sentimento"
