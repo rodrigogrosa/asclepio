@@ -1,0 +1,26 @@
+{
+  "consulta_normal": {
+    "alteracoes": "nenhuma (fala fluente, taxa padrão do say, pausas de 0,4 s entre trechos)",
+    "texto": "Bom dia, doutora. Vim para a consulta de rotina. Estou me sentindo bem, durmo bem e faço minhas caminhadas todos os dias. Nego dor no peito e não tenho falta de ar. Também não tenho febre. Só sinto um pouco de cansaço no fim do dia, mas nada que atrapalhe o meu trabalho.",
+    "arquivo": "consulta_normal.wav",
+    "voz": "Luciana (say, macOS)",
+    "sintetico": true,
+    "formato": "WAV 16 kHz mono PCM 16 bits"
+  },
+  "consulta_fadiga": {
+    "alteracoes": "taxa lenta (say -r 100 + alongamento PSOLA ×1,2), F0 achatado por PSOLA (expoente 0,25), volume −9 dB com queda progressiva, pausas de 1,2 a 1,8 s",
+    "texto": "Bom dia, doutora. Ando muito cansado, sem energia nenhuma. Acordo cansado, mesmo depois de dormir a noite inteira. Sinto muita fraqueza nas pernas e não tenho vontade de fazer nada. Nego febre e nego dor no peito. Mas está tudo pesado, preciso ficar deitado a maior parte do dia.",
+    "arquivo": "consulta_fadiga.wav",
+    "voz": "Luciana (say, macOS)",
+    "sintetico": true,
+    "formato": "WAV 16 kHz mono PCM 16 bits"
+  },
+  "consulta_dispneia": {
+    "alteracoes": "frases curtas (2 a 4 palavras), ruído de inspiração antes de cada frase, pausas de 0,7 a 1,3 s",
+    "texto": "Doutora, eu estou com falta de ar. Sinto dor no peito quando subo a escada. Preciso parar para respirar. Tenho chiado no peito à noite. Não tenho febre. Mas o cansaço está piorando.",
+    "arquivo": "consulta_dispneia.wav",
+    "voz": "Luciana (say, macOS)",
+    "sintetico": true,
+    "formato": "WAV 16 kHz mono PCM 16 bits"
+  }
+}
