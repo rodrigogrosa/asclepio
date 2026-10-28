@@ -22,7 +22,14 @@ from .events import detect_events, event_findings
 from .features import extract_features, load_sound
 from .local_stt import sentiment_local, transcribe_local
 from .report import plot_voice, render_report
-from .vocal import indicator_findings, score_indicators
+from .vocal import (
+    DISCLAIMER,
+    INDICATORS,
+    indicator_findings,
+    level_for,
+    score_indicators,
+    voice_quality_score,
+)
 
 Progress = Callable[[float, str], None]
 _SEV = {"info": 0, "atencao": 1, "critico": 2}
@@ -159,6 +166,33 @@ def _merge_terms(transcript: str, azure: dict[str, Any] | None) -> list[dict[str
                 ).to_dict()
             )
     return sorted(terms, key=lambda t: t["start"])
+
+
+MIN_WORDS_FOR_SPEECH = 8
+MIN_SYLLABLES_FOR_SPEECH = 15
+MIN_VOICED_FOR_VOWEL = 0.6
+
+
+def _voice_quality_findings(vq: float | None, f: dict[str, float | None]) -> list[Finding]:
+    level = level_for(vq)
+    if vq is None or level not in ("atencao", "critico"):
+        return []
+    return [
+        Finding(
+            code="audio.qualidade_vocal",
+            title="Qualidade vocal alterada (vogal sustentada)",
+            description=(
+                f"Jitter {f.get('jitter_local_pct')} %, shimmer {f.get('shimmer_local_pct')} % e "
+                f"HNR {f.get('hnr_db')} dB se afastam da referência de vozes saudáveis (VOICED). "
+                f"{DISCLAIMER}"
+            ),
+            severity=level,  # type: ignore[arg-type]
+            modality="audio",
+            score=vq,
+            evidence={k: f.get(k) for k in ("jitter_local_pct", "shimmer_local_pct", "hnr_db")},
+            recommendation="Se persistir, avaliação fonoaudiológica ou otorrinolaringológica.",
+        )
+    ]
 
 
 def _term_findings(terms: list[dict[str, Any]], words: list[dict[str, Any]]) -> list[Finding]:
@@ -325,10 +359,38 @@ def run(
         if det["per_min"]
         else None
     )
-    inds = score_indicators(ac.features, resp_rate)
+    # Indicadores de fala (fadiga, respiração na fala, disartria) só valem com fala: som de pulmão,
+    # tosse isolada ou vogal sustentada davam "disartria" sem sentido.
+    speech_ok = (
+        len(words) >= MIN_WORDS_FOR_SPEECH
+        if stt_provider != "nenhum"
+        else (ac.features.get("n_syllables") or 0) >= MIN_SYLLABLES_FOR_SPEECH
+    )
+    if speech_ok:
+        inds = score_indicators(ac.features, resp_rate)
+    else:
+        inds = {
+            k: {"title": title, "score": None, "level": "indisponivel", "components": []}
+            for k, (title, _, _) in INDICATORS.items()
+        }
+        warns.append(
+            f"Pouca fala no áudio ({len(words)} palavra(s)): os indicadores de fala (fadiga, "
+            "dificuldade respiratória, disartria) não se aplicam. Eventos sonoros e qualidade "
+            "vocal continuam valendo."
+        )
+    # Fonação sustentada sem fala (ex.: "aaa" do exame de voz): mede a qualidade vocal contra a
+    # referência de vogal (VOICED), que é a medida válida para esse tipo de gravação
+    vq = (
+        voice_quality_score(ac.features)
+        if not speech_ok and (ac.features.get("voiced_fraction") or 0) >= MIN_VOICED_FOR_VOWEL
+        else None
+    )
     term_findings = _term_findings(terms, words)
     findings = (
-        indicator_findings(inds) + (event_findings(det) if det["events"] else []) + term_findings
+        indicator_findings(inds)
+        + (event_findings(det) if det["events"] else [])
+        + term_findings
+        + _voice_quality_findings(vq, ac.features)
     )
     if sentiment and sentiment["overall"] == "negative" and sentiment["scores"]["negative"] >= 0.6:
         findings.append(
@@ -361,6 +423,7 @@ def run(
         "critical_terms": terms,
         "audio_events": det,
         "vocal_indicators": inds,
+        "voice_quality": {"score": vq, "level": level_for(vq)} if vq is not None else None,
         "pauses": [{"start": a, "end": b} for a, b in ac.pauses],
         "breath_groups": [{"start": a, "end": b} for a, b in ac.groups],
         "providers": {"stt": stt_provider, "text": "azure" if azure else "local"},
@@ -396,6 +459,7 @@ def run(
         "sentiment_overall": sentiment["overall"] if sentiment else None,
         "events_total": len(det["events"]),
         **{f"indicador_{k}": v["score"] for k, v in inds.items()},
+        "qualidade_vocal": vq,
     }
     risk = _risk(findings)
     step(1.0, "Concluído")
