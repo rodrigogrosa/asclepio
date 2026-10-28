@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   python:
-    name: Python · lint + testes (core, api, ml)
+    name: Python · lint + testes (core, api, multimodal, ml)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
       - run: uv sync --all-packages
       - run: uv run ruff check .
       - run: uv run ruff format --check .
-      - run: uv run pytest packages/asclepio_core/tests backend/tests -q --cov=asclepio_api --cov=asclepio_core --cov-report=term-missing
+      - run: uv run pytest packages/asclepio_core/tests backend/tests multimodal/tests -q --cov=asclepio_api --cov=asclepio_core --cov=asclepio_multimodal --cov-report=term-missing
       - run: uv run pytest ml/tests -q
 
   frontend:

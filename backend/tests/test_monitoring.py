@@ -28,7 +28,7 @@ def _tiny_video(path: Path) -> Path:
     return path
 
 
-def _fake_analyze(kind, path, out_dir, profile, exercise, progress):
+def _fake_analyze(kind, path, out_dir, profile, params, progress):
     progress(0.5, "Analisando (fake)")
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "report.md").write_text("# Relatório de teste\n\nQueda detectada.", encoding="utf-8")

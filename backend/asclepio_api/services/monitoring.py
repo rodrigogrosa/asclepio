@@ -83,6 +83,11 @@ VIDEO_SAMPLES: dict[str, tuple[str, str, str | None]] = {
     "video_fall": ("Quarto · paciente cai ao levantar (URFD fall-01)", "quarto", None),
     "video_adl": ("Quarto · atividade normal, sem queda (URFD adl-01)", "quarto", None),
 }
+# Os vídeos do UR Fall trazem profundidade (esquerda) e RGB (direita) lado a lado: analisa só o RGB
+SAMPLE_REGION: dict[str, tuple[float, float, float, float]] = {
+    "video_fall": (0.5, 0.0, 1.0, 1.0),
+    "video_adl": (0.5, 0.0, 1.0, 1.0),
+}
 AUDIO_SAMPLES: dict[str, tuple[str, str]] = {
     "audio_normal": ("Consulta · fala fluente (sintético)", "consulta_normal.wav"),
     "audio_fadiga": ("Consulta · sinais de fadiga (sintético)", "consulta_fadiga.wav"),
@@ -258,7 +263,7 @@ async def create_media_analysis(
         kind=kind,
         status="na_fila",
         profile=profile if kind == "video" else None,
-        params={"exercise": exercise, "sample": sample},
+        params={"exercise": exercise, "sample": sample, "region": SAMPLE_REGION.get(sample or "")},
         filename=filename,
         file_path=str(path),
         sha256=digest,
@@ -356,7 +361,7 @@ async def _run_media_analysis(aid: str) -> None:
             _progress[aid] = (max(0.0, min(1.0, float(frac))), stage)
 
         out_dir = Path(mm_settings().analyses_dir) / aid
-        exercise = (row.params or {}).get("exercise")
+        params = row.params or {}
         try:
             result = await run_in_threadpool(
                 _analyze,
@@ -364,7 +369,7 @@ async def _run_media_analysis(aid: str) -> None:
                 Path(row.file_path or ""),
                 out_dir,
                 row.profile,
-                exercise,
+                params,
                 progress,
             )
         except media.MediaError as exc:
@@ -398,14 +403,20 @@ def _analyze(
     path: Path,
     out_dir: Path,
     profile: str | None,
-    exercise: str | None,
+    params: dict[str, Any],
     progress: Callable[[float, str], None],
 ) -> AnalysisResult:
     if kind == "video":
         from asclepio_multimodal.video import analyze_video
 
+        region = params.get("region")
         return analyze_video(
-            path, out_dir, profile or "fisioterapia", exercise=exercise, progress=progress
+            path,
+            out_dir,
+            profile or "fisioterapia",
+            exercise=params.get("exercise"),
+            regiao=tuple(region) if region else None,
+            progress=progress,
         )
     from asclepio_multimodal.audio import analyze_audio
 

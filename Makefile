@@ -159,7 +159,7 @@ fase4-eval: ## Avaliações reais da Fase 4 (URFD, VOICED, PhysioNet) → multim
 	$(UV) run python -m asclepio_multimodal anomaly evaluate
 
 fase4-demo: ## Roda os exemplos de vídeo e áudio pela linha de comando (relatórios em data/analyses/cli/)
-	$(UV) run python -m asclepio_multimodal video analyze data/samples/video/urfd_fall-01-cam0.mp4 --profile quarto --out data/analyses/cli/queda
+	$(UV) run python -m asclepio_multimodal video analyze data/samples/video/urfd_fall-01-cam0.mp4 --profile quarto --regiao 0.5,0,1,1 --out data/analyses/cli/queda
 	$(UV) run python -m asclepio_multimodal video analyze data/samples/video/kettlebell_squat_side.webm --profile fisioterapia --exercise agachamento --out data/analyses/cli/agachamento
 	$(UV) run python -m asclepio_multimodal audio analyze data/samples/audio/consulta_dispneia.wav --out data/analyses/cli/dispneia
 
