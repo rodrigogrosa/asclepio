@@ -11,6 +11,7 @@ import { cn, ROLE_LABEL } from "@/lib/utils";
 import { Avatar, Breadcrumb } from "@/components/ui/misc";
 import { Badge } from "@/components/ui/badge";
 import { pageTitle } from "@/lib/nav";
+import { useAlertEvents } from "@/components/alerts/alert-stream";
 import { useConfig } from "@/components/providers/config-provider";
 
 const SUB_TITLES: Record<string, string> = {
@@ -26,7 +27,7 @@ function crumbsFor(pathname: string, rootLabel: string) {
   if (parts.length === 1) items.push({ label: rootLabel });
   else {
     items.push({ label: rootLabel, href: root });
-    items.push({ label: SUB_TITLES[pathname] ?? parts.slice(1).join("/") });
+    items.push({ label: SUB_TITLES[pathname] ?? (root === "/monitoramento" ? "Análise" : parts.slice(1).join("/")) });
   }
   return items;
 }
@@ -40,7 +41,8 @@ export function Header({ onMenu }: { onMenu: () => void }) {
 
   const { config } = useConfig();
   const title = pageTitle(pathname, user);
-  const { data: stats } = useAsync(() => api.dashboard.stats(), [pathname], { pollMs: 60_000 });
+  const { data: stats, reload: reloadStats } = useAsync(() => api.dashboard.stats(), [pathname], { pollMs: 60_000 });
+  useAlertEvents(() => void reloadStats(true));
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {

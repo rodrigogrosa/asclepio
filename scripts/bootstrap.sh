@@ -120,7 +120,7 @@ API_PORT=$(grep -E '^API_PORT=' .env | cut -d= -f2 || true); API_PORT=${API_PORT
 WEB_PORT=$(grep -E '^WEB_PORT=' .env | cut -d= -f2 || true); WEB_PORT=${WEB_PORT:-3000}
 for spec in "API:$API_PORT" "WEB:$WEB_PORT"; do
   name=${spec%%:*}; port=${spec##*:}
-  holder=$(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | awk 'NR==2{print $1}')
+  holder=$(lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | awk 'NR==2{print $1}' || true)
   if [[ -n "$holder" && "$holder" != com.docke* ]]; then
     warn "porta $port ($name) já está em uso no host por '$holder'. Ajuste ${name}_PORT no .env (ex.: API_PORT=8001 / WEB_PORT=3001) ou libere a porta."
   fi

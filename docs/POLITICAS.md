@@ -62,12 +62,23 @@ A **validação humana** de um fluxo é exclusiva de médico/admin. Médicos pre
 ## 5. Auditoria e rastreabilidade
 - Toda ação relevante vira um registro **append-only** em `audit_log` com `prev_hash` e `hash` (SHA-256 do registro canônico + hash anterior). `GET /audit/verify` recomputa a cadeia e aponta onde quebrou (testado com adulteração direta no banco).
 - Cada requisição tem `X-Request-ID` (= `trace_id`) propagado para logs, auditoria, mensagens, fluxos e traces do Langfuse.
-- Eventos: `auth.login`, `auth.login_failed`, `auth.logout`, `patient.view`, `assistant.chat`, `assistant.blocked`, `assistant.feedback`, `workflow.start`, `workflow.alert`, `workflow.decision`, `workflow.finalize`, `alert.ack`, `knowledge.search`, `knowledge.reindex`, `model.switch`, `audit.verify`.
+- Eventos: `auth.login`, `auth.login_failed`, `auth.logout`, `patient.view`, `assistant.chat`, `assistant.blocked`, `assistant.feedback`, `workflow.start`, `workflow.alert`, `workflow.decision`, `workflow.finalize`, `alert.ack`, `knowledge.search`, `knowledge.reindex`, `model.switch`, `audit.verify`, `monitoring.analysis.create`, `monitoring.analysis.view`, `monitoring.scan`, `monitoring.live.start`, `monitoring.live.stop`.
 
 ## 6. Infraestrutura
 - Headers: `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control: no-store`, CSP restritiva na API, HSTS em produção.
 - CORS apenas para as origens configuradas; limite de corpo (1 MB); containers com usuário não-root; segredos só via `.env`/variáveis; `gitleaks` no pre-commit e na CI; `pip-audit` na CI.
 - LiteLLM (quando usado) centraliza chaves e limites; Langfuse registra prompts/respostas — **atenção**: só envie traces para serviços externos com dados já anonimizados (é o caso aqui).
+
+## 6.1 Monitoramento multimodal — vídeo, áudio e séries (Fase 4)
+| Risco | Controle |
+|---|---|
+| Vídeo/áudio de paciente é **dado sensível** (LGPD art. 11) | Arquivo gravado fora da área servida pela web (`data/uploads`), nome trocado por UUID, SHA-256 registrado na auditoria (`monitoring.analysis.create`); cada abertura de resultado também é auditada (`monitoring.analysis.view`). Só `monitoring:run` envia; `monitoring:read` vê. |
+| Upload malicioso (extensão falsa, arquivo enorme, *zip bomb*) | Lista de extensões, limite de tamanho conferido **em blocos** ao gravar (não só pelo `Content-Length`): 200 MB vídeo / 50 MB áudio; o conteúdo é **decodificado** (OpenCV/ffmpeg) antes de aceitar; vídeo cortado em 5 min de análise. |
+| *Path traversal* nos artefatos | Artefato é pedido pelo **nome registrado no resultado**, resolvido dentro do diretório da análise e conferido com `is_relative_to`; qualquer outro nome → 404. |
+| Envio de dados à nuvem (Azure) | Só quando há chave no `.env`; região `brazilsouth`; a **transcrição é anonimizada antes** do Text Analytics; o áudio vai ao Speech (necessário para transcrever). Sem chave, tudo roda local. Ver `docs/fase4/GUIA_AZURE.md` e ADR-0007. |
+| Fadiga de alarme | Detector com duração mínima, histerese e *cooldown*; no máximo 6 alertas por análise (o relatório traz o resto); *dedupe* de alerta aberto com o mesmo título por paciente. |
+| Alerta automático vira conduta | Alertas são **apoio**: todo achado traz evidência numérica e recomendação de avaliação presencial; nenhum alerta altera prescrição ou prontuário. |
+| Webhook externo (Teams/Slack) | Opcional (`ALERT_WEBHOOK_URL`), só atenção/crítico, sem redirecionamento; falha só gera log. Em produção, enviar apenas iniciais/leito em canal institucional. |
 
 ## 7. O que fica fora do escopo acadêmico (trabalho futuro)
 MFA, SSO institucional (OIDC), refresh tokens com revogação, criptografia de campo para PII em repouso, DLP em anexos, revisão clínica formal dos protocolos, homologação regulatória.

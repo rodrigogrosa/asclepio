@@ -1,0 +1,805 @@
+{
+  "gerado_em": "2026-10-28T19:16:12+00:00",
+  "ambiente": {
+    "python": "3.12.13",
+    "parselmouth": "0.4.7",
+    "scikit_learn": "1.9.0",
+    "whisper": "openai/whisper-small",
+    "ast": "MIT/ast-finetuned-audioset-10-10-0.4593"
+  },
+  "voiced": {
+    "fonte": "VOICED 1.0.0, PhysioNet (Cesari et al., 2018), ODC-By 1.0; vogal /a/ sustentada, 8 kHz",
+    "n_saudaveis": 57,
+    "n_patologicos": 151,
+    "sexo": {
+      "saudavel": {
+        "m": 21,
+        "f": 36
+      },
+      "patologico": {
+        "m": 51,
+        "f": 100
+      }
+    },
+    "idade_media": {
+      "saudavel": 36.9,
+      "patologico": 46.8
+    },
+    "diagnosticos": {
+      "hyperkinetic dysphonia": 72,
+      "healthy": 57,
+      "hypokinetic dysphonia": 41,
+      "reflux laryngitis": 38
+    },
+    "medidas": {
+      "f0_mean_hz": {
+        "saudavel": {
+          "n": 57,
+          "media": 193.644,
+          "dp": 50.039,
+          "mediana": 193.871,
+          "escala_mad": 49.77
+        },
+        "patologico": {
+          "n": 151,
+          "media": 178.071,
+          "dp": 53.24,
+          "mediana": 168.718,
+          "escala_mad": 46.752
+        },
+        "auc": 0.402,
+        "auc_ic95": [
+          0.322,
+          0.484
+        ],
+        "sentido": "menor no patológico",
+        "p_mannwhitney": 0.0295
+      },
+      "f0_sd_hz": {
+        "saudavel": {
+          "n": 57,
+          "media": 6.057,
+          "dp": 11.436,
+          "mediana": 1.764,
+          "escala_mad": 1.016
+        },
+        "patologico": {
+          "n": 151,
+          "media": 16.21,
+          "dp": 24.641,
+          "mediana": 2.394,
+          "escala_mad": 2.027
+        },
+        "auc": 0.635,
+        "auc_ic95": [
+          0.552,
+          0.709
+        ],
+        "sentido": "maior no patológico",
+        "p_mannwhitney": 0.00269
+      },
+      "f0_sd_st": {
+        "saudavel": {
+          "n": 57,
+          "media": 0.678,
+          "dp": 1.378,
+          "mediana": 0.156,
+          "escala_mad": 0.09
+        },
+        "patologico": {
+          "n": 151,
+          "media": 1.76,
+          "dp": 2.444,
+          "mediana": 0.249,
+          "escala_mad": 0.206
+        },
+        "auc": 0.682,
+        "auc_ic95": [
+          0.603,
+          0.758
+        ],
+        "sentido": "maior no patológico",
+        "p_mannwhitney": 5.24e-05
+      },
+      "f0_range_st": {
+        "saudavel": {
+          "n": 57,
+          "media": 1.81,
+          "dp": 3.674,
+          "mediana": 0.498,
+          "escala_mad": 0.279
+        },
+        "patologico": {
+          "n": 151,
+          "media": 4.946,
+          "dp": 6.881,
+          "mediana": 0.826,
+          "escala_mad": 0.652
+        },
+        "auc": 0.681,
+        "auc_ic95": [
+          0.599,
+          0.758
+        ],
+        "sentido": "maior no patológico",
+        "p_mannwhitney": 5.85e-05
+      },
+      "jitter_local_pct": {
+        "saudavel": {
+          "n": 57,
+          "media": 0.438,
+          "dp": 0.34,
+          "mediana": 0.327,
+          "escala_mad": 0.155
+        },
+        "patologico": {
+          "n": 151,
+          "media": 0.796,
+          "dp": 0.999,
+          "mediana": 0.454,
+          "escala_mad": 0.268
+        },
+        "auc": 0.65,
+        "auc_ic95": [
+          0.562,
+          0.734
+        ],
+        "sentido": "maior no patológico",
+        "p_mannwhitney": 0.000871
+      },
+      "shimmer_local_pct": {
+        "saudavel": {
+          "n": 57,
+          "media": 4.259,
+          "dp": 2.849,
+          "mediana": 3.779,
+          "escala_mad": 1.769
+        },
+        "patologico": {
+          "n": 151,
+          "media": 6.075,
+          "dp": 4.253,
+          "mediana": 4.619,
+          "escala_mad": 2.867
+        },
+        "auc": 0.631,
+        "auc_ic95": [
+          0.548,
+          0.709
+        ],
+        "sentido": "maior no patológico",
+        "p_mannwhitney": 0.00352
+      },
+      "hnr_db": {
+        "saudavel": {
+          "n": 57,
+          "media": 20.285,
+          "dp": 4.674,
+          "mediana": 19.444,
+          "escala_mad": 3.961
+        },
+        "patologico": {
+          "n": 151,
+          "media": 17.115,
+          "dp": 6.034,
+          "mediana": 18.154,
+          "escala_mad": 5.667
+        },
+        "auc": 0.355,
+        "auc_ic95": [
+          0.276,
+          0.437
+        ],
+        "sentido": "menor no patológico",
+        "p_mannwhitney": 0.00127
+      },
+      "voiced_fraction": {
+        "saudavel": {
+          "n": 57,
+          "media": 0.958,
+          "dp": 0.077,
+          "mediana": 0.981,
+          "escala_mad": 0.0
+        },
+        "patologico": {
+          "n": 151,
+          "media": 0.928,
+          "dp": 0.159,
+          "mediana": 0.981,
+          "escala_mad": 0.0
+        },
+        "auc": 0.431,
+        "auc_ic95": [
+          0.354,
+          0.51
+        ],
+        "sentido": "menor no patológico",
+        "p_mannwhitney": 0.102
+      },
+      "voice_quality_score": {
+        "saudavel": {
+          "n": 57,
+          "media": 0.162,
+          "dp": 0.256,
+          "mediana": 0.042,
+          "escala_mad": 0.062
+        },
+        "patologico": {
+          "n": 151,
+          "media": 0.348,
+          "dp": 0.362,
+          "mediana": 0.177,
+          "escala_mad": 0.262
+        },
+        "auc": 0.644,
+        "auc_ic95": [
+          0.557,
+          0.724
+        ],
+        "sentido": "maior no patológico",
+        "p_mannwhitney": 0.00128
+      }
+    },
+    "normas_vogal": {
+      "jitter_local_pct": {
+        "n": 57,
+        "media": 0.438,
+        "dp": 0.34,
+        "mediana": 0.327,
+        "escala_mad": 0.155
+      },
+      "shimmer_local_pct": {
+        "n": 57,
+        "media": 4.259,
+        "dp": 2.849,
+        "mediana": 3.779,
+        "escala_mad": 1.769
+      },
+      "hnr_db": {
+        "n": 57,
+        "media": 20.285,
+        "dp": 4.674,
+        "mediana": 19.444,
+        "escala_mad": 3.961
+      }
+    },
+    "classificador": {
+      "modelo": "StandardScaler + regressão logística (class_weight=balanced)",
+      "medidas": [
+        "f0_mean_hz",
+        "f0_sd_st",
+        "jitter_local_pct",
+        "shimmer_local_pct",
+        "hnr_db",
+        "voiced_fraction"
+      ],
+      "validacao": "estratificada, 5 dobras, seed 42",
+      "auc": 0.615,
+      "auc_ic95_bootstrap": [
+        0.534,
+        0.698
+      ],
+      "auc_por_dobra_media": 0.623,
+      "auc_por_dobra_dp": 0.09,
+      "auc_5x10_media": 0.654,
+      "auc_5x10_dp": 0.086,
+      "acuracia": 0.601,
+      "acuracia_classe_majoritaria": 0.726,
+      "sensibilidade": 0.556,
+      "especificidade": 0.719,
+      "matriz": {
+        "vp": 84,
+        "fn": 67,
+        "vn": 41,
+        "fp": 16
+      }
+    },
+    "classificador_qualidade_vocal": {
+      "modelo": "StandardScaler + regressão logística (class_weight=balanced)",
+      "medidas": [
+        "jitter_local_pct",
+        "shimmer_local_pct",
+        "hnr_db"
+      ],
+      "validacao": "estratificada, 5 dobras, seed 42",
+      "auc": 0.605,
+      "auc_ic95_bootstrap": [
+        0.522,
+        0.688
+      ],
+      "auc_por_dobra_media": 0.626,
+      "auc_por_dobra_dp": 0.089,
+      "auc_5x10_media": 0.637,
+      "auc_5x10_dp": 0.085,
+      "acuracia": 0.558,
+      "acuracia_classe_majoritaria": 0.726,
+      "sensibilidade": 0.51,
+      "especificidade": 0.684,
+      "matriz": {
+        "vp": 77,
+        "fn": 74,
+        "vn": 39,
+        "fp": 18
+      }
+    }
+  },
+  "normas_fala": {
+    "fonte": "FLEURS pt-BR (dev, primeiros enunciados), leitura, CC BY 4.0",
+    "n_enunciados": 110,
+    "normas": {
+      "f0_sd_st": {
+        "n": 110,
+        "media": 4.669,
+        "dp": 2.128,
+        "mediana": 4.292,
+        "escala_mad": 2.685
+      },
+      "articulation_rate": {
+        "n": 110,
+        "media": 4.8,
+        "dp": 0.742,
+        "mediana": 4.793,
+        "escala_mad": 0.776
+      },
+      "pause_mean_s": {
+        "n": 110,
+        "media": 0.403,
+        "dp": 0.233,
+        "mediana": 0.421,
+        "escala_mad": 0.142
+      },
+      "pauses_per_min": {
+        "n": 110,
+        "media": 11.49,
+        "dp": 6.841,
+        "mediana": 12.105,
+        "escala_mad": 5.982
+      },
+      "breath_group_mean_s": {
+        "n": 110,
+        "media": 3.6,
+        "dp": 2.631,
+        "mediana": 2.853,
+        "escala_mad": 0.889
+      },
+      "level_dbfs": {
+        "n": 110,
+        "media": -25.793,
+        "dp": 4.791,
+        "mediana": -26.06,
+        "escala_mad": 5.945
+      },
+      "hnr_db": {
+        "n": 110,
+        "media": 11.329,
+        "dp": 1.852,
+        "mediana": 11.165,
+        "escala_mad": 1.853
+      },
+      "jitter_local_pct": {
+        "n": 110,
+        "media": 2.51,
+        "dp": 0.407,
+        "mediana": 2.449,
+        "escala_mad": 0.359
+      },
+      "shimmer_local_pct": {
+        "n": 110,
+        "media": 12.388,
+        "dp": 2.651,
+        "mediana": 12.496,
+        "escala_mad": 3.01
+      },
+      "syllable_interval_cv": {
+        "n": 110,
+        "media": 0.471,
+        "dp": 0.062,
+        "mediana": 0.468,
+        "escala_mad": 0.059
+      },
+      "pause_ratio": {
+        "n": 110,
+        "media": 0.094,
+        "dp": 0.066,
+        "mediana": 0.087,
+        "escala_mad": 0.053
+      },
+      "speech_rate": {
+        "n": 110,
+        "media": 4.356,
+        "dp": 0.777,
+        "mediana": 4.309,
+        "escala_mad": 0.726
+      },
+      "resp_events_per_min": {
+        "n": 110,
+        "media": 0.032,
+        "dp": 0.331,
+        "mediana": 0.0,
+        "escala_mad": 0.0,
+        "fracao_com_algum_evento": 0.009
+      }
+    },
+    "constantes_divergentes_de_vocal_py": {},
+    "disparo_em_fala_sem_queixa_(mesma_amostra)": {
+      "fadiga": {
+        "atencao": 0.036,
+        "critico": 0.0
+      },
+      "dificuldade_respiratoria": {
+        "atencao": 0.009,
+        "critico": 0.0
+      },
+      "alteracao_articulatoria": {
+        "atencao": 0.055,
+        "critico": 0.018
+      }
+    }
+  },
+  "esc50": {
+    "fonte": "ESC-50 (Piczak, 2015), CC BY-NC; 40 clipes de cada classe-alvo e 1 de cada uma das 47 outras",
+    "divisao": "metade A orienta o limiar (F1), metade B só mede",
+    "limiares_em_uso": {
+      "tosse": 0.08,
+      "pigarro": 0.3,
+      "espirro": 0.1,
+      "respiracao": 0.03,
+      "chiado": 0.15,
+      "suspiro": 0.2,
+      "engasgo": 0.5
+    },
+    "por_tipo": {
+      "tosse": {
+        "limiar_em_uso": 0.08,
+        "melhor_limiar_F1_metade_A": 0.08,
+        "metade_A": {
+          "positivos": 24,
+          "recall": 0.75,
+          "negativos": 59,
+          "falsos_positivos": 1,
+          "precisao": 0.947
+        },
+        "metade_B": {
+          "positivos": 16,
+          "recall": 0.875,
+          "negativos": 68,
+          "falsos_positivos": 4,
+          "precisao": 0.778
+        },
+        "falsos_positivos_por_classe": {
+          "sneezing": 5
+        },
+        "mistura_com_fala": {
+          "evento_+6_dB_vs_fala": {
+            "clipes": 17,
+            "recall": 0.235
+          },
+          "evento_+0_dB_vs_fala": {
+            "clipes": 19,
+            "recall": 0.105
+          },
+          "evento_-6_dB_vs_fala": {
+            "clipes": 19,
+            "recall": 0.053
+          }
+        }
+      },
+      "respiracao": {
+        "limiar_em_uso": 0.03,
+        "melhor_limiar_F1_metade_A": 0.03,
+        "metade_A": {
+          "positivos": 21,
+          "recall": 0.905,
+          "negativos": 62,
+          "falsos_positivos": 2,
+          "precisao": 0.905
+        },
+        "metade_B": {
+          "positivos": 19,
+          "recall": 0.789,
+          "negativos": 65,
+          "falsos_positivos": 5,
+          "precisao": 0.75
+        },
+        "falsos_positivos_por_classe": {
+          "brushing_teeth": 1,
+          "coughing": 2,
+          "sneezing": 4
+        },
+        "mistura_com_fala": {
+          "evento_+6_dB_vs_fala": {
+            "clipes": 18,
+            "recall": 0.389
+          },
+          "evento_+0_dB_vs_fala": {
+            "clipes": 18,
+            "recall": 0.333
+          },
+          "evento_-6_dB_vs_fala": {
+            "clipes": 18,
+            "recall": 0.278
+          }
+        }
+      },
+      "espirro": {
+        "limiar_em_uso": 0.1,
+        "melhor_limiar_F1_metade_A": 0.03,
+        "metade_A": {
+          "positivos": 17,
+          "recall": 0.529,
+          "negativos": 66,
+          "falsos_positivos": 1,
+          "precisao": 0.9
+        },
+        "metade_B": {
+          "positivos": 23,
+          "recall": 0.87,
+          "negativos": 61,
+          "falsos_positivos": 1,
+          "precisao": 0.952
+        },
+        "falsos_positivos_por_classe": {
+          "coughing": 2
+        },
+        "mistura_com_fala": {
+          "evento_+6_dB_vs_fala": {
+            "clipes": 17,
+            "recall": 0.353
+          },
+          "evento_+0_dB_vs_fala": {
+            "clipes": 20,
+            "recall": 0.25
+          },
+          "evento_-6_dB_vs_fala": {
+            "clipes": 15,
+            "recall": 0.2
+          }
+        }
+      }
+    }
+  },
+  "demos": {
+    "aviso": "áudios sintéticos com alterações controladas: sanidade, não validação",
+    "consulta_dispneia": {
+      "indicadores": {
+        "fadiga": {
+          "pontuacao": 0.582,
+          "nivel": "atencao"
+        },
+        "dificuldade_respiratoria": {
+          "pontuacao": 0.568,
+          "nivel": "atencao"
+        },
+        "alteracao_articulatoria": {
+          "pontuacao": 0.28,
+          "nivel": "normal"
+        }
+      },
+      "achados": [
+        "audio.fadiga",
+        "audio.dificuldade_respiratoria",
+        "audio.respiracao",
+        "texto.termo.falta_de_ar",
+        "texto.termo.dor_no_peito",
+        "texto.termo.chiado_no_peito",
+        "texto.termo.cansaco_fadiga",
+        "texto.sentimento_negativo"
+      ],
+      "termos_criticos": [
+        {
+          "trecho": "falta de ar",
+          "severidade": "critico",
+          "negado": false
+        },
+        {
+          "trecho": "dor no peito",
+          "severidade": "critico",
+          "negado": false
+        },
+        {
+          "trecho": "chiado no peito",
+          "severidade": "atencao",
+          "negado": false
+        },
+        {
+          "trecho": "febre",
+          "severidade": "atencao",
+          "negado": true
+        },
+        {
+          "trecho": "cansaço",
+          "severidade": "atencao",
+          "negado": false
+        }
+      ],
+      "eventos": {
+        "tosse": 0,
+        "pigarro": 0,
+        "espirro": 1,
+        "respiracao": 7,
+        "chiado": 0,
+        "suspiro": 2,
+        "engasgo": 0
+      },
+      "sentimento": "negative",
+      "provedores": {
+        "stt": "local",
+        "text": "local"
+      },
+      "risco": 1.0,
+      "nivel_risco": "critico",
+      "transcricao": "Doutora, eu estou com falta de ar. Sinto dor no peito. Quando subo a escada, preciso parar para respirar. Tenho chiado no peito. A noite, não ou tenho febre, mas o cansaço está piorando.",
+      "avisos": [
+        "Azure Speech não configurado — transcrição feita localmente com Whisper.",
+        "Azure Language não configurado — texto analisado com o léxico local."
+      ],
+      "medidas": {
+        "articulation_rate": 2.827,
+        "pause_mean_s": 1.015,
+        "pauses_per_min": 21.3,
+        "breath_group_mean_s": 1.651,
+        "f0_sd_st": 2.677295152513973,
+        "level_dbfs": -21.04
+      }
+    },
+    "consulta_fadiga": {
+      "indicadores": {
+        "fadiga": {
+          "pontuacao": 0.582,
+          "nivel": "atencao"
+        },
+        "dificuldade_respiratoria": {
+          "pontuacao": 0.054,
+          "nivel": "normal"
+        },
+        "alteracao_articulatoria": {
+          "pontuacao": 0.179,
+          "nivel": "normal"
+        }
+      },
+      "achados": [
+        "audio.fadiga",
+        "texto.termo.cansaco_fadiga",
+        "texto.sentimento_negativo"
+      ],
+      "termos_criticos": [
+        {
+          "trecho": "cansado",
+          "severidade": "atencao",
+          "negado": false
+        },
+        {
+          "trecho": "sem energia",
+          "severidade": "atencao",
+          "negado": false
+        },
+        {
+          "trecho": "cansado",
+          "severidade": "atencao",
+          "negado": false
+        },
+        {
+          "trecho": "fraqueza",
+          "severidade": "atencao",
+          "negado": false
+        },
+        {
+          "trecho": "febre",
+          "severidade": "atencao",
+          "negado": true
+        },
+        {
+          "trecho": "dor no peito",
+          "severidade": "critico",
+          "negado": true
+        }
+      ],
+      "eventos": {
+        "tosse": 0,
+        "pigarro": 0,
+        "espirro": 0,
+        "respiracao": 0,
+        "chiado": 0,
+        "suspiro": 0,
+        "engasgo": 0
+      },
+      "sentimento": "negative",
+      "provedores": {
+        "stt": "local",
+        "text": "local"
+      },
+      "risco": 0.517,
+      "nivel_risco": "alto",
+      "transcricao": "Bom dia, doutora, ando muito cansado, sem energia nenhuma. Acordo cansado, mesmo depois de dormir a noite inteira. Sinto muita fraqueza nas pernas e não tenho vontade de fazer nada. e nego febre e nego dor no peito, mas está tudo pesado, preciso ficar deitado a maior parte do dia.",
+      "avisos": [
+        "Azure Speech não configurado — transcrição feita localmente com Whisper.",
+        "Azure Language não configurado — texto analisado com o léxico local."
+      ],
+      "medidas": {
+        "articulation_rate": 3.534,
+        "pause_mean_s": 0.958,
+        "pauses_per_min": 15.33,
+        "breath_group_mean_s": 2.66,
+        "f0_sd_st": 0.5378743912018533,
+        "level_dbfs": -27.33
+      }
+    },
+    "consulta_normal": {
+      "indicadores": {
+        "fadiga": {
+          "pontuacao": 0.13,
+          "nivel": "normal"
+        },
+        "dificuldade_respiratoria": {
+          "pontuacao": 0.0,
+          "nivel": "normal"
+        },
+        "alteracao_articulatoria": {
+          "pontuacao": 0.061,
+          "nivel": "normal"
+        }
+      },
+      "achados": [
+        "texto.termo.cansaco_fadiga"
+      ],
+      "termos_criticos": [
+        {
+          "trecho": "dor no peito",
+          "severidade": "critico",
+          "negado": true
+        },
+        {
+          "trecho": "falta de ar",
+          "severidade": "critico",
+          "negado": true
+        },
+        {
+          "trecho": "febre",
+          "severidade": "atencao",
+          "negado": true
+        },
+        {
+          "trecho": "cansaço",
+          "severidade": "atencao",
+          "negado": false
+        }
+      ],
+      "eventos": {
+        "tosse": 0,
+        "pigarro": 0,
+        "espirro": 0,
+        "respiracao": 0,
+        "chiado": 0,
+        "suspiro": 0,
+        "engasgo": 0
+      },
+      "sentimento": "mixed",
+      "provedores": {
+        "stt": "local",
+        "text": "local"
+      },
+      "risco": 0.375,
+      "nivel_risco": "moderado",
+      "transcricao": "Bom dia, doutora, vim para a consulta de rotina. Estou me sentindo bem, durmo bem e faço minhas caminhadas todos os dias. Nego dor no peito e não ou tenho falta de ar, também e não ou tenho febre. Só sinto um pouco de cansaço no fim do dia, mas nada que atrapalhe meu trabalho.",
+      "avisos": [
+        "Azure Speech não configurado — transcrição feita localmente com Whisper.",
+        "Azure Language não configurado — texto analisado com o léxico local."
+      ],
+      "medidas": {
+        "articulation_rate": 4.362,
+        "pause_mean_s": 0.422,
+        "pauses_per_min": 11.98,
+        "breath_group_mean_s": 3.668,
+        "f0_sd_st": 2.128003115673009,
+        "level_dbfs": -16.39
+      }
+    }
+  },
+  "limitacoes": [
+    "VOICED é vogal sustentada em 8 kHz gravada em celular; a fala de consulta é corrida e mais ruidosa.",
+    "Saudáveis e patológicos diferem em sexo e idade (ver voiced.sexo/idade_media); a AUC pode misturar esses fatores.",
+    "Referência de fala = leitura (FLEURS): a fala espontânea tem mais pausas e frases mais curtas.",
+    "Os indicadores de fadiga, respiração e articulação NÃO foram validados contra pacientes reais; as 3 consultas são sintéticas.",
+    "A taxa de articulação usa núcleos de intensidade e subestima sílabas reais; vale só contra a referência medida igual."
+  ]
+}

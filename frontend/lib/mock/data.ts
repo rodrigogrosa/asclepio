@@ -38,9 +38,9 @@ export const MOCK_RECOVERY_CODE = "AAAA-BBBB";
 
 const PERMS: Record<User["role"], string[]> = {
   admin: ["*"],
-  medico: ["patients:read", "assistant:chat", "workflows:run", "workflows:decide", "alerts:read", "alerts:ack", "knowledge:read", "catalog:read"],
-  enfermagem: ["patients:read", "assistant:chat", "workflows:run", "alerts:read", "alerts:ack", "knowledge:read", "catalog:read"],
-  auditor: ["audit:read", "alerts:read", "knowledge:read", "catalog:read", "docs:read"],
+  medico: ["patients:read", "assistant:chat", "workflows:run", "workflows:decide", "alerts:read", "alerts:ack", "knowledge:read", "catalog:read", "monitoring:read", "monitoring:run"],
+  enfermagem: ["patients:read", "assistant:chat", "workflows:run", "alerts:read", "alerts:ack", "knowledge:read", "catalog:read", "monitoring:read", "monitoring:run"],
+  auditor: ["audit:read", "alerts:read", "knowledge:read", "catalog:read", "docs:read", "monitoring:read"],
 };
 
 export const PUBLIC_CONFIG: PublicConfig = {
@@ -764,7 +764,7 @@ export const MODEL_INFO: ModelInfoResponse = {
 };
 
 // ---------- Auditoria ----------
-const ACTIONS = ["auth.login", "auth.login_failed", "auth.logout", "patient.view", "assistant.chat", "assistant.blocked", "assistant.feedback", "workflow.start", "workflow.alert", "workflow.decision", "alert.ack", "knowledge.reindex", "knowledge.search", "model.switch", "audit.verify"];
+const ACTIONS = ["auth.login", "auth.login_failed", "auth.logout", "patient.view", "assistant.chat", "assistant.blocked", "assistant.feedback", "workflow.start", "workflow.alert", "workflow.decision", "alert.ack", "knowledge.reindex", "knowledge.search", "model.switch", "audit.verify", "monitoring.analysis.create", "monitoring.analysis.view", "monitoring.scan", "monitoring.live.start", "monitoring.live.stop"];
 export const AUDIT_ACTIONS = ACTIONS;
 
 function fakeHash(seed: string) {

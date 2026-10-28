@@ -10,6 +10,7 @@ import { Logo, LogoMark } from "@/components/brand/logo";
 import { Spinner } from "@/components/ui/misc";
 import { Button } from "@/components/ui/button";
 import { footerText, useConfig } from "@/components/providers/config-provider";
+import { AlertStreamListener } from "@/components/alerts/alert-stream";
 
 const PASSWORD_PATH = "/conta/senha";
 const MFA_PATH = "/conta/mfa";
@@ -91,6 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-bg">
+      <AlertStreamListener />
       <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div className="flex min-h-screen flex-col lg:pl-[240px]">
         <Header onMenu={() => setMenuOpen(true)} />

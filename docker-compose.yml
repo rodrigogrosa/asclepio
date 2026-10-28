@@ -83,6 +83,8 @@ services:
         condition: service_healthy
     environment:
       APP_ENV: ${APP_ENV:-development}
+      # horários do banco são "locais" (sem fuso): o container precisa do fuso do hospital, não UTC
+      TZ: ${TZ:-America/Sao_Paulo}
       APP_HOSPITAL_NAME: ${APP_HOSPITAL_NAME:-Hospital Universitário}
       APP_HOSPITAL_SHORT_NAME: ${APP_HOSPITAL_SHORT_NAME:-HU}
       APP_SUPPORT_EMAIL: ${APP_SUPPORT_EMAIL:-}
@@ -106,6 +108,15 @@ services:
       EMBEDDINGS_PROVIDER: ${EMBEDDINGS_PROVIDER:-ollama}
       EMBEDDINGS_MODEL: ${EMBEDDINGS_MODEL:-nomic-embed-text}
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+      # --- Fase 4: monitoramento multimodal (Azure opcional; sem chave cai para o modo local) ---
+      AZURE_SPEECH_KEY: ${AZURE_SPEECH_KEY:-}
+      AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION:-brazilsouth}
+      AZURE_LANGUAGE_KEY: ${AZURE_LANGUAGE_KEY:-}
+      AZURE_LANGUAGE_ENDPOINT: ${AZURE_LANGUAGE_ENDPOINT:-}
+      STT_PROVIDER: ${STT_PROVIDER:-auto}
+      TEXT_PROVIDER: ${TEXT_PROVIDER:-auto}
+      VIDEO_SAMPLE_FPS: ${VIDEO_SAMPLE_FPS:-5}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
       <<: *langfuse-env
     volumes:
       - ./data:/app/data

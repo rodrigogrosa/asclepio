@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     app_hospital_short_name: str = "HU"
     app_support_email: str | None = None
     app_env: Literal["development", "test", "production"] = "development"
-    app_version: str = "1.2.0"
+    app_version: str = "2.0.0"
     log_level: str = "INFO"
     log_format: Literal["console", "json"] = "console"
     api_prefix: str = "/api/v1"
@@ -79,6 +79,15 @@ class Settings(BaseSettings):
     ml_eval_report_file: str = str(REPO_ROOT / "ml" / "reports" / "eval_latest.json")
     rag_top_k: int = 5
     rag_min_score: float = 0.25
+
+    # --- monitoramento multimodal (Fase 4) ---
+    max_video_upload_mb: int = 200
+    max_audio_upload_mb: int = 50
+    uploads_dir: str = str(REPO_ROOT / "data" / "uploads")
+    live_max_seconds: int = 900  # sessão ao vivo encerra sozinha (não fica gravando para sempre)
+    alert_webhook_url: str | None = (
+        None  # opcional: Teams/Slack/qualquer webhook recebe alertas críticos
+    )
 
     # --- observabilidade ---
     enable_metrics: bool = True

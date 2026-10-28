@@ -1,0 +1,1196 @@
+{
+  "gerado_em": "2026-10-28T19:27:38+00:00",
+  "ambiente": {
+    "python": "3.12.13",
+    "opencv": "4.14.0",
+    "ultralytics": "8.4.191",
+    "so": "Darwin arm64",
+    "cpus": 18,
+    "pose_backend": "openpose",
+    "yolo": "yolov8n.pt",
+    "carga_media_1min_inicio": 12.48,
+    "carga_media_1min_fim": 19.2,
+    "duracao_total_s": 1223.9
+  },
+  "urfd": {
+    "conjunto": {
+      "fonte": "UR Fall Detection Dataset (Kwolek & Kepski, 2014), câmera 0, RGB",
+      "quedas": 30,
+      "adl": 40,
+      "sample_fps": 5.0,
+      "perfil": "quarto"
+    },
+    "n_videos": 70,
+    "matriz_confusao": {
+      "tp": 27,
+      "fn": 3,
+      "fp": 2,
+      "tn": 38
+    },
+    "sensibilidade": 0.9,
+    "especificidade": 0.95,
+    "acuracia": 0.9286,
+    "precisao": 0.931,
+    "f1": 0.9153,
+    "fora_da_calibracao": {
+      "n_videos": 40,
+      "matriz_confusao": {
+        "tp": 8,
+        "fn": 2,
+        "fp": 2,
+        "tn": 28
+      },
+      "sensibilidade": 0.8,
+      "especificidade": 0.9333,
+      "acuracia": 0.9,
+      "precisao": 0.8,
+      "f1": 0.8
+    },
+    "sequencias_de_calibracao": [
+      "fall-01",
+      "fall-02",
+      "fall-03",
+      "fall-04",
+      "fall-05",
+      "fall-06",
+      "fall-07",
+      "fall-08",
+      "fall-09",
+      "fall-10",
+      "fall-11",
+      "fall-12",
+      "fall-13",
+      "fall-14",
+      "fall-15",
+      "fall-16",
+      "fall-17",
+      "fall-18",
+      "fall-19",
+      "fall-20",
+      "adl-01",
+      "adl-02",
+      "adl-03",
+      "adl-04",
+      "adl-05",
+      "adl-06",
+      "adl-07",
+      "adl-08",
+      "adl-09",
+      "adl-10"
+    ],
+    "tempo_medio_s_por_video": 16.45,
+    "tempo_medio_s_por_quadro": 0.571,
+    "videos": [
+      {
+        "video": "fall-01",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 3.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 30.96,
+        "quadros": 27,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 92.6
+      },
+      {
+        "video": "fall-02",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.2,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 37.13,
+        "quadros": 19,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "fall-03",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 5.8,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 46.37,
+        "quadros": 36,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "fall-04",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 14.06,
+        "quadros": 16,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 87.5
+      },
+      {
+        "video": "fall-05",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 3.4,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 23.12,
+        "quadros": 26,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 80.8
+      },
+      {
+        "video": "fall-06",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 21.95,
+        "quadros": 17,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "fall-07",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 3.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 26.55,
+        "quadros": 26,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 92.3
+      },
+      {
+        "video": "fall-08",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.8,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 20.16,
+        "quadros": 16,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 93.8
+      },
+      {
+        "video": "fall-09",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 5.0,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 26.1,
+        "quadros": 31,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 93.5
+      },
+      {
+        "video": "fall-10",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.2,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 21.72,
+        "quadros": 22,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 86.4
+      },
+      {
+        "video": "fall-11",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.4,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 23.22,
+        "quadros": 22,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "fall-12",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.0,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 23.81,
+        "quadros": 19,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "fall-13",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.2,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 34.01,
+        "quadros": 15,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "fall-14",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 10.58,
+        "quadros": 11,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "fall-15",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.0,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 3.86,
+        "quadros": 12,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 91.7
+      },
+      {
+        "video": "fall-16",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 6.33,
+        "quadros": 10,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "fall-17",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 6.12,
+        "quadros": 16,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 93.8
+      },
+      {
+        "video": "fall-18",
+        "rotulo": 1,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 3.59,
+        "quadros": 11,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 63.6
+      },
+      {
+        "video": "fall-19",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.0,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 4.26,
+        "quadros": 17,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 58.8
+      },
+      {
+        "video": "fall-20",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.8,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 9.53,
+        "quadros": 19,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 89.5
+      },
+      {
+        "video": "fall-21",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 2.8,
+        "quadros": 10,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 80.0
+      },
+      {
+        "video": "fall-22",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.2,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 5.4,
+        "quadros": 10,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 90.0
+      },
+      {
+        "video": "fall-23",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.0,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 3.99,
+        "quadros": 13,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 76.9
+      },
+      {
+        "video": "fall-24",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.6,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 3.43,
+        "quadros": 10,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 80.0
+      },
+      {
+        "video": "fall-25",
+        "rotulo": 1,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 3.75,
+        "quadros": 15,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 73.3
+      },
+      {
+        "video": "fall-26",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.4,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 3.83,
+        "quadros": 11,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 90.9
+      },
+      {
+        "video": "fall-27",
+        "rotulo": 1,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 3.45,
+        "quadros": 16,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 75.0
+      },
+      {
+        "video": "fall-28",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.0,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 3.76,
+        "quadros": 11,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 90.9
+      },
+      {
+        "video": "fall-29",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 2.4,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 3.9,
+        "quadros": 17,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 88.2
+      },
+      {
+        "video": "fall-30",
+        "rotulo": 1,
+        "previsto": 1,
+        "t_queda_s": 1.8,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 4.02,
+        "quadros": 12,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-01",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 7.38,
+        "quadros": 25,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 92.0
+      },
+      {
+        "video": "adl-02",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 6.11,
+        "quadros": 30,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 73.3
+      },
+      {
+        "video": "adl-03",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 8.68,
+        "quadros": 30,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-04",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 7.04,
+        "quadros": 25,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 96.0
+      },
+      {
+        "video": "adl-05",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 11.61,
+        "quadros": 30,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-06",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 9.19,
+        "quadros": 39,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 89.7
+      },
+      {
+        "video": "adl-07",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 6.99,
+        "quadros": 30,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 96.7
+      },
+      {
+        "video": "adl-08",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 8.72,
+        "quadros": 30,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 93.3
+      },
+      {
+        "video": "adl-09",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 7.76,
+        "quadros": 25,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-10",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 20.6,
+        "quadros": 50,
+        "calibracao": true,
+        "quadros_com_pessoa_pct": 98.0
+      },
+      {
+        "video": "adl-11",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 14.76,
+        "quadros": 50,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 90.0
+      },
+      {
+        "video": "adl-12",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 8.36,
+        "quadros": 42,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 71.4
+      },
+      {
+        "video": "adl-13",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 9.51,
+        "quadros": 45,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 68.9
+      },
+      {
+        "video": "adl-14",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 8.99,
+        "quadros": 40,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 70.0
+      },
+      {
+        "video": "adl-15",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 29.87,
+        "quadros": 46,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 71.7
+      },
+      {
+        "video": "adl-16",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 37.4,
+        "quadros": 40,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 40.0
+      },
+      {
+        "video": "adl-17",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 48.86,
+        "quadros": 39,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 69.2
+      },
+      {
+        "video": "adl-18",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 46.01,
+        "quadros": 45,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 51.1
+      },
+      {
+        "video": "adl-19",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 50.68,
+        "quadros": 42,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 61.9
+      },
+      {
+        "video": "adl-20",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 68.23,
+        "quadros": 45,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 71.1
+      },
+      {
+        "video": "adl-21",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 63.33,
+        "quadros": 47,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 51.1
+      },
+      {
+        "video": "adl-22",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 39.0,
+        "quadros": 40,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 37.5
+      },
+      {
+        "video": "adl-23",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 10.7,
+        "quadros": 37,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 40.5
+      },
+      {
+        "video": "adl-24",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 7.99,
+        "quadros": 12,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-25",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 9.53,
+        "quadros": 19,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-26",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 8.53,
+        "quadros": 16,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-27",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 7.28,
+        "quadros": 17,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-28",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 8.08,
+        "quadros": 15,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-29",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 9.57,
+        "quadros": 21,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 100.0
+      },
+      {
+        "video": "adl-30",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 24.22,
+        "quadros": 67,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 73.1
+      },
+      {
+        "video": "adl-31",
+        "rotulo": 0,
+        "previsto": 1,
+        "t_queda_s": 3.4,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 8.61,
+        "quadros": 42,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 47.6
+      },
+      {
+        "video": "adl-32",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 8.03,
+        "quadros": 34,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 58.8
+      },
+      {
+        "video": "adl-33",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 11.4,
+        "quadros": 34,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 79.4
+      },
+      {
+        "video": "adl-34",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 11.22,
+        "quadros": 32,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 81.2
+      },
+      {
+        "video": "adl-35",
+        "rotulo": 0,
+        "previsto": 1,
+        "t_queda_s": 2.2,
+        "achados": [
+          "video.queda"
+        ],
+        "tempo_s": 14.36,
+        "quadros": 47,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 63.8
+      },
+      {
+        "video": "adl-36",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 22.26,
+        "quadros": 57,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 89.5
+      },
+      {
+        "video": "adl-37",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 15.67,
+        "quadros": 59,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 91.5
+      },
+      {
+        "video": "adl-38",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 9.9,
+        "quadros": 58,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 63.8
+      },
+      {
+        "video": "adl-39",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 6.44,
+        "quadros": 45,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 55.6
+      },
+      {
+        "video": "adl-40",
+        "rotulo": 0,
+        "previsto": 0,
+        "t_queda_s": null,
+        "achados": [],
+        "tempo_s": 6.81,
+        "quadros": 55,
+        "calibracao": false,
+        "quadros_com_pessoa_pct": 50.9
+      }
+    ],
+    "erros": []
+  },
+  "historico_ajuste": {
+    "primeira_execucao": {
+      "limiares": "a priori: descida ≥ 0,5 altura em ≤ 1,0 s; pessoa principal = maior caixa",
+      "quedas_detectadas": "12 de 30 (sensibilidade 0,40)",
+      "falsos_positivos_adl": "0 de 11 ADL processados (interrompida em adl-11)"
+    },
+    "causas_encontradas": [
+      "descida de 1,2–2 s (a caixa do YOLOv8 acompanha o corpo com atraso): janela de 1,0 → 2,0 s",
+      "vídeos cortados no instante da queda: permanência não confirmável → 'Possível queda' (atenção)",
+      "YOLOv8 desenha 'person' fantasma em cadeira/mochila e a trilha grudava nele: principal = confiança × área, com continuidade ponderada pela confiança",
+      "caixa minúscula (detecção espúria) é descartada; corpo colapsado a < 50% da altura de pé conta como deitado (deitado de frente para a câmera a razão largura/altura fica < 1)"
+    ],
+    "ajustado_com": "fall-01..20 e adl-01..10 (sinais inspecionados); o resto só foi visto como acerto/erro"
+  },
+  "agachamentos": [
+    {
+      "video": "squat_demo.webm",
+      "exercicio": "agachamento",
+      "tempo_s": 11.73,
+      "sample_fps": 5.0,
+      "resumo": "Agachamento: 2 repetição(ões) identificada(s), flexão máxima do joelho 128°. Nenhum desvio relevante.",
+      "metricas": {
+        "quadros_analisados": 36,
+        "fps_amostrado": 5.0,
+        "resolucao": "1280x720",
+        "pessoas_max": 3,
+        "quadros_com_pessoa_pct": 100.0,
+        "quadros_com_pose_pct": 100.0,
+        "vista_estimada": "obliqua",
+        "repeticoes": 2,
+        "rom_media_graus": 122.6,
+        "flexao_joelho_max_graus": 127.6,
+        "tronco_max_graus": 30.0,
+        "energia_media": 0.89,
+        "objetos_detectados": {
+          "sports ball": 57,
+          "parking meter": 1
+        },
+        "ms_yolo_por_quadro": 32.1,
+        "ms_pose_por_quadro": 279.2
+      },
+      "achados": [],
+      "repeticoes": [
+        {
+          "n": 1,
+          "t_ini": 1.2,
+          "t_min": 2.2,
+          "t_fim": 3.4,
+          "duracao_s": 2.2,
+          "flexao_graus": 127.61,
+          "rom_graus": 124.94,
+          "tronco_max_graus": 26.11,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        },
+        {
+          "n": 2,
+          "t_ini": 4.4,
+          "t_min": 5.4,
+          "t_fim": 6.4,
+          "duracao_s": 2.0,
+          "flexao_graus": 122.9,
+          "rom_graus": 120.19,
+          "tronco_max_graus": 30.0,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        }
+      ],
+      "vista": "obliqua"
+    },
+    {
+      "video": "single_leg_squat.webm",
+      "exercicio": "agachamento_unipodal",
+      "tempo_s": 11.73,
+      "sample_fps": 5.0,
+      "resumo": "Agachamento unipodal: 2 repetição(ões) identificada(s), flexão máxima do joelho 115°. Desvios: inclinação excessiva do tronco no agachamento unipodal (4s).",
+      "metricas": {
+        "quadros_analisados": 40,
+        "fps_amostrado": 5.0,
+        "resolucao": "480x640",
+        "pessoas_max": 2,
+        "quadros_com_pessoa_pct": 100.0,
+        "quadros_com_pose_pct": 100.0,
+        "vista_estimada": "lateral",
+        "repeticoes": 2,
+        "rom_media_graus": 83.1,
+        "flexao_joelho_max_graus": 114.6,
+        "tronco_max_graus": 72.0,
+        "energia_media": 1.15,
+        "objetos_detectados": {},
+        "ms_yolo_por_quadro": 35.0,
+        "ms_pose_por_quadro": 241.0
+      },
+      "achados": [
+        {
+          "code": "video.tronco_compensacao",
+          "severidade": "atencao",
+          "t_start": 4.2,
+          "t_end": 6.8,
+          "descricao": "2 de 2 repetições: inclinação do tronco acima do limite — sinal de compensação (pior: 72.0°; limite 30°).",
+          "evidencia": {
+            "maximo": 72.02,
+            "limite": 30.0,
+            "repeticoes_afetadas": [
+              2,
+              1
+            ],
+            "t_quadro_s": 5.8
+          }
+        }
+      ],
+      "repeticoes": [
+        {
+          "n": 1,
+          "t_ini": 1.4,
+          "t_min": 2.8,
+          "t_fim": 3.4,
+          "duracao_s": 2.0,
+          "flexao_graus": 114.64,
+          "rom_graus": 87.69,
+          "tronco_max_graus": 63.56,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        },
+        {
+          "n": 2,
+          "t_ini": 4.2,
+          "t_min": 5.8,
+          "t_fim": 6.8,
+          "duracao_s": 2.6,
+          "flexao_graus": 101.1,
+          "rom_graus": 78.46,
+          "tronco_max_graus": 72.02,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        }
+      ],
+      "vista": "lateral"
+    },
+    {
+      "video": "kettlebell_squat_side.webm",
+      "exercicio": "agachamento",
+      "tempo_s": 48.84,
+      "sample_fps": 5.0,
+      "resumo": "Agachamento: 6 repetição(ões) identificada(s), flexão máxima do joelho 148°. Nenhum desvio relevante.",
+      "metricas": {
+        "quadros_analisados": 254,
+        "fps_amostrado": 5.0,
+        "resolucao": "640x480",
+        "pessoas_max": 2,
+        "quadros_com_pessoa_pct": 100.0,
+        "quadros_com_pose_pct": 100.0,
+        "vista_estimada": "lateral",
+        "repeticoes": 6,
+        "rom_media_graus": 142.4,
+        "flexao_joelho_max_graus": 148.3,
+        "tronco_max_graus": 85.6,
+        "energia_media": 0.59,
+        "objetos_detectados": {
+          "kite": 2,
+          "skateboard": 1
+        },
+        "ms_yolo_por_quadro": 35.3,
+        "ms_pose_por_quadro": 152.2
+      },
+      "achados": [
+        {
+          "code": "video.padrao_atipico",
+          "severidade": "info",
+          "t_start": 0.0,
+          "t_end": 7.8,
+          "descricao": "Entre 0.0s e 7.8s o movimento difere do restante da sessão (z robusto 14.0; característica: tronco:amplitude).",
+          "evidencia": {
+            "z_robusto": 13.96,
+            "caracteristica": "tronco:amplitude",
+            "t_quadro_s": 0.0
+          }
+        }
+      ],
+      "repeticoes": [
+        {
+          "n": 1,
+          "t_ini": 4.0,
+          "t_min": 5.6,
+          "t_fim": 7.0,
+          "duracao_s": 3.0,
+          "flexao_graus": 143.33,
+          "rom_graus": 140.36,
+          "tronco_max_graus": 17.03,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        },
+        {
+          "n": 2,
+          "t_ini": 11.4,
+          "t_min": 13.0,
+          "t_fim": 14.2,
+          "duracao_s": 2.8,
+          "flexao_graus": 145.57,
+          "rom_graus": 142.98,
+          "tronco_max_graus": 18.74,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        },
+        {
+          "n": 3,
+          "t_ini": 19.6,
+          "t_min": 21.2,
+          "t_fim": 22.6,
+          "duracao_s": 3.0,
+          "flexao_graus": 147.04,
+          "rom_graus": 146.65,
+          "tronco_max_graus": 20.87,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        },
+        {
+          "n": 4,
+          "t_ini": 27.8,
+          "t_min": 29.0,
+          "t_fim": 30.4,
+          "duracao_s": 2.6,
+          "flexao_graus": 147.15,
+          "rom_graus": 138.96,
+          "tronco_max_graus": 16.38,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        },
+        {
+          "n": 5,
+          "t_ini": 35.8,
+          "t_min": 37.4,
+          "t_fim": 38.8,
+          "duracao_s": 3.0,
+          "flexao_graus": 148.3,
+          "rom_graus": 147.32,
+          "tronco_max_graus": 18.35,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        },
+        {
+          "n": 6,
+          "t_ini": 43.8,
+          "t_min": 45.4,
+          "t_fim": 46.6,
+          "duracao_s": 2.8,
+          "flexao_graus": 148.06,
+          "rom_graus": 138.06,
+          "tronco_max_graus": 21.93,
+          "valgo_max_graus": null,
+          "assimetria_pct": null,
+          "oscilacao_lateral": null
+        }
+      ],
+      "vista": "lateral"
+    }
+  ],
+  "figuras": [
+    "matriz_confusao_urfd.png",
+    "exemplo_fall-01_queda.jpg",
+    "exemplo_fall-02_queda.jpg",
+    "exemplo_fall-03_queda.jpg",
+    "angulos_kettlebell_squat_side.png",
+    "angulos_squat_demo.png",
+    "exemplo_unipodal.jpg"
+  ],
+  "limitacoes": [
+    "Limiares dos perfis são heurísticos; ajustados olhando as sequências de calibração (fall-01..20, adl-01..10); ver historico_ajuste.",
+    "O UR Fall tem um único ambiente e poucos voluntários: não representa quartos hospitalares reais.",
+    "Os vídeos de agachamento não têm rótulo-ouro: reportam-se apenas medições e achados.",
+    "Tempos medidos num Mac compartilhado com outras cargas (ver carga_media_*)."
+  ]
+}

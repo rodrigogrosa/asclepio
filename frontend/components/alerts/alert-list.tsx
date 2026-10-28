@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, Check, Clock, Workflow } from "lucide-react";
+import { Activity, Bell, Check, Clock, Workflow } from "lucide-react";
 import type { Alert } from "@/lib/types";
 import { api, errorMessage } from "@/lib/api";
 import { cn, fmtDateTime, fmtRelative } from "@/lib/utils";
 import { useToast } from "@/components/providers/toast-provider";
 import { useAuth } from "@/components/providers/auth-provider";
 import { hasPermission } from "@/lib/permissions";
+import { alertSourceLabel } from "@/lib/monitoring";
 import { Button } from "@/components/ui/button";
 import { SeverityBadge } from "@/components/ui/status-badges";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +57,10 @@ export function AlertList({ alerts, onChanged, showPatient = true, compact = fal
                 {showPatient &&
                   (canOpenPatient ? <Link href={`/pacientes/${a.patient_id}`} className="font-medium text-primary-hover hover:underline">{a.patient_name}</Link> : <span className="font-medium text-text">{a.patient_name}</span>)}
                 <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {fmtRelative(a.created_at)}</span>
-                <span>origem: {a.source}</span>
+                <span>origem: {alertSourceLabel(a.source)}</span>
+                {a.analysis_id && hasPermission(user, "monitoring:read") && (
+                  <Link href={`/monitoramento/${a.analysis_id}`} className="inline-flex items-center gap-1 font-medium text-primary-hover hover:underline"><Activity className="h-3 w-3" /> ver análise</Link>
+                )}
                 {a.run_id &&
                   (hasPermission(user, "workflows:run") ? <Link href={`/fluxos/${a.run_id}`} className="inline-flex items-center gap-1 hover:text-text"><Workflow className="h-3 w-3" /> revisão clínica</Link> : <span className="inline-flex items-center gap-1"><Workflow className="h-3 w-3" /> revisão clínica</span>)}
                 {!open && <span>por {a.acknowledged_by} em {fmtDateTime(a.acknowledged_at)}</span>}

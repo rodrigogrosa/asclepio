@@ -2,6 +2,31 @@
 
 Todas as mudanças notáveis deste projeto são documentadas aqui (formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), versionamento semântico).
 
+## [2.0.0] — 2026-10-28 · Fase 4: monitoramento multimodal
+### Adicionado
+- Pacote `asclepio_multimodal` (workspace uv) com contrato único de resultado (`AnalysisResult`).
+- **Vídeo**: OpenPose COCO (pesos oficiais da CMU via OpenCV DNN) em modo top-down sobre o YOLOv8n;
+  perfis fisioterapia (amplitude, compensação de tronco, valgo, assimetria, consistência das
+  repetições), quarto (queda, saída do leito, imobilidade) e cirurgia (área estéril, objetos não
+  permitidos); quadros anotados, vídeo anotado H.264, gráficos e relatório Markdown automáticos.
+- **Áudio**: Azure Speech to Text (pt-BR, timestamps por palavra) e Azure Text Analytics (Text
+  Analytics for Health, sentimento, frases-chave) sobre texto anonimizado; acústica da voz com Praat
+  (jitter, shimmer, HNR, pausas, ritmo) e eventos sonoros com AST treinado no AudioSet; indicadores de
+  fadiga, dificuldade respiratória e alteração articulatória; modo local de reserva (Whisper + léxico).
+- **Anomalias em tempo real**: detector online de sinais vitais (limites, z-score robusto, CUSUM/EWMA,
+  Isolation Forest, antiflood), prescrições (salto de dose, dose máxima, alergia, suspensão abrupta,
+  duplicidade) e mobilidade na internação (imobilidade, agitação noturna, saída do leito, queda);
+  replay de séries reais do PhysioNet como monitor de beira-leito.
+- **Fusão multimodal** tardia com regra de segurança e concordância entre modalidades.
+- API `/monitoring/*`, `GET /alerts/stream` (SSE) e webhook opcional de alertas; tabelas
+  `monitoring_analyses`, `prescription_events`, `mobility_readings`; permissões `monitoring:read/run`.
+- Telas **Monitoramento** (tempo real, vídeo, áudio, histórico), detalhe da análise, painel
+  multimodal no paciente e alertas em tempo real (toast) em todo o sistema.
+- Avaliações reais (URFD, VOICED/PhysioNet, PhysioNet), relatório técnico, checklist e roteiro do
+  vídeo da Fase 4; ADRs 0006–0008; `make azure-setup`, `make fase4-*`.
+### Alterado
+- PyTorch só-CPU no Linux (containers e CI); OpenCV fixado em 4.x (importador Caffe do OpenPose).
+
 ## [1.2.0] — 2026-08-22
 ### Adicionado
 - Plataforma por perfil: RBAC revisado (IA & Modelos, gestão da base, usuários, catálogos e detalhes técnicos só para admin), catálogo de especialidades e setores, cadastro de profissionais com CRM/especialidade validados, dashboard por perfil ("Meu trabalho"), configuração pública do hospital (`APP_HOSPITAL_NAME`), interface sem textos acadêmicos.

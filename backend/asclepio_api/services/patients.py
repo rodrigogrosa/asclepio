@@ -164,6 +164,7 @@ def alert_dict(a: m.Alert, patient_name: str = "") -> dict[str, Any]:
         "message": a.message,
         "source": a.source,
         "run_id": a.run_id,
+        "analysis_id": a.analysis_id,
         "created_at": a.created_at,
         "acknowledged_at": a.acknowledged_at,
         "acknowledged_by": a.acknowledged_by,

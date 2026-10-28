@@ -33,12 +33,14 @@ from .routers import (
     docs_hub,
     knowledge,
     model,
+    monitoring,
     patients,
     public,
     system,
     users,
     workflows,
 )
+from .services import monitoring as monitoring_svc
 from .services.knowledge import get_knowledge_service
 from .services.model_info import load_persisted_model
 from .services.workflow import get_workflow_runtime
@@ -76,7 +78,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         s = get_settings()
         if request.method in ("POST", "PUT", "PATCH"):
             cl = request.headers.get("content-length")
-            if cl and int(cl) > s.max_request_body_bytes:
+            # Upload de vídeo/áudio tem limite próprio (conferido de novo, em blocos, ao gravar)
+            limit = (
+                s.max_video_upload_mb * 1024 * 1024 + 65_536
+                if request.url.path.endswith("/monitoring/analyses")
+                else s.max_request_body_bytes
+            )
+            if cl and int(cl) > limit:
                 return JSONResponse(
                     {"detail": "Corpo da requisição excede o limite permitido"}, status_code=413
                 )
@@ -127,8 +135,11 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
             error=str(exc),
         )
     await get_workflow_runtime().start()
+    if interrupted := await monitoring_svc.recover_interrupted():
+        log.warning("análises multimodais interrompidas pelo reinício", total=interrupted)
     log.info("pronto", docs="/docs")
     yield
+    await monitoring_svc.shutdown()
     await get_workflow_runtime().stop()
     await dispose_db()
 
@@ -138,7 +149,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Asclépio API",
         version=s.app_version,
-        description="Assistente clínico inteligente — LLM fine-tunada + LangChain/LangGraph, com guardrails, RAG com fontes, anonimização e auditoria. Tech Challenge FIAP · Fase 3.",
+        description="Assistente clínico inteligente — LLM fine-tunada + LangChain/LangGraph, com guardrails, RAG com fontes, anonimização e auditoria. Fase 4: monitoramento multimodal (vídeo, áudio, anomalias em tempo real, Azure). Tech Challenge FIAP.",
         lifespan=lifespan,
         docs_url="/docs",
         redoc_url="/redoc",
@@ -185,6 +196,7 @@ def create_app() -> FastAPI:
         assistant.router,
         workflows.router,
         alerts.router,
+        monitoring.router,
         knowledge.router,
         model.router,
         audit.router,

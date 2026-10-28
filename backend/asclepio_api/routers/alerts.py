@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
+from sse_starlette.sse import EventSourceResponse
 
 from ..core import audit
 from ..core.deps import CurrentUser, DbSession, client_ip, require_permission
 from ..schemas import AlertOut
 from ..services.alerts import ack_alert, list_alerts
+from ..services.events import bus
 from ..services.patients import alert_dict
 
 router = APIRouter(prefix="/alerts", tags=["alertas"])
@@ -22,6 +25,21 @@ async def alerts(
 ) -> list[dict[str, Any]]:
     rows = await list_alerts(session, patient_id, severity, open_only)
     return [alert_dict(a, a.patient.name if a.patient else "") for a in rows]
+
+
+@router.get("/stream", dependencies=[require_permission("alerts:read")])
+async def stream() -> EventSourceResponse:
+    """SSE com todo alerta novo (fluxos, regras e monitoramento multimodal) — a equipe vê na hora,
+    sem recarregar a página."""
+
+    async def gen():  # type: ignore[no-untyped-def]
+        async with bus.subscribe("alerts") as q:
+            yield {"event": "ready", "data": "{}"}
+            while True:
+                event, data = await q.get()
+                yield {"event": event, "data": json.dumps(data, default=str)}
+
+    return EventSourceResponse(gen(), ping=15)
 
 
 @router.post(

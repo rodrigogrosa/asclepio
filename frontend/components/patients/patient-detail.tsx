@@ -22,6 +22,8 @@ import { Textarea } from "@/components/ui/input";
 import { Kv } from "@/components/ui/misc";
 import { VitalsGrid } from "./vitals-chart";
 import { AlertList } from "@/components/alerts/alert-list";
+import { useAlertEvents } from "@/components/alerts/alert-stream";
+import { PatientMonitoringCard } from "@/components/monitoring/patient-monitoring-card";
 
 type Tab = "resumo" | "exames" | "medicacoes" | "evolucoes" | "alertas";
 
@@ -32,6 +34,9 @@ export function PatientDetailView({ id }: { id: number }) {
   const router = useRouter();
   const toast = useToast();
   const { data: p, loading, error, reload, setData } = useAsync(() => api.patients.get(id), [id]);
+  useAlertEvents((a) => {
+    if (a.patient_id === id) void reload(true);
+  });
   const [tab, setTab] = useState<Tab>("resumo");
   const [wfOpen, setWfOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -136,6 +141,7 @@ export function PatientDetailView({ id }: { id: number }) {
             <CardHeader title="Sinais vitais" subtitle="Tendência das últimas medições" icon={<HeartPulse className="h-4 w-4" />} />
             <CardBody><VitalsGrid vitals={p.vitals} /></CardBody>
           </Card>
+          <PatientMonitoringCard patientId={p.id} onScanned={() => void reload(true)} />
           <Card>
             <CardHeader title="Alergias" icon={<AlertOctagon className="h-4 w-4" />} />
             <CardBody>

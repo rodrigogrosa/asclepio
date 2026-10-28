@@ -16,6 +16,7 @@ import {
 import { initials, sleep, uid } from "@/lib/utils";
 import { getStoredUser, notifyPrecondition } from "@/lib/session";
 import { hasPermission, type Permission } from "@/lib/permissions";
+import { createMonitoringMock } from "./monitoring";
 
 class MockApiError extends Error implements ApiErrorT {
   status: number;
@@ -358,6 +359,8 @@ function persistChat(req: ChatRequest, built: ReturnType<typeof buildAnswer>, la
 function healthNow(): HealthResponse {
   return { status: "ok", version: PUBLIC_CONFIG.version, env: "mock", llm: { provider: "ollama", model: state.model.active.name, reachable: true }, embeddings: { provider: "ollama", model: "nomic-embed-text" }, db: "ok", vectorstore: { chunks: 156 } };
 }
+
+const mm = createMonitoringMock({ alerts: state.alerts, userName: () => currentUser().name, can: (p) => requirePerm(p), latency, fail: (status, detail) => new MockApiError(status, detail) });
 
 const rawMockApi: ApiClient = {
   async health(): Promise<HealthResponse> {
@@ -982,7 +985,9 @@ const rawMockApi: ApiClient = {
       a.acknowledged_by = currentUser().name;
       return { ...a };
     },
+    stream: mm.alertsStream,
   },
+  monitoring: mm.monitoring,
   knowledge: {
     async documents(doc_type): Promise<KnowledgeDocument[]> {
       await latency();
@@ -1087,6 +1092,7 @@ export const mockApi: ApiClient = {
   assistant: guardNamespace(rawMockApi.assistant),
   workflows: guardNamespace(rawMockApi.workflows),
   alerts: guardNamespace(rawMockApi.alerts),
+  monitoring: guardNamespace(rawMockApi.monitoring),
   knowledge: guardNamespace(rawMockApi.knowledge),
   model: guardNamespace(rawMockApi.model),
   audit: guardNamespace(rawMockApi.audit),

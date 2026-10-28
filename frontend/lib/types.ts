@@ -80,6 +80,7 @@ export type ClinicalNote = {
   text: string;
 };
 export type AlertSeverity = "info" | "atencao" | "critico";
+export type AlertSource = "fluxo" | "regra" | "manual" | "video" | "audio" | "sinais" | "prescricao" | "mobilidade" | "fusao";
 export type Alert = {
   id: number;
   patient_id: number;
@@ -87,8 +88,10 @@ export type Alert = {
   severity: AlertSeverity;
   title: string;
   message: string;
-  source: "fluxo" | "regra" | "manual";
+  source: AlertSource;
   run_id: string | null;
+  /** Análise multimodal que originou o alerta (Fase 4); ausente/null nas demais origens. */
+  analysis_id?: string | null;
   created_at: string;
   acknowledged_at: string | null;
   acknowledged_by: string | null;
@@ -428,3 +431,127 @@ export type StreamEvent =
   | { event: "guardrail"; data: Guardrail }
   | { event: "done"; data: ChatResponse }
   | { event: "error"; data: { detail: string } };
+
+// ---- Monitoramento multimodal (v2.0 — Fase 4) ----
+export type Severity = AlertSeverity;
+export type Modality = "video" | "audio" | "texto" | "sinais" | "prescricao" | "mobilidade";
+export type AnalysisKind = "video" | "audio" | "sinais" | "prescricao" | "mobilidade" | "fusao";
+export type VideoProfile = "fisioterapia" | "quarto" | "cirurgia";
+export type Finding = {
+  code: string;
+  title: string;
+  description: string;
+  severity: Severity;
+  modality: Modality;
+  score: number;
+  /** segundos na mídia */
+  t_start: number | null;
+  t_end: number | null;
+  /** instante na série temporal (ISO) */
+  at: string | null;
+  evidence: Record<string, unknown>;
+  /** nome do artefato (imagem) do quadro anotado */
+  frame: string | null;
+  recommendation: string | null;
+};
+export type MMModelInfo = { name: string; task: string; provider: "local" | "azure" | "regra"; version: string | null; details: Record<string, unknown> };
+export type AnalysisResult = {
+  kind: AnalysisKind;
+  summary: string;
+  risk_score: number;
+  risk_level: RiskLevel;
+  severity: Severity;
+  findings: Finding[];
+  metrics: Record<string, unknown>;
+  series: Record<string, (number | string | null)[]>;
+  details: Record<string, unknown>;
+  models: MMModelInfo[];
+  artifacts: Record<string, string>;
+  duration_s: number | null;
+  processing_ms: number;
+  warnings: string[];
+};
+export type AnalysisStatus = "na_fila" | "processando" | "concluida" | "erro";
+export type AnalysisSummary = {
+  id: string;
+  patient_id: number;
+  patient_name: string;
+  kind: AnalysisKind;
+  status: AnalysisStatus;
+  progress: number;
+  stage: string | null;
+  profile: string | null;
+  filename: string | null;
+  created_at: string;
+  created_by: string;
+  finished_at: string | null;
+  risk_level: RiskLevel | null;
+  risk_score: number | null;
+  severity: Severity | null;
+  findings_count: number;
+  summary: string | null;
+  error: string | null;
+};
+export type AnalysisArtifact = { name: string; content_type: string; url: string };
+export type Analysis = AnalysisSummary & { result: AnalysisResult | null; report_markdown: string | null; artifacts: AnalysisArtifact[] };
+export type MonitoringStatus = {
+  azure: { speech: { configured: boolean; region: string | null }; language: { configured: boolean; endpoint: string | null } };
+  providers: { stt: "azure" | "local"; text: "azure" | "local" };
+  models: { name: string; task: string; ready: boolean }[];
+  samples: { key: string; kind: "video" | "audio"; label: string; profile: VideoProfile | null; exercise: string | null; license: string }[];
+  live_sources: { key: string; label: string }[];
+};
+export type PrescriptionEvent = {
+  at: string;
+  drug: string;
+  dose_value: number | null;
+  dose_unit: string;
+  route: string;
+  frequency: string;
+  action: "inicio" | "ajuste" | "suspensao" | "manutencao";
+  prescriber: string | null;
+};
+export type MobilityReading = { at: string; activity: number; position: string; in_bed: boolean };
+export type PatientMonitoring = {
+  patient_id: number;
+  patient_name: string;
+  updated_at: string | null;
+  /** risco fundido (kind "fusao") */
+  fused: AnalysisResult | null;
+  /** última análise de cada modalidade */
+  latest: Partial<Record<AnalysisKind, AnalysisSummary>>;
+  modalities: Partial<Record<"sinais" | "prescricao" | "mobilidade", AnalysisResult>>;
+  prescription_events: PrescriptionEvent[];
+  mobility: MobilityReading[];
+};
+export type LiveVital = {
+  at: string;
+  hr: number | null;
+  sbp: number | null;
+  dbp: number | null;
+  map: number | null;
+  rr: number | null;
+  spo2: number | null;
+  temp_c: number | null;
+  anomaly_score: number;
+};
+export type CreateAnalysisInput = {
+  kind: "video" | "audio";
+  patient_id: number;
+  /** arquivo enviado (multipart) — ou `sample` */
+  file?: File | null;
+  /** chave de uma amostra do servidor (`MonitoringStatus.samples`) */
+  sample?: string | null;
+  profile?: VideoProfile;
+  exercise?: string;
+};
+export type LiveStartInput = { patient_id: number; source: string; speed?: number };
+
+/** Eventos SSE de `GET /monitoring/live/stream`. */
+export type LiveEvent =
+  | { event: "vital"; data: LiveVital }
+  | { event: "finding"; data: Finding }
+  | { event: "alert"; data: Alert }
+  | { event: "end"; data: Record<string, unknown> | string };
+/** Eventos SSE de `GET /alerts/stream`. */
+export type AlertStreamEvent = { event: "alert"; data: Alert } | { event: "ping"; data: unknown };

@@ -191,6 +191,7 @@ class Alert(Base):
     message: Mapped[str] = mapped_column(Text)
     source: Mapped[str] = mapped_column(String(10), default="regra")
     run_id: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
+    analysis_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now_local)
     acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     acknowledged_by: Mapped[str | None] = mapped_column(String(120), nullable=True)
@@ -263,6 +264,65 @@ class AuditLog(Base):
     details: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     prev_hash: Mapped[str] = mapped_column(String(64))
     hash: Mapped[str] = mapped_column(String(64), index=True)
+
+
+class MonitoringAnalysis(Base):
+    """Análise multimodal (Fase 4): vídeo, áudio, séries temporais ou fusão de um paciente.
+
+    O arquivo enviado fica em ``data/uploads`` (fora do alcance da web) e os artefatos gerados em
+    ``data/analyses/<id>``; ``file_path`` é interno e nunca sai na API."""
+
+    __tablename__ = "monitoring_analyses"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(12), index=True)
+    status: Mapped[str] = mapped_column(String(12), index=True, default="na_fila")
+    profile: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    params: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    filename: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    file_path: Mapped[str | None] = mapped_column(String(400), nullable=True)
+    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_by_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_by: Mapped[str] = mapped_column(String(120), default="sistema")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now_local, index=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    risk_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    risk_level: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    severity: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    findings_count: Mapped[int] = mapped_column(Integer, default=0)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    result: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class PrescriptionEvent(Base):
+    """Histórico de prescrição (início, ajuste, suspensão) — base da detecção de mudanças inesperadas."""
+
+    __tablename__ = "prescription_events"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), index=True)
+    at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    drug: Mapped[str] = mapped_column(String(120))
+    dose_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    dose_unit: Mapped[str] = mapped_column(String(20), default="mg")
+    route: Mapped[str] = mapped_column(String(20), default="VO")
+    frequency: Mapped[str] = mapped_column(String(80), default="")
+    action: Mapped[str] = mapped_column(String(12), default="inicio")
+    prescriber: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    note: Mapped[str | None] = mapped_column(String(250), nullable=True)
+
+
+class MobilityReading(Base):
+    """Leitura agregada do sensor de leito/câmera do quarto (movimento e posição do paciente)."""
+
+    __tablename__ = "mobility_readings"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), index=True)
+    at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    activity: Mapped[float] = mapped_column(Float)
+    position: Mapped[str] = mapped_column(String(16))
+    in_bed: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
 class AppSetting(Base):

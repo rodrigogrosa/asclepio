@@ -1,6 +1,6 @@
 // Navegação montada a partir de `user.permissions` (contrato v1.2).
 import type { LucideIcon } from "lucide-react";
-import { Bell, BookOpen, BookOpenText, Bot, ClipboardList, Cpu, LayoutDashboard, ScrollText, Settings, UserCog, UserRound, Users, Workflow } from "lucide-react";
+import { Activity, Bell, BookOpen, BookOpenText, Bot, ClipboardList, Cpu, LayoutDashboard, ScrollText, Settings, UserCog, UserRound, Users, Workflow } from "lucide-react";
 import type { User } from "./types";
 import { hasPermission, type Permission } from "./permissions";
 
@@ -20,6 +20,7 @@ const CLINICAL: NavItem[] = [
   { href: "/pacientes", label: "Pacientes", icon: Users, all: ["patients:read"] },
   { href: "/assistente", label: "Assistente", icon: Bot, all: ["assistant:chat"] },
   { href: "/fluxos", label: "Fluxos clínicos", icon: Workflow, all: ["workflows:run"] },
+  { href: "/monitoramento", label: "Monitoramento", icon: Activity, all: ["monitoring:read"] },
   { href: "/alertas", label: "Alertas", icon: Bell, all: ["alerts:read"] },
   { href: "/conhecimento", label: "Protocolos e documentos", icon: BookOpen, all: ["knowledge:read"], hideIf: ["knowledge:manage"] },
   { href: "/auditoria", label: "Auditoria", icon: ScrollText, all: ["audit:read"], hideIf: ["settings:read"] },

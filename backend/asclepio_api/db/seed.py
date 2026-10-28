@@ -334,10 +334,71 @@ async def seed_catalogs(session: AsyncSession) -> int:
     return n
 
 
+async def seed_monitoring(session: AsyncSession) -> int:
+    """Fase 4: histórico de prescrição e leituras do sensor de leito por paciente (sintéticos, com
+    anomalias plantadas em alguns cenários). Idempotente e vale também para bancos anteriores."""
+    from asclepio_multimodal.anomaly.synthetic import (
+        generate_mobility,
+        generate_prescription_history,
+    )
+    from sqlalchemy.orm import selectinload
+
+    with_rx = set(
+        (await session.execute(select(m.PrescriptionEvent.patient_id).distinct())).scalars()
+    )
+    with_mob = set(
+        (await session.execute(select(m.MobilityReading.patient_id).distinct())).scalars()
+    )
+    patients = (
+        (await session.execute(select(m.Patient).options(selectinload(m.Patient.medications))))
+        .scalars()
+        .all()
+    )
+    now = datetime.now().replace(microsecond=0)
+    n = 0
+    for p in patients:
+        if p.id in with_rx and p.id in with_mob:
+            continue
+        d = {
+            "mrn": p.mrn,
+            "name": p.name,
+            "age": p.age,
+            "sex": p.sex,
+            "scenario": p.scenario,
+            "primary_diagnosis": p.primary_diagnosis,
+            "allergies": list(p.allergies or []),
+            "comorbidities": list(p.comorbidities or []),
+            "weight_kg": p.weight_kg,
+            "admission_date": p.admission_date,
+            "medications": [
+                {
+                    "name": md.name,
+                    "dose": md.dose,
+                    "route": md.route,
+                    "frequency": md.frequency,
+                    "started_at": md.started_at,
+                    "status": md.status,
+                }
+                for md in p.medications
+            ],
+        }
+        if p.id not in with_rx:
+            for e in generate_prescription_history(d, now=now):
+                session.add(m.PrescriptionEvent(patient_id=p.id, **e.model_dump()))
+                n += 1
+        if p.id not in with_mob:
+            for r in generate_mobility(d, now=now):
+                session.add(m.MobilityReading(patient_id=p.id, **r.model_dump()))
+                n += 1
+    await session.commit()
+    return n
+
+
 async def run_seed(session: AsyncSession) -> dict[str, int]:
     users = await seed_users(session)
     await seed_catalogs(session)
     patients = await seed_patients(session)
-    if users or patients:
-        log.info("seed concluído", users=users, patients=patients)
-    return {"users": users, "patients": patients}
+    monitoring = await seed_monitoring(session)
+    if users or patients or monitoring:
+        log.info("seed concluído", users=users, patients=patients, monitoring=monitoring)
+    return {"users": users, "patients": patients, "monitoring": monitoring}

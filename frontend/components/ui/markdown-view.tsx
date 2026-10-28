@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, type ReactNode } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,6 +32,13 @@ type Props = {
 };
 
 const CITE_RE = /\[(\d{1,2})\]/g;
+
+// O backend embute as imagens dos relatórios como data URI (artefatos exigem Bearer); o filtro padrão
+// do react-markdown descarta `data:`. Libera só imagens raster e mantém a sanitização para o resto.
+const DATA_IMAGE_RE = /^data:image\/(png|jpe?g|gif|webp);base64,/i;
+function urlTransform(url: string): string {
+  return DATA_IMAGE_RE.test(url) ? url : defaultUrlTransform(url);
+}
 
 function renderWithCitations(children: ReactNode, onClick?: (n: number) => void, max?: number): ReactNode {
   if (!onClick) return children;
@@ -92,7 +99,7 @@ export function MarkdownView({ content, className, onCitationClick, citationCoun
   );
   return (
     <div className={cn("md", className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components} urlTransform={urlTransform}>
         {content}
       </ReactMarkdown>
     </div>

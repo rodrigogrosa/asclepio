@@ -9,10 +9,11 @@ NPM ?= npm
 PROFILE ?= full
 
 .PHONY: help setup up up-full down logs ps restart clean dev api web install test test-core test-api lint format typecheck \
-        seed reindex finetune prepare train export eval eval-quick ollama-create ollama-pull docs-diagrams check ci build pull-images health
+        seed reindex finetune prepare train export eval eval-quick ollama-create ollama-pull docs-diagrams check ci build pull-images health \
+        fase4-assets fase4-eval fase4-demo azure-setup azure-check test-multimodal
 
 help: ## Mostra esta ajuda
-	@printf "\n  \033[1;35mASCLÉPIO\033[0m — Assistente Clínico Inteligente (Tech Challenge FIAP · Fase 3)\n\n"
+	@printf "\n  \033[1;35mASCLÉPIO\033[0m — Assistente Clínico Inteligente (Tech Challenge FIAP · Fases 3 e 4)\n\n"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 	@printf "\n"
 
@@ -78,8 +79,11 @@ reindex: ## Reindexa a base de conhecimento via API (exige admin)
 # ---------------------------------------------------------------------
 # ✅ Qualidade
 # ---------------------------------------------------------------------
-test: test-core test-api ## Roda todos os testes Python
+test: test-core test-api test-multimodal ## Roda todos os testes Python
 	$(UV) run pytest ml/tests -q
+
+test-multimodal: ## Testes da Fase 4 (vídeo, áudio, anomalias, fusão) — sem rede nem pesos
+	$(UV) run pytest multimodal/tests -q
 
 test-core: ## Testes do pacote core
 	$(UV) run pytest packages/asclepio_core/tests -q
@@ -141,3 +145,26 @@ docs-metrics: ## Atualiza relatório/README com os números de ml/registry.json 
 docs-pdf: ## Gera docs/RELATORIO_TECNICO.pdf e docs/GUIA_INSTALACAO.pdf (capa + conteúdo + anexos; requer Google Chrome)
 	$(UV) run --with markdown python scripts/build_report_pdf.py relatorio
 	$(UV) run --with markdown python scripts/build_report_pdf.py guia
+	$(UV) run --with markdown python scripts/build_report_pdf.py fase4
+
+# ---------------------------------------------------------------------
+# 🎥🎙️ Fase 4 — monitoramento multimodal (vídeo, áudio, anomalias, Azure)
+# ---------------------------------------------------------------------
+fase4-assets: ## Baixa e confere (SHA-256) OpenPose, YOLOv8 e os vídeos de demonstração → data/
+	$(UV) run python -m asclepio_multimodal assets all
+
+fase4-eval: ## Avaliações reais da Fase 4 (URFD, VOICED, PhysioNet) → multimodal/reports/ e docs/assets/fase4/
+	$(UV) run python -m asclepio_multimodal video evaluate
+	$(UV) run python -m asclepio_multimodal audio evaluate
+	$(UV) run python -m asclepio_multimodal anomaly evaluate
+
+fase4-demo: ## Roda os exemplos de vídeo e áudio pela linha de comando (relatórios em data/analyses/cli/)
+	$(UV) run python -m asclepio_multimodal video analyze data/samples/video/urfd_fall-01-cam0.mp4 --profile quarto --regiao 0.5,0,1,1 --out data/analyses/cli/queda
+	$(UV) run python -m asclepio_multimodal video analyze data/samples/video/kettlebell_squat_side.webm --profile fisioterapia --exercise agachamento --out data/analyses/cli/agachamento
+	$(UV) run python -m asclepio_multimodal audio analyze data/samples/audio/consulta_dispneia.wav --out data/analyses/cli/dispneia
+
+azure-setup: ## Cria Speech + Language no Azure (F0, via Azure CLI) e grava as chaves no .env
+	@./scripts/azure_setup.sh
+
+azure-check: ## Confere as chaves do Azure com uma chamada real (transcrição + Text Analytics)
+	$(UV) run python scripts/azure_check.py
