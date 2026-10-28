@@ -10,10 +10,19 @@ dependencies = []
 package = false
 
 [tool.uv.workspace]
-members = ["packages/asclepio_core", "backend", "ml"]
+members = ["packages/asclepio_core", "backend", "ml", "multimodal"]
 
 [tool.uv.sources]
 asclepio-core = { workspace = true }
+asclepio-multimodal = { workspace = true }
+# Linux (containers e CI) usa o PyTorch só-CPU: o wheel padrão do PyPI traz ~3 GB de CUDA.
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+torchvision = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [dependency-groups]
 dev = [
@@ -38,12 +47,13 @@ ignore = ["S101", "S311", "S105", "S110", "B008", "RUF012", "RUF001", "RUF002", 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S", "B", "N"]
 "ml/**" = ["S603", "S607"]
+"multimodal/**" = ["S603", "S607"]
 "scripts/**" = ["S603", "S607"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "--import-mode=importlib -p no:cacheprovider"
-testpaths = ["backend/tests", "packages/asclepio_core/tests", "ml/tests"]
+testpaths = ["backend/tests", "packages/asclepio_core/tests", "ml/tests", "multimodal/tests"]
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.mypy]

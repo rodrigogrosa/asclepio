@@ -44,3 +44,10 @@ ml/.cache/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# Fase 4: pesos de modelos, datasets públicos, mídias baixadas, uploads e análises (gerados/baixados)
+data/models/
+data/datasets/
+data/samples/video/
+data/uploads/
+data/analyses/

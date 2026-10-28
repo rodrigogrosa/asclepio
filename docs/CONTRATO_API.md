@@ -240,3 +240,75 @@ type HubCategory = { id: string; title: string; description: string; documents: 
 - `GET /docs-hub/{doc_id}` → `HubDocument & {content: string}` — conteúdo para leitura (só `md`/`mmd`); imagens relativas já vêm **embutidas em base64** (renderizam direto no MarkdownView); diagramas `.mmd` vêm com `content` puro Mermaid (renderizar com o MermaidGraph).
 - `GET /docs-hub/{doc_id}/download` → arquivo original (`Content-Disposition: attachment`), inclusive PDFs.
 - 404 para id desconhecido; sem acesso a caminhos fora da lista curada (não há endpoint por caminho livre).
+
+## Monitoramento multimodal (v2.0 — Fase 4)
+
+Vídeo (OpenPose + YOLOv8), áudio (Azure Speech to Text + Azure Text Analytics + acústica da voz),
+anomalias em tempo real (sinais vitais, prescrições, mobilidade) e fusão num risco único. Todo
+achado com severidade `atencao`/`critico` vira **alerta** para a equipe (mesma tabela de alertas,
+`source` indica a modalidade) e é publicado em tempo real no stream de alertas.
+
+### Permissões
+| Permissão | admin | medico | enfermagem | auditor |
+|---|---|---|---|---|
+| `monitoring:read` (ver análises, painel e stream ao vivo) | ✓ | ✓ | ✓ | ✓ |
+| `monitoring:run` (enviar vídeo/áudio, recalcular, iniciar monitor ao vivo) | ✓ | ✓ | ✓ | — |
+
+### Tipos
+```ts
+type Severity = "info" | "atencao" | "critico";
+type Modality = "video" | "audio" | "texto" | "sinais" | "prescricao" | "mobilidade";
+type AnalysisKind = "video" | "audio" | "sinais" | "prescricao" | "mobilidade" | "fusao";
+type VideoProfile = "fisioterapia" | "quarto" | "cirurgia";
+type Finding = { code: string; title: string; description: string; severity: Severity; modality: Modality;
+  score: number; t_start: number | null; t_end: number | null; at: string | null;
+  evidence: Record<string, unknown>; frame: string | null; recommendation: string | null };
+type MMModelInfo = { name: string; task: string; provider: "local" | "azure" | "regra"; version: string | null; details: Record<string, unknown> };
+type AnalysisResult = { kind: AnalysisKind; summary: string; risk_score: number; risk_level: RiskLevel; severity: Severity;
+  findings: Finding[]; metrics: Record<string, unknown>; series: Record<string, (number | string | null)[]>;
+  details: Record<string, unknown>; models: MMModelInfo[]; artifacts: Record<string, string>;
+  duration_s: number | null; processing_ms: number; warnings: string[] };
+type AnalysisStatus = "na_fila" | "processando" | "concluida" | "erro";
+type AnalysisSummary = { id: string; patient_id: number; patient_name: string; kind: AnalysisKind; status: AnalysisStatus;
+  progress: number; stage: string | null; profile: string | null; filename: string | null; created_at: string; created_by: string;
+  finished_at: string | null; risk_level: RiskLevel | null; risk_score: number | null; severity: Severity | null;
+  findings_count: number; summary: string | null; error: string | null };
+type Analysis = AnalysisSummary & { result: AnalysisResult | null; report_markdown: string | null;
+  artifacts: { name: string; content_type: string; url: string }[] };   // url relativa à API; baixar com o Bearer (blob)
+type MonitoringStatus = {
+  azure: { speech: { configured: boolean; region: string | null }; language: { configured: boolean; endpoint: string | null } };
+  providers: { stt: "azure" | "local"; text: "azure" | "local" };
+  models: { name: string; task: string; ready: boolean }[];
+  samples: { key: string; kind: "video" | "audio"; label: string; profile: VideoProfile | null; exercise: string | null; license: string }[];
+  live_sources: { key: string; label: string }[] };
+type PatientMonitoring = { patient_id: number; patient_name: string; updated_at: string | null;
+  fused: AnalysisResult | null;                                  // kind "fusao"
+  latest: Partial<Record<AnalysisKind, AnalysisSummary>>;        // última análise de cada modalidade
+  modalities: Partial<Record<"sinais" | "prescricao" | "mobilidade", AnalysisResult>>;
+  prescription_events: { at: string; drug: string; dose_value: number | null; dose_unit: string; route: string;
+    frequency: string; action: "inicio" | "ajuste" | "suspensao" | "manutencao"; prescriber: string | null }[];
+  mobility: { at: string; activity: number; position: string; in_bed: boolean }[] };
+type LiveVital = { at: string; hr: number | null; sbp: number | null; dbp: number | null; map: number | null;
+  rr: number | null; spo2: number | null; temp_c: number | null; anomaly_score: number };
+// Alert ganha: source "fluxo" | "regra" | "manual" | "video" | "audio" | "sinais" | "prescricao" | "mobilidade" | "fusao"; analysis_id: string | null
+```
+
+### Endpoints
+| Método | Rota | Permissão | Descrição |
+|---|---|---|---|
+| GET | `/monitoring/status` | `monitoring:read` | Integração Azure (configurada?), provedores efetivos, modelos prontos, amostras e fontes ao vivo |
+| POST | `/monitoring/analyses` | `monitoring:run` | `multipart/form-data`: `kind` (`video`/`audio`), `patient_id`, `file` **ou** `sample` (chave de amostra), `profile` e `exercise` (vídeo). Responde **202** com `AnalysisSummary`; processamento em segundo plano |
+| GET | `/monitoring/analyses?patient_id=&kind=&limit=` | `monitoring:read` | Lista `AnalysisSummary[]` (mais recentes primeiro) |
+| GET | `/monitoring/analyses/{id}` | `monitoring:read` | `Analysis` completa (resultado, relatório em Markdown, artefatos) |
+| GET | `/monitoring/analyses/{id}/artifacts/{name}` | `monitoring:read` | Arquivo do artefato (JPEG/PNG/MP4/Markdown) |
+| GET | `/monitoring/patients/{id}` | `monitoring:read` | `PatientMonitoring` (fusão + última análise de cada modalidade + séries) |
+| POST | `/monitoring/patients/{id}/scan` | `monitoring:run` | Recalcula sinais vitais, prescrições e mobilidade, funde com vídeo/áudio, **cria alertas** e devolve `PatientMonitoring` |
+| POST | `/monitoring/live/start` | `monitoring:run` | `{patient_id, source, speed?}` inicia o monitor de beira-leito (replay PhysioNet ou cenário sintético) → `{session_id}` |
+| POST | `/monitoring/live/{session_id}/stop` | `monitoring:run` | Encerra a sessão |
+| GET | `/monitoring/live/stream?patient_id=` | `monitoring:read` | **SSE** (via `fetch` com Bearer): `vital` (`LiveVital`), `finding` (`Finding`), `alert` (`Alert`), `end` |
+| GET | `/alerts/stream` | `alerts:read` | **SSE** de alertas novos de qualquer origem: `alert` (`Alert`), `ping` a cada 15 s |
+
+Limites: vídeo até 200 MB/5 min, áudio até 50 MB/10 min; extensões aceitas `mp4 mov avi mkv webm ogv m4v` e
+`wav mp3 m4a ogg oga opus webm flac`; o arquivo é validado decodificando-o (não pela extensão).
+Ações de auditoria novas: `monitoring.analysis.create`, `monitoring.analysis.view`, `monitoring.scan`,
+`monitoring.live.start`, `monitoring.live.stop`.

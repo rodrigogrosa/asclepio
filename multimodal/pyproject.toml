@@ -1,0 +1,37 @@
+[project]
+name = "asclepio-multimodal"
+version = "2.0.0"
+description = "Asclépio · Fase 4 — monitoramento multimodal: vídeo (OpenPose + YOLOv8), áudio (Azure Speech/Text Analytics + acústica), anomalias em tempo real e fusão"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "asclepio-core",
+    "pydantic>=2.8",
+    "pydantic-settings>=2.5",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "scikit-learn>=1.5",
+    "matplotlib>=3.9",
+    # vídeo: OpenPose (Caffe, via OpenCV DNN) + YOLOv8 (Ultralytics). Ultralytics já traz o opencv-python.
+    "opencv-python>=4.9,<5",  # OpenCV 5 removeu o importador Caffe (pesos oficiais do OpenPose)
+    "ultralytics>=8.3",
+    "torch>=2.4",
+    # áudio: acústica (Praat), decodificação (ffmpeg estático), nuvem (Azure) e fallback local
+    "praat-parselmouth>=0.4.5",
+    "soundfile>=0.12",
+    "imageio-ffmpeg>=0.5",
+    "azure-cognitiveservices-speech>=1.40",
+    "azure-ai-textanalytics>=5.3",
+    "transformers>=4.46",
+    # dados públicos (PhysioNet)
+    "wfdb>=4.1",
+    "httpx>=0.27",
+    "typer>=0.12",
+    "rich>=13",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["asclepio_multimodal"]
