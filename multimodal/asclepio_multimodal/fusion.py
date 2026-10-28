@@ -26,7 +26,7 @@ LABELS: dict[str, str] = {
     "sinais": "sinais vitais",
     "video": "vídeo",
     "audio": "áudio da consulta",
-    "texto": "texto (transcrição/evolução)",
+    "texto": "relato transcrito",
     "prescricao": "prescrições",
     "mobilidade": "mobilidade",
 }
@@ -120,7 +120,7 @@ def fuse(results: dict[str, AnalysisResult | None]) -> AnalysisResult:
                 code=f"fusao.{axis}",
                 title=f"Sinais concordantes de {label} ({names})",
                 description=(
-                    f"{len(mods)} modalidades independentes apontam {label}: "
+                    f"{len(mods)} fontes distintas apontam {label}: "
                     + "; ".join(f"{LABELS.get(m, m)} — {f.title}" for m, f in sorted(mods.items()))
                     + ". A concordância entre fontes reduz a chance de falso alarme."
                 ),

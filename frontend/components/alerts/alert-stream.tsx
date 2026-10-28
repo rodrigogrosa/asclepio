@@ -27,7 +27,8 @@ export function useAlertEvents(handler: (a: Alert) => void) {
 
 /**
  * Assina `GET /alerts/stream` enquanto o usuário está no sistema (quem tem `alerts:read`): mostra um aviso para cada
- * alerta novo (crítico em destaque, com "Ver" e "Reconhecer") e reconecta sozinho, com espera crescente, se a conexão cair.
+ * alerta crítico (em destaque, com "Ver" e "Reconhecer"), agrupa rajadas de alertas de atenção num aviso só e
+ * reconecta sozinho, com espera crescente, se a conexão cair.
  */
 export function AlertStreamListener() {
   const { user } = useAuth();
@@ -44,11 +45,37 @@ export function AlertStreamListener() {
     const ac = new AbortController();
     const seen = new Set<number>();
 
+    // Rajada de alertas de atenção (ex.: paciente deteriorando no monitor ao vivo) vira UM aviso agrupado;
+    // crítico sempre aparece sozinho. Evita a pilha de avisos cobrindo a tela (fadiga de alarme).
+    let burst: Alert[] = [];
+    let burstTimer: ReturnType<typeof setTimeout> | null = null;
+    const flushBurst = () => {
+      burstTimer = null;
+      const batch = burst;
+      burst = [];
+      if (batch.length === 1) return toastOne(batch[0]);
+      const patients = [...new Set(batch.map((a) => a.patient_name))].join(", ");
+      const sources = [...new Set(batch.map((a) => alertSourceLabel(a.source)))].join(", ");
+      ctx.current.toast.toast({
+        kind: "warning",
+        title: `${batch.length} alertas de atenção`,
+        description: `${patients} · origem: ${sources}`,
+        durationMs: 10_000,
+        actions: [{ label: "Ver alertas", onClick: () => ctx.current.router.push("/alertas") }],
+      });
+    };
+
     const announce = (a: Alert) => {
       if (seen.has(a.id)) return;
       seen.add(a.id);
       if (seen.size > 200) seen.delete(seen.values().next().value as number);
       window.dispatchEvent(new CustomEvent(ALERT_EVENT, { detail: a }));
+      if (a.severity === "critico") return toastOne(a);
+      burst.push(a);
+      burstTimer ??= setTimeout(flushBurst, 2000);
+    };
+
+    const toastOne = (a: Alert) => {
       const { toast: t, router: r, canAck, canMonitor, canPatient } = ctx.current;
       const target = a.analysis_id && canMonitor ? `/monitoramento/${a.analysis_id}` : canPatient ? `/pacientes/${a.patient_id}` : "/alertas";
       const critical = a.severity === "critico";
@@ -88,7 +115,10 @@ export function AlertStreamListener() {
         }, ac.signal),
       ac.signal,
     );
-    return () => ac.abort();
+    return () => {
+      ac.abort();
+      if (burstTimer) clearTimeout(burstTimer);
+    };
   }, [enabled]);
 
   return null;

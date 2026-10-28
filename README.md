@@ -5,7 +5,7 @@
 <p align="center">
   <b>Assistente clínico com inteligência artificial treinada com os protocolos do hospital.</b><br>
   Responde dúvidas da equipe médica citando as fontes, executa revisões clínicas automatizadas com validação humana e registra tudo em auditoria.<br>
-  <i>Projeto do Tech Challenge · FIAP Pós-Tech IA para Devs (8IADT) · Fase 3</i>
+  <i>Projeto do Tech Challenge · FIAP Pós-Tech IA para Devs (8IADT) · Fases 3 e 4</i>
 </p>
 
 ---
@@ -60,6 +60,16 @@ Abra o navegador em **http://localhost:3000** e entre:
 
 \* Perdeu a senha do admin? No mesmo terminal, dentro da pasta do projeto (`cd ~/asclepio`), rode `grep ASCLEPIO_ .env` — ela aparece. No 1º acesso o admin troca a senha e cadastra um **aplicativo autenticador** (Google Authenticator etc.) escaneando um QR code — o próprio sistema ensina.
 
+### Fase 4 — monitoramento multimodal (mais 5 minutos)
+Entre como **Dra. Ana** e abra o menu **Monitoramento**:
+1. **Vídeo** → paciente → perfil *Quarto do paciente* → **Usar vídeo de exemplo** → *"paciente cai ao levantar"* → **Analisar vídeo**. Em ~1 min, a queda é detectada (OpenPose + YOLOv8) e o **alerta crítico aparece sozinho** em qualquer tela.
+2. **Áudio** → paciente → exemplo *"Consulta · falta de ar"* → **Analisar áudio**: transcrição, termos críticos destacados, sentimento e sinais na voz (fadiga, dificuldade respiratória).
+3. **Tempo real** → paciente → fonte *"deterioração tipo sepse"* (ou *PhysioNet 203*, UTI real) → **Iniciar**: sinais vitais ao vivo com anomalias marcadas e alertas chegando à equipe.
+4. **Pacientes** → paciente → card **Monitoramento multimodal** → **Recalcular agora**: risco fundido de vídeo, áudio, sinais vitais, prescrições e mobilidade.
+5. Para ligar o **Azure** (Speech to Text + Text Analytics): `make azure-setup` — guia em [docs/fase4/GUIA_AZURE.md](docs/fase4/GUIA_AZURE.md). Sem chave, tudo funciona em modo local e a tela avisa.
+
+> A primeira análise de vídeo e de áudio baixa os modelos (OpenPose, YOLOv8, Whisper, AST — ~1,5 GB) para a pasta `data/`; as seguintes começam na hora. Para baixar antes: `make fase4-assets`.
+
 ### O que testar primeiro (5 minutos)
 1. **Assistente** → pergunte: *"Qual o alvo de lactato na reavaliação segundo o protocolo de sepse?"* → veja a resposta com as **fontes**.
 2. Ainda no Assistente → selecione um paciente → **"ver contexto anonimizado"** (o que a IA recebe, sem dados pessoais).
@@ -87,6 +97,18 @@ Guia completo com mais detalhes e problemas: **[docs/GUIA_INSTALACAO.md](docs/GU
 
 Resultado do treinamento (medido, não prometido): o modelo ajustado ficou ~3× melhor em aderência ao formato institucional (ROUGE-L 0,13 → 0,36), obedece aos limites de segurança em 95 % dos casos (antes 77 %) e responde em ~1 s. Detalhes em [docs/FINE_TUNING.md](docs/FINE_TUNING.md).
 
+# 🎥🎙️ Fase 4 — monitoramento multimodal
+
+O hospital passa a **monitorar continuamente** o paciente com vídeo, áudio, texto e sinais vitais e a **avisar a equipe em tempo real**:
+
+- **Vídeo**: **OpenPose** (pesos oficiais da CMU) + **YOLOv8** analisam sessões de fisioterapia, o quarto (quedas, saída do leito, imobilidade) e a sala cirúrgica (área estéril) e geram **relatório automático** com vídeo anotado e quadros-chave.
+- **Áudio**: **Azure Speech to Text** transcreve a consulta e **Azure Text Analytics** aponta termos críticos e sentimento (texto anonimizado antes); a voz é medida com Praat (fadiga, dificuldade respiratória) e sons com um modelo treinado no **AudioSet**.
+- **Anomalias em tempo real**: sinais vitais (dados reais do **PhysioNet**), evolução de prescrições e padrões de mobilidade; **fusão** das modalidades num risco único e alerta à equipe na hora.
+
+Resultados medidos: quedas no UR Fall Dataset com **sensibilidade 0,90 / especificidade 0,95** (70 vídeos); antiflood reduz os alertas de sinais vitais em **97,8 %**; detalhes, limites e o que ainda é triagem em **[docs/fase4/RELATORIO_TECNICO_FASE4.md](docs/fase4/RELATORIO_TECNICO_FASE4.md)** · checklist do edital em **[docs/fase4/EVIDENCIAS_FASE4.md](docs/fase4/EVIDENCIAS_FASE4.md)**.
+
+<p align="center"><img src="docs/assets/fase4/telas/02_video_queda_alerta_tempo_real.jpg" alt="Queda detectada no vídeo e alerta crítico chegando em tempo real" width="720"></p>
+
 # 📚 Para avaliadores e curiosos (documentação completa)
 
 **Dentro do próprio sistema**: menu **Documentação** (perfil admin ou auditor) — todos os artefatos para ler e baixar.
@@ -94,7 +116,9 @@ Resultado do treinamento (medido, não prometido): o modelo ajustado ficou ~3× 
 | Documento | O que tem |
 |---|---|
 | [Guia de instalação](docs/GUIA_INSTALACAO.md) · [PDF](docs/GUIA_INSTALACAO.pdf) | Passo a passo detalhado por sistema operacional + problemas comuns |
-| [Relatório técnico](docs/RELATORIO_TECNICO.md) · [PDF](docs/RELATORIO_TECNICO.pdf) | Documento central da entrega (34 págs.): dados, fine-tuning, assistente, fluxos, segurança, avaliação |
+| **Fase 4** · [Relatório técnico](docs/fase4/RELATORIO_TECNICO_FASE4.md) · [PDF](docs/fase4/RELATORIO_TECNICO_FASE4.pdf) | Fluxo multimodal, modelos por tipo de dado, resultados medidos e exemplos de anomalias |
+| **Fase 4** · [Checklist do edital](docs/fase4/EVIDENCIAS_FASE4.md) · [Roteiro do vídeo](docs/fase4/ROTEIRO_VIDEO_FASE4.md) · [Guia do Azure](docs/fase4/GUIA_AZURE.md) | Onde cada exigência está, cena a cena do vídeo e como ligar o Azure |
+| [Relatório técnico (Fase 3)](docs/RELATORIO_TECNICO.md) · [PDF](docs/RELATORIO_TECNICO.pdf) | Documento central da Fase 3 (34 págs.): dados, fine-tuning, assistente, fluxos, segurança, avaliação |
 | [Processo de desenvolvimento](docs/PROCESSO_DESENVOLVIMENTO.md) | Como foi feito, etapa por etapa (visão acadêmica) |
 | [Mapa de evidências](docs/EVIDENCIAS.md) | Onde cada exigência do edital aparece no sistema |
 | [Arquitetura](docs/ARQUITETURA.md) · [ADRs](docs/adr/) · [Contrato da API](docs/CONTRATO_API.md) | Desenho da solução e decisões |
@@ -110,7 +134,9 @@ Resultado do treinamento (medido, não prometido): o modelo ajustado ficou ~3× 
 make setup      # instala e sobe tudo em Docker (o que o install.sh chama)
 make up-full    # + LiteLLM (gateway) e Langfuse (observabilidade de LLM)
 make dev        # desenvolvimento local com hot-reload (requer: uv, node)
-make check      # lint + 88 testes + typecheck (o que a CI roda)
+make check      # lint + testes (core, API, multimodal, ML) + typecheck (o que a CI roda)
+make fase4-demo # Fase 4 pela linha de comando: vídeo (queda, agachamento) e áudio (falta de ar)
+make fase4-eval # refaz as avaliações da Fase 4 (URFD, VOICED, PhysioNet)
 make finetune   # reproduz o fine-tuning: prepare → train (LoRA) → export → eval
 make docs-pdf   # regenera os PDFs do relatório e do guia
 make down       # para tudo · make clean remove tudo
@@ -119,7 +145,8 @@ make down       # para tudo · make clean remove tudo
 ### Estrutura
 ```
 packages/asclepio_core/  # anonimização (LGPD), regras clínicas, guardrails, base de conhecimento, dados sintéticos
-backend/                 # FastAPI + LangChain/LangGraph (auth MFA, pacientes, assistente, fluxos, auditoria, docs-hub)
+multimodal/              # Fase 4: vídeo (OpenPose+YOLOv8), áudio (Azure+Praat+AudioSet), anomalias, fusão
+backend/                 # FastAPI + LangChain/LangGraph (auth MFA, pacientes, assistente, fluxos, monitoramento, auditoria)
 frontend/                # Next.js 16 (identidade FIAP), navegação por permissão, modo mock
 ml/                      # pipeline de fine-tuning: prepare → train → export → evaluate
 data/                    # knowledge_base (protocolos/FAQ/modelos) · synthetic · processed (dataset SFT)
@@ -128,7 +155,7 @@ infra/ · scripts/        # LiteLLM, Ollama init, Postgres, bootstrap, geradores
 ```
 
 ### Stack e garantias
-Python 3.12 (uv) · LangChain/LangGraph 1.x · Transformers/PEFT/TRL · Ollama · ChromaDB · FastAPI · SQLAlchemy 2 · PostgreSQL · Next.js 16/React 19/Tailwind 4 · Docker Compose · GitHub Actions (lint, 88 testes, build, gitleaks/pip-audit) · pre-commit · Dev Container. O modelo fine-tunado (`asclepio-med`) é baixado automaticamente da [Release v1.2.0](https://github.com/rodrigogrosa/asclepio/releases/tag/v1.2.0). Provedores de LLM plugáveis (`ollama` | `litellm` | `openai` | `fake` para CI). Segredos só via `.env`; senhas de admin geradas por instalação.
+Python 3.12 (uv) · LangChain/LangGraph 1.x · Transformers/PEFT/TRL · Ollama · ChromaDB · FastAPI · SQLAlchemy 2 · PostgreSQL · Next.js 16/React 19/Tailwind 4 · Docker Compose · GitHub Actions (lint, testes, build, gitleaks/pip-audit) · Fase 4: OpenCV/OpenPose, Ultralytics YOLOv8, Praat, Whisper/AST (AudioSet), Azure Speech + Text Analytics, scikit-learn · pre-commit · Dev Container. O modelo fine-tunado (`asclepio-med`) é baixado automaticamente da [Release v1.2.0](https://github.com/rodrigogrosa/asclepio/releases/tag/v1.2.0). Provedores de LLM plugáveis (`ollama` | `litellm` | `openai` | `fake` para CI). Segredos só via `.env`; senhas de admin geradas por instalação.
 
 Contribuições: [CONTRIBUTING.md](CONTRIBUTING.md) · Segurança: [SECURITY.md](SECURITY.md) · Histórico: [CHANGELOG.md](CHANGELOG.md)
 </details>

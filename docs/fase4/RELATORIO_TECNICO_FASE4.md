@@ -28,7 +28,7 @@ equipe em tempo real. Todos os números deste relatório foram **medidos** e est
 5. [Análise de áudio](#5-análise-de-áudio)
 6. [Detecção de anomalias](#6-detecção-de-anomalias)
 7. [Fusão e fluxo final do alerta à equipe médica](#7-fusão-e-fluxo-final-do-alerta-à-equipe-médica)
-8. [Integração com o Azure](#8-integração-com-o-azure)
+8. [Integração com o Azure](#8-integração-com-o-azure) · [8.1 Telas do sistema](#81-telas-do-sistema-prova-de-uso-real)
 9. [Segurança, privacidade e auditoria](#9-segurança-privacidade-e-auditoria)
 10. [Engenharia, testes e reprodução](#10-engenharia-testes-e-reprodução)
 11. [Limitações e trabalhos futuros](#11-limitações-e-trabalhos-futuros)
@@ -435,6 +435,25 @@ sequenceDiagram
   depende de uma chave, que o aluno cria na própria assinatura (Azure for Students). O formato exato de
   algumas respostas do Text Analytics for Health só aparece com chave; o código trata ausência de campos
   sem quebrar.
+
+## 8.1 Telas do sistema (prova de uso real)
+Capturas da plataforma rodando em Docker (`make up`), com os exemplos da tela **Monitoramento** — o mesmo
+caminho descrito no roteiro do vídeo. Sem chave Azure nesta máquina, as telas mostram o **modo local**;
+com a chave, o cabeçalho passa a "Azure conectado" e os modelos listados mudam.
+
+| | |
+|---|---|
+| ![Integração Azure e modelos prontos](../assets/fase4/telas/01_monitoramento_azure_modelos.jpg) | ![Queda detectada e alerta crítico em tempo real](../assets/fase4/telas/02_video_queda_alerta_tempo_real.jpg) |
+| Cabeçalho: integração Azure (modo local/conectado) e os 7 modelos prontos | Vídeo do quarto: queda detectada e o **alerta crítico chegando sozinho** |
+| ![Detalhe da análise de vídeo](../assets/fase4/telas/03_video_detalhe_queda.jpg) | ![Análise de áudio da consulta](../assets/fase4/telas/04_audio_detalhe.jpg) |
+| Detalhe do vídeo: achado crítico, risco, métricas, vídeo anotado | Áudio: termos críticos destacados, indicadores vocais, sentimento |
+| ![Monitor ao vivo — alertas](../assets/fase4/telas/05_monitor_ao_vivo_alertas.jpg) | ![Monitor ao vivo — gráficos](../assets/fase4/telas/06_monitor_ao_vivo_graficos.jpg) |
+| Monitor de beira-leito: leituras chegando e alertas em tempo real | Fim da deterioração: FC 117, PAM 65, SpO2 90 %, pontos anômalos marcados |
+| ![Painel multimodal do paciente](../assets/fase4/telas/07_paciente_fusao.jpg) | ![Alertas para a equipe](../assets/fase4/telas/08_alertas_equipe.jpg) |
+| Paciente: risco fundido e **concordância de 3 fontes** (áudio + sinais vitais + relato) | Alertas: origem, evidência, recomendação, "ver análise" e reconhecer |
+
+Tempos medidos no container (CPU, Mac M5 Pro via Docker Desktop): vídeo de 5 s analisado em ~35 s
+(OpenPose em CPU); consulta de 31 s em ~2 min com Whisper local — com o Azure, a transcrição sai da máquina.
 
 ## 9. Segurança, privacidade e auditoria
 Detalhes em `docs/POLITICAS.md` §6.1 e ADR-0007.

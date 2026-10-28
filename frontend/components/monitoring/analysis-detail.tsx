@@ -311,14 +311,18 @@ export function AnalysisDetailView({ id }: { id: string }) {
 
           {images.length > 0 && (
             <Card>
-              <CardHeader title={`Quadros-chave (${images.length})`} subtitle="Os momentos que sustentam os achados, com a pose e as detecções desenhadas" icon={<Images className="h-4 w-4" />} />
+              <CardHeader
+                title={a.kind === "video" ? `Quadros-chave (${images.length})` : `Gráficos (${images.length})`}
+                subtitle={a.kind === "video" ? "Os momentos que sustentam os achados, com a pose e as detecções desenhadas" : "Curvas medidas na análise, com pausas e eventos marcados"}
+                icon={<Images className="h-4 w-4" />}
+              />
               <CardBody className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {images.map((img) => {
                   const f = frameFinding(img.name);
                   return (
                     <button key={img.name} type="button" onClick={() => setFrameOpen(img.name)} className="group text-left" aria-label={`Ampliar ${f?.title ?? "quadro-chave"}`}>
-                      <ArtifactImage analysisId={a.id} name={img.name} alt={f?.title ?? "Quadro-chave"} className="border border-border transition-colors group-hover:border-primary/60" />
-                      <p className="mt-1 truncate text-xs font-semibold text-text">{f?.title ?? "Quadro-chave"}</p>
+                      <ArtifactImage analysisId={a.id} name={img.name} alt={f?.title ?? (a.kind === "video" ? "Quadro-chave" : "Gráfico da análise")} className="border border-border transition-colors group-hover:border-primary/60" />
+                      <p className="mt-1 truncate text-xs font-semibold text-text">{f?.title ?? (a.kind === "video" ? "Quadro-chave" : "Gráfico da análise")}</p>
                       {f?.t_start != null && <p className="text-[11px] text-muted">aos {fmtClock(f.t_start)}</p>}
                     </button>
                   );
@@ -376,7 +380,7 @@ export function AnalysisDetailView({ id }: { id: string }) {
         open={!!frameOpen}
         onClose={() => setFrameOpen(null)}
         size="lg"
-        title={openFrame?.title ?? "Quadro-chave"}
+        title={openFrame?.title ?? (a.kind === "video" ? "Quadro-chave" : "Gráfico da análise")}
         description={openFrame?.t_start != null ? `Aos ${fmtClock(openFrame.t_start)} do ${a.kind === "audio" ? "áudio" : "vídeo"}` : undefined}
         footer={
           openFrame?.t_start != null && canSeek ? (
@@ -394,7 +398,7 @@ export function AnalysisDetailView({ id }: { id: string }) {
       >
         {frameOpen && (
           <div className="space-y-3">
-            <ArtifactImage analysisId={a.id} name={frameOpen} alt={openFrame?.title ?? "Quadro-chave"} className="max-h-[60vh] border border-border" />
+            <ArtifactImage analysisId={a.id} name={frameOpen} alt={openFrame?.title ?? (a.kind === "video" ? "Quadro-chave" : "Gráfico da análise")} className="max-h-[60vh] border border-border" />
             {openFrame && <p className="text-sm leading-relaxed text-muted">{openFrame.description}</p>}
           </div>
         )}

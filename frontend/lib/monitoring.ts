@@ -85,8 +85,25 @@ const KEY_WORDS: Record<string, string> = {
   saturacao: "saturação", pressao: "pressão", media: "média", medio: "médio", indice: "índice", numero: "número", posicao: "posição", deteccao: "detecção", horas: "horas", eventos: "eventos",
   alergia: "alergia", associacao: "associação", prescricao: "prescrição", medicacao: "medicação", observacao: "observação",
 };
+// Rótulos exatos das medidas de áudio (as chaves vêm em inglês do módulo de acústica)
+const KEY_LABELS: Record<string, string> = {
+  duration_s: "Duração (s)", f0: "F0 (Hz)", intensity: "Intensidade (dB)",
+  f0_mean_hz: "F0 média (Hz)", f0_sd_hz: "Desvio de F0 (Hz)", f0_sd_st: "Variação de F0 (semitons)", f0_range_st: "Faixa de F0 (semitons)",
+  voiced_fraction: "Fração vozeada", jitter_local_pct: "Jitter local (%)", shimmer_local_pct: "Shimmer local (%)", hnr_db: "HNR (dB)",
+  speech_span_s: "Tempo de fala (s)", n_pauses: "Pausas", pause_total_s: "Pausas — total (s)", pause_mean_s: "Pausa média (s)",
+  pause_ratio: "Proporção de pausas", pauses_per_min: "Pausas por minuto", n_syllables: "Sílabas (núcleos)",
+  syllable_interval_cv: "Irregularidade silábica (CV)", speech_rate: "Taxa de fala (síl./s)", articulation_rate: "Taxa de articulação (síl./s)",
+  phonation_ratio: "Razão de fonação", breath_group_mean_s: "Grupo respiratório médio (s)", n_breath_groups: "Grupos respiratórios",
+  intensity_mean_db: "Intensidade média (dB)", intensity_sd_db: "Variação de intensidade (dB)", level_dbfs: "Nível da fala (dBFS)",
+  intensity_slope_db_min: "Tendência de intensidade (dB/min)", n_words: "Palavras", critical_terms_count: "Termos críticos",
+  negated_terms_count: "Termos negados", sentiment_overall: "Sentimento geral", events_total: "Eventos sonoros",
+  indicador_fadiga: "Indicador de fadiga", indicador_dificuldade_respiratoria: "Indicador respiratório",
+  indicador_alteracao_articulatoria: "Indicador articulatório",
+};
+
 /** "joelho_dir" -> "Joelho direito"; "n_quedas" -> "N quedas". Rótulo de reserva para chaves que o backend inventar. */
 export function humanizeKey(key: string) {
+  if (KEY_LABELS[key]) return KEY_LABELS[key];
   const words = key.replace(/[._-]+/g, " ").trim().split(/\s+/).map((w) => KEY_WORDS[w.toLowerCase()] ?? w);
   const t = words.join(" ");
   return t.charAt(0).toUpperCase() + t.slice(1);

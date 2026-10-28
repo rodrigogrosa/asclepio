@@ -7,6 +7,11 @@
 
 Legenda: ✅ concluído e provado · 🟡 concluído, depende de ação do avaliador/aluno (ex.: chave Azure, gravação do vídeo)
 
+**Prova de uso real:** prints das telas rodando em Docker em [`docs/assets/fase4/telas/`](../assets/fase4/telas/)
+(relatório §8.1): integração Azure e modelos, queda detectada com alerta em tempo real, análise de áudio
+com termos críticos (e negação), monitor ao vivo, painel multimodal com concordância de 3 fontes e a lista
+de alertas da equipe.
+
 ## 1. Análise de vídeo
 
 | Exigência do edital | Status | Onde ver | Código | Prova |

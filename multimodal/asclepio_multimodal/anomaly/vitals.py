@@ -444,8 +444,8 @@ class OnlineVitalsDetector:
                     code=f"sinais.{lad.code}",
                     title=f"{lad.title}: {x:.3g}{unit}",
                     description=(
-                        f"{lad.title} ({x:.3g}{unit}), {'abaixo' if lad.dir < 0 else 'acima'} do limite "
-                        f"de {limit:g}{unit}. Referência: {lad.ref}."
+                        f"{lad.title} ({x:.3g}{unit}) — limite de alerta "
+                        f"{'≤' if lad.dir < 0 else '≥'} {limit:g}{unit}. Referência: {lad.ref}."
                     ),
                     severity=emit,
                     modality="sinais",

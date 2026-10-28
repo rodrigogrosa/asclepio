@@ -14,15 +14,15 @@ const str = (v: unknown) => (typeof v === "string" && v.trim() ? v : null);
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const pick = (d: Rec, keys: string[]) => keys.map((k) => d[k]).find((v) => v !== undefined && v !== null);
 
-type Term = { term: string; start: number | null; end: number | null; category: string | null; t: number | null };
+type Term = { term: string; start: number | null; end: number | null; category: string | null; t: number | null; negated: boolean };
 function readTerms(v: unknown): Term[] {
   if (!Array.isArray(v)) return [];
   return v.flatMap((x): Term[] => {
-    if (typeof x === "string") return [{ term: x, start: null, end: null, category: null, t: null }];
+    if (typeof x === "string") return [{ term: x, start: null, end: null, category: null, t: null, negated: false }];
     if (!isRec(x)) return [];
     const term = str(x.term) ?? str(x.text) ?? str(x.word) ?? str(x.termo);
     if (!term) return [];
-    return [{ term, start: num(x.start) ?? num(x.offset) ?? num(x.start_char), end: num(x.end) ?? num(x.end_char), category: str(x.category) ?? str(x.categoria) ?? str(x.type), t: num(x.t_start) ?? num(x.time) ?? num(x.start_s) }];
+    return [{ term, start: num(x.start) ?? num(x.offset) ?? num(x.start_char), end: num(x.end) ?? num(x.end_char), category: str(x.category) ?? str(x.categoria) ?? str(x.type), t: num(x.t_start) ?? num(x.time) ?? num(x.start_s), negated: x.negated === true || x.negado === true }];
   });
 }
 
@@ -101,32 +101,41 @@ const fold: Fold = (s) => Array.from(s).map((c) => c.normalize("NFD")[0] ?? c).j
 /** Destaca os termos críticos no texto: usa as posições do backend quando conferem; senão procura o termo. */
 function highlight(text: string, terms: Term[], useOffsets: boolean): ReactNode {
   const f = fold(text);
-  const ranges: [number, number][] = [];
+  // [início, fim, negado]: termo negado pelo paciente ("nega febre") aparece riscado, sem cor de alerta
+  const ranges: [number, number, boolean][] = [];
   for (const t of terms) {
     const needle = fold(t.term);
     if (!needle) continue;
     if (useOffsets && t.start != null && t.end != null && t.end > t.start && f.slice(t.start, t.end) === needle) {
-      ranges.push([t.start, t.end]);
+      ranges.push([t.start, t.end, t.negated]);
       continue;
     }
-    for (let i = f.indexOf(needle); i !== -1; i = f.indexOf(needle, i + needle.length)) ranges.push([i, i + needle.length]);
+    for (let i = f.indexOf(needle); i !== -1; i = f.indexOf(needle, i + needle.length)) ranges.push([i, i + needle.length, t.negated]);
   }
   if (!ranges.length) return text;
   ranges.sort((a, b) => a[0] - b[0]);
-  const merged: [number, number][] = [];
+  const merged: [number, number, boolean][] = [];
   for (const r of ranges) {
     const last = merged[merged.length - 1];
-    if (last && r[0] <= last[1]) last[1] = Math.max(last[1], r[1]);
-    else merged.push([...r]);
+    if (last && r[0] <= last[1]) {
+      last[1] = Math.max(last[1], r[1]);
+      last[2] = last[2] && r[2];
+    } else merged.push([...r]);
   }
   const out: ReactNode[] = [];
   let at = 0;
-  merged.forEach(([a, b], i) => {
+  merged.forEach(([a, b, negated], i) => {
     out.push(<Fragment key={`t${i}`}>{text.slice(at, a)}</Fragment>);
     out.push(
-      <mark key={`m${i}`} className="rounded bg-danger/25 px-0.5 font-semibold text-danger" title="Termo crítico">
-        {text.slice(a, b)}
-      </mark>,
+      negated ? (
+        <mark key={`m${i}`} className="rounded bg-surface-2 px-0.5 text-muted line-through" title="Negado pelo paciente: não gera alerta">
+          {text.slice(a, b)}
+        </mark>
+      ) : (
+        <mark key={`m${i}`} className="rounded bg-danger/25 px-0.5 font-semibold text-danger" title="Termo crítico">
+          {text.slice(a, b)}
+        </mark>
+      ),
     );
     at = b;
   });
@@ -178,8 +187,9 @@ export const AudioInsights = memo(function AudioInsights({ details, onSeek }: { 
               <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-3">
                 <span className="text-[11px] text-muted">Termos críticos:</span>
                 {terms.map((t, i) => (
-                  <Badge key={`${t.term}-${i}`} tone="danger" size="sm" title={t.category ?? undefined}>
+                  <Badge key={`${t.term}-${i}`} tone={t.negated ? "neutral" : "danger"} size="sm" title={t.negated ? "Negado pelo paciente: não gera alerta" : (t.category ?? undefined)}>
                     {t.term}
+                    {t.negated ? " (negado)" : ""}
                     {t.category ? ` · ${t.category}` : ""}
                     {t.t != null ? ` · ${fmtClock(t.t)}` : ""}
                   </Badge>
