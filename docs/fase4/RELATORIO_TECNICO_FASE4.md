@@ -508,8 +508,17 @@ make test-multimodal # testes da Fase 4
   "2 famílias concordam" (medida na avaliação) ao detector online como opção, ou calibrar por unidade; usar a PAM mínima como preditor dedicado de hipotensão.
 - **Voz**: classificador fraco no VOICED (AUC 0,62); referência de fala é leitura, não conversa
   espontânea; eventos sonoros perdem recall sob fala.
+- **Testes com material externo (28/10)**: os indicadores de fala estavam sendo aplicados a áudios
+  sem fala (som de pulmão, estridor, vogal sustentada) e davam "disartria" sem sentido — **corrigido**:
+  agora exigem ≥ 8 palavras transcritas e, para vogal sustentada, entra a qualidade vocal (VOICED).
+  Ficaram como limitação: o modelo AudioSet **não reconheceu um chiado gravado por estetoscópio**, e o
+  estridor aparece como "qualidade vocal alterada" (não há classe de estridor). Tosse e respiração reais
+  (ESC-50) foram detectadas.
 - **Vídeo**: pose 2D monocular; valgo/assimetria sem vídeo frontal real; instrumental cirúrgico exige
   treinar o YOLOv8 (ex.: m2cai16-tool) — fora do escopo.
+- **Marcha**: vídeos reais de marcha parkinsoniana (bloqueios, discinesia) e o teste *Timed Up and Go*
+  não geram achado — o perfil *quarto* procura queda, imobilidade e agitação, não alterações de marcha.
+  Um perfil de marcha (cadência, comprimento de passo, congelamento) é o próximo passo natural.
 - **Escala**: barramento de eventos em memória (um processo); com várias réplicas, Redis pub/sub;
   análises pesadas em *worker* dedicado (GPU).
 - **Azure em produção**: contrato de operador (DPA) e RIPD; logs do serviço desabilitados.

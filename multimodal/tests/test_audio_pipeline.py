@@ -263,3 +263,36 @@ def test_negacao_do_azure_vale_sobre_o_lexico_e_entidades_novas_entram():
         "azure",
     ]  # 2 ocorrências
     assert len(terms) == 3
+
+
+def test_sem_fala_nao_opina_sobre_fala_e_mede_qualidade_vocal(monkeypatch, tmp_path):
+    """Som de pulmão, tosse isolada ou vogal sustentada não podem virar 'disartria'."""
+    t = np.arange(5 * SR) / SR
+    vogal = tmp_path / "vogal.wav"
+    sf.write(str(vogal), 0.3 * np.sin(2 * np.pi * 150 * t), SR)  # "aaa" sustentado, sem palavras
+    monkeypatch.setattr(pipeline, "get_settings", lambda: settings())
+    monkeypatch.setattr(
+        pipeline,
+        "transcribe_local",
+        lambda wav, lang: {
+            "text": "Ah.",
+            "segments": [],
+            "words": [{"word": "Ah.", "start": 0.1, "end": 4.9}],
+        },
+    )
+    monkeypatch.setattr(pipeline, "detect_events", lambda wav, progress=None: dict(FAKE_EVENTS))
+
+    res = analyze_audio(vogal, tmp_path / "out")
+
+    codes = {f.code for f in res.findings}
+    assert not codes & {
+        "audio.fadiga",
+        "audio.dificuldade_respiratoria",
+        "audio.alteracao_articulatoria",
+    }
+    assert all(i["level"] == "indisponivel" for i in res.details["vocal_indicators"].values())
+    assert any("Pouca fala no áudio" in w for w in res.warnings)
+    assert res.details["voice_quality"] is not None and res.metrics["qualidade_vocal"] is not None
+    assert "audio.tosse" in codes or any(
+        f.modality == "audio" for f in res.findings
+    )  # eventos seguem
