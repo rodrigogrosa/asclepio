@@ -54,6 +54,18 @@ CATALOG: tuple[Category, ...] = (
         "Entrega da Fase 4: vídeo (OpenPose + YOLOv8), áudio (Azure Speech/Text Analytics), anomalias em tempo real e fusão.",
         (
             Doc(
+                "fase4-manual",
+                "Manual de testes da Fase 4",
+                "Passo a passo para conferir cada exigência do edital na tela: o que clicar, o que deve aparecer e onde está a prova.",
+                FASE4 / "MANUAL_DE_TESTES_FASE4.md",
+            ),
+            Doc(
+                "fase4-manual-pdf",
+                "Manual de testes da Fase 4 (PDF)",
+                "Versão em PDF do manual, para imprimir ou enviar a quem vai avaliar.",
+                FASE4 / "MANUAL_DE_TESTES_FASE4.pdf",
+            ),
+            Doc(
                 "fase4-relatorio",
                 "Relatório Técnico da Fase 4",
                 "Fluxo multimodal, modelos aplicados em cada tipo de dado, resultados medidos e exemplos de anomalias detectadas — abre com o checklist do edital.",

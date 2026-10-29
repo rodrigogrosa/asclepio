@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-# Documentos disponíveis: `python scripts/build_report_pdf.py [relatorio|guia|fase4] [out_dir]`
+# Documentos disponíveis: `python scripts/build_report_pdf.py [relatorio|guia|fase4|manual4] [out_dir]`
 DOC_KIND = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("/") else "relatorio"
 OUT_DIR = (
     Path(sys.argv[2])
@@ -76,6 +76,16 @@ DOCUMENTS["fase4"] = {
             "Anexo E — Decisões (ADR-0008 · anomalias e fusão)",
             DOCS / "adr" / "0008-anomalias-em-tempo-real-e-fusao.md",
         ),
+    ],
+}
+DOCUMENTS["manual4"] = {
+    "out": "fase4/MANUAL_DE_TESTES_FASE4.pdf",
+    "title": "Manual de testes · Fase 4",
+    "subtitle": "Passo a passo para conferir cada exigência do edital na plataforma",
+    "badge": "TECH CHALLENGE · FASE 4 · FIAP PÓS-TECH IA PARA DEVS (8IADT)",
+    "sections": [
+        ("", DOCS / "fase4" / "MANUAL_DE_TESTES_FASE4.md"),
+        ("Anexo — Configuração do Azure", DOCS / "fase4" / "GUIA_AZURE.md"),
     ],
 }
 DOC = DOCUMENTS[DOC_KIND]

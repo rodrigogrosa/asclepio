@@ -61,14 +61,16 @@ Abra o navegador em **http://localhost:3000** e entre:
 \* Perdeu a senha do admin? No mesmo terminal, dentro da pasta do projeto (`cd ~/asclepio`), rode `grep ASCLEPIO_ .env` — ela aparece. No 1º acesso o admin troca a senha e cadastra um **aplicativo autenticador** (Google Authenticator etc.) escaneando um QR code — o próprio sistema ensina.
 
 ### Fase 4 — monitoramento multimodal (mais 5 minutos)
+> 📋 **Avaliando a Fase 4?** Siga o **[Manual de testes da Fase 4](docs/fase4/MANUAL_DE_TESTES_FASE4.md)** ([PDF](docs/fase4/MANUAL_DE_TESTES_FASE4.pdf)): cada exigência do edital, o que clicar, o que deve aparecer na tela e onde está a prova.
+
 Entre como **Dra. Ana** e abra o menu **Monitoramento**:
 1. **Vídeo** → paciente → perfil *Quarto do paciente* → **Usar vídeo de exemplo** → *"paciente cai ao levantar"* → **Analisar vídeo**. Em ~1 min, a queda é detectada (OpenPose + YOLOv8) e o **alerta crítico aparece sozinho** em qualquer tela.
 2. **Áudio** → paciente → exemplo *"Consulta · falta de ar"* → **Analisar áudio**: transcrição, termos críticos destacados, sentimento e sinais na voz (fadiga, dificuldade respiratória).
 3. **Tempo real** → paciente → fonte *"deterioração tipo sepse"* (ou *PhysioNet 203*, UTI real) → **Iniciar**: sinais vitais ao vivo com anomalias marcadas e alertas chegando à equipe.
 4. **Pacientes** → paciente → card **Monitoramento multimodal** → **Recalcular agora**: risco fundido de vídeo, áudio, sinais vitais, prescrições e mobilidade.
-5. Para ligar o **Azure** (Speech to Text + Text Analytics): `make azure-setup` — guia em [docs/fase4/GUIA_AZURE.md](docs/fase4/GUIA_AZURE.md). Sem chave, tudo funciona em modo local e a tela avisa.
+5. Para ligar o **Azure** (Speech to Text + Text Analytics): crie uma conta Azure com assinatura ativa (avaliação gratuita ou *Azure for Students*), instale a Azure CLI (`brew install azure-cli` no macOS) e rode `make azure-setup`, `make azure-check` e `docker compose up -d api` — passo a passo e erros comuns em [docs/fase4/GUIA_AZURE.md](docs/fase4/GUIA_AZURE.md). Sem chave, tudo funciona em **modo local** e a tela avisa.
 
-> A primeira análise de vídeo e de áudio baixa os modelos (OpenPose, YOLOv8, Whisper, AST — ~1,5 GB) para a pasta `data/`; as seguintes começam na hora. Para baixar antes: `make fase4-assets`.
+> A primeira análise de vídeo e de áudio baixa os modelos para a pasta `data/` (OpenPose ~200 MB; modelos de som ~0,4 GB com Azure ou ~1,2 GB sem Azure, por causa do Whisper); as seguintes começam na hora. Para baixar antes: `make fase4-assets`. A tela tem **13 vídeos e 10 áudios de exemplo reais** (quedas, fisioterapia, marcha, tosse, respiração, vozes) — o que cada um deve mostrar está em [data/samples/exemplos/LEIAME.md](data/samples/exemplos/LEIAME.md).
 
 ### O que testar primeiro (5 minutos)
 1. **Assistente** → pergunte: *"Qual o alvo de lactato na reavaliação segundo o protocolo de sepse?"* → veja a resposta com as **fontes**.
@@ -105,7 +107,7 @@ O hospital passa a **monitorar continuamente** o paciente com vídeo, áudio, te
 - **Áudio**: **Azure Speech to Text** transcreve a consulta e **Azure Text Analytics** aponta termos críticos e sentimento (texto anonimizado antes); a voz é medida com Praat (fadiga, dificuldade respiratória) e sons com um modelo treinado no **AudioSet**.
 - **Anomalias em tempo real**: sinais vitais (dados reais do **PhysioNet**), evolução de prescrições e padrões de mobilidade; **fusão** das modalidades num risco único e alerta à equipe na hora.
 
-Resultados medidos: quedas no UR Fall Dataset com **sensibilidade 0,90 / especificidade 0,95** (70 vídeos); antiflood reduz os alertas de sinais vitais em **97,8 %**; detalhes, limites e o que ainda é triagem em **[docs/fase4/RELATORIO_TECNICO_FASE4.md](docs/fase4/RELATORIO_TECNICO_FASE4.md)** · checklist do edital em **[docs/fase4/EVIDENCIAS_FASE4.md](docs/fase4/EVIDENCIAS_FASE4.md)**.
+Resultados medidos: quedas no UR Fall Dataset com **sensibilidade 0,90 / especificidade 0,95** (70 vídeos); antiflood reduz os alertas de sinais vitais em **97,8 %**; integração com o **Azure provada** (Speech to Text + Text Analytics for Health em português, com negação). Detalhes, limites e o que ainda é triagem em **[docs/fase4/RELATORIO_TECNICO_FASE4.md](docs/fase4/RELATORIO_TECNICO_FASE4.md)** · checklist do edital em **[docs/fase4/EVIDENCIAS_FASE4.md](docs/fase4/EVIDENCIAS_FASE4.md)** · como testar cada ponto em **[docs/fase4/MANUAL_DE_TESTES_FASE4.md](docs/fase4/MANUAL_DE_TESTES_FASE4.md)**.
 
 <p align="center"><img src="docs/assets/fase4/telas/02_video_queda_alerta_tempo_real.jpg" alt="Queda detectada no vídeo e alerta crítico chegando em tempo real" width="720"></p>
 
@@ -116,8 +118,9 @@ Resultados medidos: quedas no UR Fall Dataset com **sensibilidade 0,90 / especif
 | Documento | O que tem |
 |---|---|
 | [Guia de instalação](docs/GUIA_INSTALACAO.md) · [PDF](docs/GUIA_INSTALACAO.pdf) | Passo a passo detalhado por sistema operacional + problemas comuns |
+| **Fase 4** · [Manual de testes](docs/fase4/MANUAL_DE_TESTES_FASE4.md) · [PDF](docs/fase4/MANUAL_DE_TESTES_FASE4.pdf) | Passo a passo para conferir cada exigência do edital na tela (o que clicar, o que deve aparecer, onde está a prova) |
 | **Fase 4** · [Relatório técnico](docs/fase4/RELATORIO_TECNICO_FASE4.md) · [PDF](docs/fase4/RELATORIO_TECNICO_FASE4.pdf) | Fluxo multimodal, modelos por tipo de dado, resultados medidos e exemplos de anomalias |
-| **Fase 4** · [Checklist do edital](docs/fase4/EVIDENCIAS_FASE4.md) · [Roteiro do vídeo](docs/fase4/ROTEIRO_VIDEO_FASE4.md) · [Guia do Azure](docs/fase4/GUIA_AZURE.md) | Onde cada exigência está, cena a cena do vídeo e como ligar o Azure |
+| **Fase 4** · [Checklist do edital](docs/fase4/EVIDENCIAS_FASE4.md) · [Roteiro do vídeo](docs/fase4/ROTEIRO_VIDEO_FASE4.md) · [Guia do Azure](docs/fase4/GUIA_AZURE.md) · [Exemplos reais](data/samples/exemplos/LEIAME.md) | Onde cada exigência está, cena a cena do vídeo, como ligar o Azure e o resultado esperado de cada exemplo |
 | [Relatório técnico (Fase 3)](docs/RELATORIO_TECNICO.md) · [PDF](docs/RELATORIO_TECNICO.pdf) | Documento central da Fase 3 (34 págs.): dados, fine-tuning, assistente, fluxos, segurança, avaliação |
 | [Processo de desenvolvimento](docs/PROCESSO_DESENVOLVIMENTO.md) | Como foi feito, etapa por etapa (visão acadêmica) |
 | [Mapa de evidências](docs/EVIDENCIAS.md) | Onde cada exigência do edital aparece no sistema |
