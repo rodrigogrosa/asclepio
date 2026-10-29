@@ -194,3 +194,19 @@ def test_monitor_ao_vivo_grava_sinais_e_consolida(client, medico, monkeypatch):
     after = len(client.get(f"{API}/patients/3", headers=medico).json()["vitals"])
     assert after == before + len(samples)
     assert client.post(f"{API}/monitoring/live/{sid}/stop", headers=medico).status_code == 404
+
+
+def test_todo_exemplo_tem_arquivo_versionado_ou_ativo_com_checksum():
+    """Exemplo listado na tela que não abre é pior que exemplo nenhum."""
+    from asclepio_multimodal.assets import BY_KEY
+    from asclepio_multimodal.config import REPO_ROOT
+
+    exemplos = REPO_ROOT / "data" / "samples"
+    for key in svc.VIDEO_SAMPLES:
+        if key in svc.LOCAL_VIDEO_SAMPLES:
+            assert (exemplos / "exemplos" / svc.LOCAL_VIDEO_SAMPLES[key][0]).is_file(), key
+        else:
+            assert key in BY_KEY and len(BY_KEY[key].sha256) == 64, key
+    for key, (_, fname, license_) in svc.AUDIO_SAMPLES.items():
+        assert (exemplos / "audio" / fname).is_file() and license_, key
+    assert set(svc.SAMPLE_REGION) <= set(svc.VIDEO_SAMPLES)

@@ -12,6 +12,9 @@ Legenda: ✅ concluído e provado · 🟡 depende de ação do aluno (gravação
 com termos críticos (e negação), monitor ao vivo, painel multimodal com concordância de 3 fontes e a lista
 de alertas da equipe.
 
+**Exemplos reais para testar** (vídeos e áudios públicos, com licença e o resultado esperado de cada um):
+[`data/samples/exemplos/LEIAME.md`](../../data/samples/exemplos/LEIAME.md) — aparecem na tela em *Usar vídeo/áudio de exemplo*.
+
 ## 1. Análise de vídeo
 
 | Exigência do edital | Status | Onde ver | Código | Prova |

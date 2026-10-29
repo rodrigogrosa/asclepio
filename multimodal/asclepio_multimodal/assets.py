@@ -115,6 +115,22 @@ ASSETS: list[Asset] = [
         "Uso em pesquisa (URFD)",
         "Kwolek & Kepski, UR Fall Detection Dataset (2014) — sequência adl-01 (atividade normal)",
     ),
+    *[
+        Asset(
+            f"video_urfd_{seq.replace('-', '')}",
+            "samples",
+            f"video/urfd_{seq}-cam0.mp4",
+            f"http://fenix.ur.edu.pl/~mkepski/ds/data/{seq}-cam0.mp4",
+            sha,
+            "Uso em pesquisa (URFD)",
+            f"Kwolek & Kepski, UR Fall Detection Dataset (2014) — sequência {seq}, câmera 0",
+        )
+        for seq, sha in (
+            ("fall-22", "e352a59c371aee46a2967bc239ba478b5779a4eff821360efa005c60a6150508"),
+            ("fall-26", "10c4bbfc0386e6e69b3fe468c4f60f32289a0ef9b2a636b847efbd23b6bef702"),
+            ("adl-12", "77506f291304616dd5a1a7940ad43acbc5e1debccf675638eea3cea5d9481b42"),
+        )
+    ],
 ]
 
 BY_KEY: dict[str, Asset] = {a.key: a for a in ASSETS}
