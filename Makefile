@@ -146,6 +146,7 @@ docs-pdf: ## Gera docs/RELATORIO_TECNICO.pdf e docs/GUIA_INSTALACAO.pdf (capa + 
 	$(UV) run --with markdown python scripts/build_report_pdf.py relatorio
 	$(UV) run --with markdown python scripts/build_report_pdf.py guia
 	$(UV) run --with markdown python scripts/build_report_pdf.py fase4
+	$(UV) run --with markdown python scripts/build_report_pdf.py manual4
 
 # ---------------------------------------------------------------------
 # 🎥🎙️ Fase 4 — monitoramento multimodal (vídeo, áudio, anomalias, Azure)

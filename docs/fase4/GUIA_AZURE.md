@@ -26,6 +26,18 @@ make up               # reinicia a API com as chaves
 
 Para apagar tudo depois da avaliação: `az group delete -n rg-asclepio --yes`.
 
+### Erros comuns (vistos na prática)
+
+| Mensagem | Causa e solução |
+|---|---|
+| `No subscriptions found for <seu e-mail>` | A conta existe, mas **não tem assinatura**. No portal, a página inicial diz "Você não tem uma assinatura?". Ative a **avaliação gratuita** (pede cartão só para verificar identidade; o F0 não cobra) ou o **Azure for Students** (precisa de e-mail acadêmico). Depois: `az login` e `az account list -o table` deve mostrar a assinatura. |
+| `'NoneType' object has no attribute 'get'` no `az login` | Bug da tela de seleção da Azure CLI. Rode `az config set core.login_experience_v2=off` e repita o `az login`. |
+| `MissingSubscriptionRegistration ... Microsoft.CognitiveServices` | Assinatura nova sem o provedor de IA registrado. O `make azure-setup` atual registra sozinho (1–3 min na primeira vez); em versões antigas: `az provider register --namespace Microsoft.CognitiveServices --wait`. |
+| `RequestDisallowedByAzure` (região) | Conta de estudante com regiões restritas: `./scripts/azure_setup.sh rg-asclepio eastus`. |
+| Tela continua em "Modo local" depois do setup | A API precisa ser recriada para ler o `.env`: `docker compose up -d api`. |
+
+> Use sempre uma conta **pessoal** para o projeto acadêmico — nunca a conta corporativa da empresa.
+
 ## Opção B — pelo portal
 
 1. <https://portal.azure.com> → **Criar um recurso** → procure **Speech** → *Criar*.
