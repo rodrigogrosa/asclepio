@@ -82,16 +82,76 @@ VIDEO_SAMPLES: dict[str, tuple[str, str, str | None]] = {
     ),
     "video_fall": ("Quarto · paciente cai ao levantar (URFD fall-01)", "quarto", None),
     "video_adl": ("Quarto · atividade normal, sem queda (URFD adl-01)", "quarto", None),
+    "video_urfd_fall22": ("Quarto · queda curta, termina no chão (URFD fall-22)", "quarto", None),
+    "video_urfd_fall26": ("Quarto · queda curta, termina no chão (URFD fall-26)", "quarto", None),
+    "video_urfd_adl12": ("Quarto · atividade normal, sem queda (URFD adl-12)", "quarto", None),
+    "video_lunge": (
+        "Fisioterapia · afundo (avanço), várias repetições",
+        "fisioterapia",
+        "agachamento",
+    ),
+    "video_tug": ("Mobilidade · teste Timed Up and Go (levantar, andar, sentar)", "quarto", None),
+    "video_parkinson_1": ("Marcha · Parkinson com bloqueios motores (paciente 1)", "quarto", None),
+    "video_parkinson_2": ("Marcha · Parkinson com bloqueios motores (paciente 2)", "quarto", None),
+    "video_parkinson_discinesia": ("Marcha · Parkinson com discinesia", "quarto", None),
 }
 # Os vídeos do UR Fall trazem profundidade (esquerda) e RGB (direita) lado a lado: analisa só o RGB
-SAMPLE_REGION: dict[str, tuple[float, float, float, float]] = {
-    "video_fall": (0.5, 0.0, 1.0, 1.0),
-    "video_adl": (0.5, 0.0, 1.0, 1.0),
+SAMPLE_REGION: dict[str, tuple[float, float, float, float]] = dict.fromkeys(
+    ("video_fall", "video_adl", "video_urfd_fall22", "video_urfd_fall26", "video_urfd_adl12"),
+    (0.5, 0.0, 1.0, 1.0),
+)
+# Exemplos versionados em data/samples/exemplos (licenças abertas; créditos no LEIAME da pasta).
+# Os demais vídeos vêm de assets (baixados sob demanda e conferidos por SHA-256).
+LOCAL_VIDEO_SAMPLES: dict[str, tuple[str, str]] = {
+    "video_lunge": ("afundo_lunge.webm", "CC BY-SA 4.0 (Wikimedia Commons)"),
+    "video_tug": ("tug_teste_mobilidade.mp4", "Domínio público (CDC/STEADI)"),
+    "video_parkinson_1": ("parkinson_marcha_bloqueio_1.ogv", "CC BY 2.5 (PLoS ONE)"),
+    "video_parkinson_2": ("parkinson_marcha_bloqueio_2.ogv", "CC BY 2.5 (PLoS ONE)"),
+    "video_parkinson_discinesia": ("parkinson_discinesia.mp4", "CC BY 4.0 (Wikimedia Commons)"),
 }
-AUDIO_SAMPLES: dict[str, tuple[str, str]] = {
-    "audio_normal": ("Consulta · fala fluente (sintético)", "consulta_normal.wav"),
-    "audio_fadiga": ("Consulta · sinais de fadiga (sintético)", "consulta_fadiga.wav"),
-    "audio_dispneia": ("Consulta · falta de ar (sintético)", "consulta_dispneia.wav"),
+AUDIO_SAMPLES: dict[str, tuple[str, str, str]] = {
+    "audio_normal": (
+        "Consulta · fala fluente (sintético)",
+        "consulta_normal.wav",
+        "Sintético, gerado pelo projeto",
+    ),
+    "audio_fadiga": (
+        "Consulta · sinais de fadiga (sintético)",
+        "consulta_fadiga.wav",
+        "Sintético, gerado pelo projeto",
+    ),
+    "audio_dispneia": (
+        "Consulta · falta de ar (sintético)",
+        "consulta_dispneia.wav",
+        "Sintético, gerado pelo projeto",
+    ),
+    "audio_tosses": ("Tosses reais (ESC-50)", "tosses_esc50.wav", "CC BY-NC 3.0 (ESC-50)"),
+    "audio_respiracao": ("Respiração (ESC-50)", "respiracao_esc50.wav", "CC BY-NC 3.0 (ESC-50)"),
+    "audio_ofegante": (
+        "Respiração ofegante",
+        "respiracao_ofegante.ogg",
+        "Domínio público (Wikimedia Commons)",
+    ),
+    "audio_estridor": (
+        "Estridor (som respiratório agudo)",
+        "estridor.ogg",
+        "CC BY-SA 3.0 (Wikimedia Commons)",
+    ),
+    "audio_chiado": (
+        "Chiado pulmonar (estetoscópio)",
+        "chiado_wheeze.ogg",
+        "CC BY-SA 3.0 (Wikimedia Commons)",
+    ),
+    "audio_voz_saudavel": (
+        "Vogal sustentada · voz saudável (VOICED)",
+        "voz_saudavel_voiced002.wav",
+        "ODC-By 1.0 (PhysioNet VOICED)",
+    ),
+    "audio_voz_disfonia": (
+        "Vogal sustentada · disfonia (VOICED)",
+        "voz_disfonia_voiced001.wav",
+        "ODC-By 1.0 (PhysioNet VOICED)",
+    ),
 }
 
 _progress: dict[str, tuple[float, str]] = {}
@@ -164,7 +224,7 @@ def status() -> dict[str, Any]:
             "label": label,
             "profile": profile,
             "exercise": exercise,
-            "license": BY_KEY[k].license,
+            "license": LOCAL_VIDEO_SAMPLES[k][1] if k in LOCAL_VIDEO_SAMPLES else BY_KEY[k].license,
         }
         for k, (label, profile, exercise) in VIDEO_SAMPLES.items()
     ] + [
@@ -174,9 +234,9 @@ def status() -> dict[str, Any]:
             "label": label,
             "profile": None,
             "exercise": None,
-            "license": "Sintético, gerado pelo projeto",
+            "license": license,
         }
-        for k, (label, fname) in AUDIO_SAMPLES.items()
+        for k, (label, fname, license) in AUDIO_SAMPLES.items()
         if (s.samples_dir / "audio" / fname).exists()
     ]
     endpoint = s.azure_language_endpoint
@@ -299,9 +359,14 @@ def _resolve_sample(kind: str, key: str) -> tuple[Path, str, str | None, str | N
         from asclepio_multimodal.assets import ensure
 
         label, profile, exercise = VIDEO_SAMPLES[key]
+        if key in LOCAL_VIDEO_SAMPLES:
+            p = s.samples_dir / "exemplos" / LOCAL_VIDEO_SAMPLES[key][0]
+            if not p.exists():
+                raise HTTPException(422, "Arquivo do exemplo ausente em data/samples/exemplos.")
+            return p, label, profile, exercise
         return ensure(key), label, profile, exercise
     if kind == "audio" and key in AUDIO_SAMPLES:
-        label, fname = AUDIO_SAMPLES[key]
+        label, fname, _ = AUDIO_SAMPLES[key]
         p = s.samples_dir / "audio" / fname
         if p.exists():
             return p, label, None, None
