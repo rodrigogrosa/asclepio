@@ -280,10 +280,8 @@ async def create_media_analysis(
         raise HTTPException(422, "Tipo de análise inválido: use 'video' ou 'audio'.")
     if await session.get(m.Patient, patient_id) is None:
         raise HTTPException(404, "Paciente não encontrado")
-    if kind == "video":
-        profile = profile or "fisioterapia"
-        if profile not in VIDEO_PROFILES:
-            raise HTTPException(422, f"Perfil de vídeo inválido. Use: {', '.join(VIDEO_PROFILES)}.")
+    if kind == "video" and profile and profile not in VIDEO_PROFILES:
+        raise HTTPException(422, f"Perfil de vídeo inválido. Use: {', '.join(VIDEO_PROFILES)}.")
     s = get_settings()
     aid = str(uuid.uuid4())
     digest: str | None = None
@@ -292,7 +290,11 @@ async def create_media_analysis(
             _resolve_sample, kind, sample
         )
         if kind == "video":
-            profile, exercise = sample_profile or profile, exercise or sample_exercise
+            # O perfil escolhido na tela vale; o do exemplo só entra quando nenhum veio, e o
+            # exercício do exemplo só faz sentido com o perfil do próprio exemplo.
+            profile = profile or sample_profile
+            if profile == sample_profile:
+                exercise = exercise or sample_exercise
         size = path.stat().st_size
     elif upload is not None and upload.filename:
         ext = Path(upload.filename).suffix.lower()
@@ -322,7 +324,7 @@ async def create_media_analysis(
         patient_id=patient_id,
         kind=kind,
         status="na_fila",
-        profile=profile if kind == "video" else None,
+        profile=(profile or "fisioterapia") if kind == "video" else None,
         params={"exercise": exercise, "sample": sample, "region": SAMPLE_REGION.get(sample or "")},
         filename=filename,
         file_path=str(path),
