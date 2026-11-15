@@ -142,6 +142,32 @@ def test_ciclo_da_analise_gera_alerta_fusao_e_artefatos(
     assert audit.status_code == 200 and audit.json()
 
 
+def test_exemplo_respeita_perfil_escolhido_na_tela(client, medico, monkeypatch, tmp_path):
+    video = _tiny_video(tmp_path / "exemplo.avi")
+    monkeypatch.setattr(
+        svc, "_resolve_sample", lambda kind, key: (video, "Exemplo", "fisioterapia", "agachamento")
+    )
+    rodou: dict[str, tuple] = {}
+
+    def fake(kind, path, out_dir, profile, params, progress):
+        rodou[out_dir.name] = (profile, params["exercise"])
+        return _fake_analyze(kind, path, out_dir, profile, params, progress)
+
+    monkeypatch.setattr(svc, "_analyze", fake)
+
+    def analisa(**extra):
+        data = {"kind": "video", "patient_id": 1, "sample": "video_squat", **extra}
+        r = client.post(f"{API}/monitoring/analyses", data=data, headers=medico)
+        assert r.status_code == 202, r.text
+        a = _wait_done(client, r.json()["id"], medico)
+        return a["profile"], rodou[a["id"]]
+
+    # a pessoa trocou o perfil depois de escolher o exemplo: vale o da tela, sem o exercício dele
+    assert analisa(profile="cirurgia") == ("cirurgia", ("cirurgia", None))
+    # sem perfil enviado, o exemplo completa perfil e exercício
+    assert analisa() == ("fisioterapia", ("fisioterapia", "agachamento"))
+
+
 def test_varredura_do_prontuario_cria_analises_e_fusao(client, medico):
     r = client.post(f"{API}/monitoring/patients/1/scan", headers=medico)
     assert r.status_code == 200, r.text

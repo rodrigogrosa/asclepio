@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { label, hint, error, leftIcon, rightSlot, className, wrapperClassName, id, ...props },
   ref,
 ) {
-  const inputId = id ?? (label ? `in-${label.toLowerCase().replace(/\W+/g, "-")}` : undefined);
+  // useId: o id derivado do rótulo se repetia quando dois campos tinham o mesmo rótulo na página
+  const auto = useId();
+  const inputId = id ?? auto;
   return (
     <div className={cn("flex flex-col gap-1.5", wrapperClassName)}>
       {label && (
@@ -43,7 +45,8 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   wrapperClassName?: string;
 }
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select({ label, className, wrapperClassName, id, children, ...props }, ref) {
-  const selId = id ?? (label ? `sel-${label.toLowerCase().replace(/\W+/g, "-")}` : undefined);
+  const auto = useId();
+  const selId = id ?? auto;
   return (
     <div className={cn("flex flex-col gap-1.5", wrapperClassName)}>
       {label && (
@@ -66,7 +69,8 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
   wrapperClassName?: string;
 }
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea({ label, className, wrapperClassName, id, ...props }, ref) {
-  const taId = id ?? (label ? `ta-${label.toLowerCase().replace(/\W+/g, "-")}` : undefined);
+  const auto = useId();
+  const taId = id ?? auto;
   return (
     <div className={cn("flex flex-col gap-1.5", wrapperClassName)}>
       {label && (
